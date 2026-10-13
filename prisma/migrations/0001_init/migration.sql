@@ -17,7 +17,16 @@ CREATE TYPE "KinkInterestLevel" AS ENUM ('FAVORITE', 'INTERESTED', 'CURIOUS', 'N
 CREATE TYPE "ConsentScope" AS ENUM ('ADULT_ALBUM', 'PROFILE_ACCESS');
 
 -- CreateEnum
-CREATE TYPE "ReportReason" AS ENUM ('HARASSMENT', 'SPAM', 'CATFISHING', 'UNDERAGE', 'THREATS', 'FRAUD', 'NON_CONSENSUAL_CONTENT', 'EMERGENCY', 'OTHER');
+CREATE TYPE "ReportReason" AS ENUM ('HARASSMENT', 'SPAM', 'CATFISHING', 'UNDERAGE', 'THREATS', 'FRAUD', 'NON_CONSENSUAL_CONTENT', 'FINANCIAL_SOLICITATION', 'EMERGENCY', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "ReportSource" AS ENUM ('USER', 'AUTOMATED');
+
+-- CreateEnum
+CREATE TYPE "AdPreference" AS ENUM ('GENERIC', 'PROFILE_INTERESTS', 'NONE');
+
+-- CreateEnum
+CREATE TYPE "SponsorLabel" AS ENUM ('SPONSOR_SPOTLIGHT', 'COMMUNITY_PARTNER', 'COMMUNITY_EVENT', 'EDUCATIONAL_RESOURCE');
 
 -- CreateEnum
 CREATE TYPE "ReportPriority" AS ENUM ('NORMAL', 'HIGH');
@@ -35,6 +44,7 @@ CREATE TABLE "User" (
     "accountStatus" "AccountStatus" NOT NULL DEFAULT 'ACTIVE',
     "statusReason" TEXT,
     "statusChangedAt" TIMESTAMP(3),
+    "adPreference" "AdPreference" NOT NULL DEFAULT 'GENERIC',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "lastActiveAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -338,8 +348,9 @@ CREATE TABLE "Block" (
 -- CreateTable
 CREATE TABLE "Report" (
     "id" TEXT NOT NULL,
-    "reporterId" TEXT NOT NULL,
+    "reporterId" TEXT,
     "reportedUserId" TEXT NOT NULL,
+    "source" "ReportSource" NOT NULL DEFAULT 'USER',
     "reason" "ReportReason" NOT NULL,
     "priority" "ReportPriority" NOT NULL DEFAULT 'NORMAL',
     "details" TEXT,
@@ -348,6 +359,25 @@ CREATE TABLE "Report" (
     "resolvedAt" TIMESTAMP(3),
 
     CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SponsorPlacement" (
+    "id" TEXT NOT NULL,
+    "label" "SponsorLabel" NOT NULL DEFAULT 'SPONSOR_SPOTLIGHT',
+    "sponsorName" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "body" TEXT,
+    "linkUrl" TEXT NOT NULL,
+    "targetKinkSlugs" TEXT[],
+    "targetGoalSlugs" TEXT[],
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "endsAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SponsorPlacement_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -476,6 +506,12 @@ CREATE UNIQUE INDEX "Block_blockerId_blockedId_key" ON "Block"("blockerId", "blo
 CREATE INDEX "Report_status_priority_createdAt_idx" ON "Report"("status", "priority", "createdAt");
 
 -- CreateIndex
+CREATE INDEX "Report_reportedUserId_reason_createdAt_idx" ON "Report"("reportedUserId", "reason", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "SponsorPlacement_isActive_startsAt_idx" ON "SponsorPlacement"("isActive", "startsAt");
+
+-- CreateIndex
 CREATE INDEX "ConsentGrant_viewerId_scope_idx" ON "ConsentGrant"("viewerId", "scope");
 
 -- CreateIndex
@@ -587,7 +623,7 @@ ALTER TABLE "Block" ADD CONSTRAINT "Block_blockerId_fkey" FOREIGN KEY ("blockerI
 ALTER TABLE "Block" ADD CONSTRAINT "Block_blockedId_fkey" FOREIGN KEY ("blockedId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Report" ADD CONSTRAINT "Report_reporterId_fkey" FOREIGN KEY ("reporterId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_reporterId_fkey" FOREIGN KEY ("reporterId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Report" ADD CONSTRAINT "Report_reportedUserId_fkey" FOREIGN KEY ("reportedUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

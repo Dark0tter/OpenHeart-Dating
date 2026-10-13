@@ -18,6 +18,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [me, setMe] = useState<string | null>(null);
   const [body, setBody] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
 
   async function load() {
     const [msgRes, profileRes] = await Promise.all([
@@ -49,7 +50,11 @@ export default function ChatPage() {
     });
     if (res.ok) {
       setBody("");
+      setSendError(null);
       await load();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setSendError(data.error ?? "Message could not be sent.");
     }
   }
 
@@ -75,6 +80,11 @@ export default function ChatPage() {
           );
         })}
       </div>
+      {sendError && (
+        <p className="mt-3 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral-deep">
+          {sendError}
+        </p>
+      )}
       <form onSubmit={send} className="mt-3 flex gap-2">
         <Input
           value={body}

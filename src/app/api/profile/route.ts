@@ -4,6 +4,10 @@ import { KinkInterestLevel, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { slugify } from "@/lib/constants/tags";
+import {
+  enforceSolicitationPolicy,
+  solicitationErrorBody,
+} from "@/lib/moderation/solicitation";
 
 const updateSchema = z.object({
   displayName: z.string().min(2).max(40).optional(),
@@ -82,6 +86,24 @@ export async function PATCH(req: Request) {
 
   const data = parsed.data;
   const profileId = user.profile.id;
+
+  const solicitation = await enforceSolicitationPolicy({
+    userId: user.id,
+    context: "profile",
+    fields: {
+      displayName: data.displayName,
+      bio: data.bio,
+      pronouns: data.pronouns,
+      city: data.city,
+      customIdentity: data.customIdentity,
+      customOrientation: data.customOrientation,
+    },
+  });
+  if (solicitation.blocked) {
+    return NextResponse.json(solicitationErrorBody(solicitation.labels), {
+      status: 422,
+    });
+  }
 
   // Activate only when age-verified (adult content / full access gate)
   if (data.isActive === true) {

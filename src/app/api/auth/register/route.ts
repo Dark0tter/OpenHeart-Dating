@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isAdult } from "@/lib/utils";
+import {
+  findSolicitation,
+  solicitationErrorBody,
+} from "@/lib/moderation/solicitation";
 
 const schema = z.object({
   email: z.string().email(),
@@ -27,6 +31,16 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "You must be 18 or older to join OpenHeart." },
         { status: 400 },
+      );
+    }
+
+    const solicitation = findSolicitation({
+      displayName: parsed.data.displayName,
+    });
+    if (solicitation.length > 0) {
+      return NextResponse.json(
+        solicitationErrorBody([...new Set(solicitation.map((m) => m.label))]),
+        { status: 422 },
       );
     }
 

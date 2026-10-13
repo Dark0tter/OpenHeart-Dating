@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import {
+  enforceSolicitationPolicy,
+  solicitationErrorBody,
+} from "@/lib/moderation/solicitation";
 
 const postSchema = z.object({
   body: z.string().min(1).max(4000).optional(),
@@ -71,6 +75,17 @@ export async function POST(
   const parsed = postSchema.safeParse(await req.json());
   if (!parsed.success || (!parsed.data.body && !parsed.data.imageUrl && !parsed.data.voiceUrl)) {
     return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+  }
+
+  const solicitation = await enforceSolicitationPolicy({
+    userId: user.id,
+    context: `message:${matchId}`,
+    fields: { body: parsed.data.body },
+  });
+  if (solicitation.blocked) {
+    return NextResponse.json(solicitationErrorBody(solicitation.labels), {
+      status: 422,
+    });
   }
 
   const message = await prisma.message.create({

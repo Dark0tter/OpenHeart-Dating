@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ const REASONS = [
   "THREATS",
   "FRAUD",
   "NON_CONSENSUAL_CONTENT",
+  "FINANCIAL_SOLICITATION",
   "EMERGENCY",
   "OTHER",
 ] as const;
@@ -24,6 +26,32 @@ export default function SettingsPage() {
   const [reason, setReason] = useState<(typeof REASONS)[number]>("HARASSMENT");
   const [details, setDetails] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [adPreference, setAdPreference] = useState<string | null>(null);
+  const [supporter, setSupporter] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/preferences")
+      .then((r) => r.json())
+      .then((d) => {
+        setAdPreference(d.adPreference ?? "GENERIC");
+        setSupporter(Boolean(d.isSupporter));
+      });
+  }, []);
+
+  async function onAdPreference(value: string) {
+    const res = await fetch("/api/preferences", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adPreference: value }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setAdPreference(data.adPreference);
+      setMsg("Sponsor preference saved.");
+    } else {
+      setMsg(data.error);
+    }
+  }
 
   async function onBlock(e: FormEvent) {
     e.preventDefault();
@@ -71,6 +99,49 @@ export default function SettingsPage() {
       {msg && (
         <p className="rounded-md bg-mist px-3 py-2 text-sm text-forest">{msg}</p>
       )}
+
+      <fieldset className="space-y-2">
+        <legend className="font-medium text-forest">Sponsor block</legend>
+        <p className="text-sm text-ink/60">
+          One small block at the bottom of the page. We never use your
+          activity, browsing, or device data.{" "}
+          <Link href="/privacy" className="underline">
+            Our privacy promise
+          </Link>
+        </p>
+        {[
+          {
+            value: "GENERIC",
+            label: "General community listings only",
+          },
+          {
+            value: "PROFILE_INTERESTS",
+            label: "Match listings to the interests on my profile",
+          },
+          {
+            value: "NONE",
+            label: supporter
+              ? "No sponsor block"
+              : "No sponsor block (supporters)",
+            disabled: !supporter,
+          },
+        ].map((o) => (
+          <label
+            key={o.value}
+            className={`flex items-center gap-2 text-sm ${o.disabled ? "text-ink/40" : "text-ink"}`}
+          >
+            <input
+              type="radio"
+              name="adPreference"
+              value={o.value}
+              checked={adPreference === o.value}
+              disabled={o.disabled || adPreference === null}
+              onChange={() => onAdPreference(o.value)}
+            />
+            {o.label}
+          </label>
+        ))}
+      </fieldset>
 
       <form onSubmit={onBlock} className="space-y-3">
         <h2 className="font-medium text-forest">Block user</h2>

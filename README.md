@@ -50,7 +50,7 @@ Production build verified with `npm run build`.
 | --- | --- |
 | **1 (this repo)** | Auth, profiles, tag taxonomies, discovery, likes, matches, messaging, age-verification stubs, block/report, noindex headers |
 | **2** | Full kink interest levels UI, advanced filters, photo albums, richer incognito flows |
-| **3** | Moderation dashboard, payments (themes/boosts only), analytics, push |
+| **3** | Moderation dashboard (report queue, warnings, suspensions, verification-based bans, appeals, sponsor management), supporter payments, push |
 | **4** | Community groups, events, forums, local meetups |
 
 ## Important API surfaces
@@ -67,6 +67,19 @@ Production build verified with `npm run build`.
 | `POST /api/consent` | Grant/deny/revoke `ADULT_ALBUM` or `PROFILE_ACCESS` |
 
 Database migrations live in `prisma/migrations`; `npm run db:setup` applies them (`prisma migrate deploy`) and seeds the tag taxonomies.
+
+## Revenue and privacy model
+
+Members are the customers, not the product.
+
+- **Always free:** likes, messages, matching, search, filters, safety tools.
+- **Sponsor block:** one small labelled block at the bottom of app pages (`SponsorSlot`). It's `GENERIC` by default; members can opt in to `PROFILE_INTERESTS`, which matches only the kinks (Favorite/Interested/Curious) and relationship goals on their profile and skips anything they marked No/Hard Limit. No impressions, clicks, or viewers are stored; links open with `rel="sponsored noopener noreferrer"` and no referrer.
+- **Supporter membership** (`Subscription.plan = "supporter"`): option to hide the sponsor block, supporter badge, extra storage, and forum video playback (Phase 4). Never core dating features.
+- **No data sales, no third-party trackers, no cross-site tracking.**
+
+## Financial solicitation policy
+
+`src/lib/moderation/solicitation.ts` blocks wishlists (Amazon, Throne), payment links and cashtags (Cash App, Venmo, PayPal.me, Zelle), tip jars (Buy Me a Coffee, Ko-fi), and paid-content promotion (OnlyFans, Fansly, Patreon, etc.) in display names, profiles, and messages. Blocked content isn't saved, and an `AUTOMATED` `FINANCIAL_SOLICITATION` report goes to the moderation queue (HIGH priority after 3 attempts in 30 days). Nothing is banned automatically: warnings, suspensions, and verification-based bans are moderator decisions with appeals. Public pages: `/privacy`, `/guidelines`.
 
 ## Legal / compliance checklist (ops)
 

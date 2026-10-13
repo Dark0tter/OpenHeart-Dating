@@ -57,8 +57,29 @@ enum ReportReason {
   THREATS
   FRAUD
   NON_CONSENSUAL_CONTENT
+  FINANCIAL_SOLICITATION
   EMERGENCY
   OTHER
+}
+
+enum ReportSource {
+  USER
+  AUTOMATED
+}
+
+/// Sexual interests are special-category data (GDPR Art. 9), so interest-based
+/// sponsor placement is opt-in; GENERIC is the default.
+enum AdPreference {
+  GENERIC
+  PROFILE_INTERESTS
+  NONE
+}
+
+enum SponsorLabel {
+  SPONSOR_SPOTLIGHT
+  COMMUNITY_PARTNER
+  COMMUNITY_EVENT
+  EDUCATIONAL_RESOURCE
 }
 
 enum ReportPriority {
@@ -82,6 +103,7 @@ model User {
   accountStatus   AccountStatus @default(ACTIVE)
   statusReason    String?
   statusChangedAt DateTime?
+  adPreference    AdPreference  @default(GENERIC)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   lastActiveAt    DateTime      @default(now())
@@ -421,20 +443,43 @@ model Block {
   @@unique([blockerId, blockedId])
 }
 
+/// AUTOMATED reports have no reporter; they come from content checks and wait for human review.
 model Report {
   id             String         @id @default(uuid())
-  reporterId     String
+  reporterId     String?
   reportedUserId String
+  source         ReportSource   @default(USER)
   reason         ReportReason
   priority       ReportPriority @default(NORMAL)
   details        String?        @db.Text
   status         String         @default("open")
   createdAt      DateTime       @default(now())
   resolvedAt     DateTime?
-  reporter       User           @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporter       User?          @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: SetNull)
   reportedUser   User           @relation("ReportsAgainst", fields: [reportedUserId], references: [id], onDelete: Cascade)
 
   @@index([status, priority, createdAt])
+  @@index([reportedUserId, reason, createdAt])
+}
+
+/// Targeting uses only kink and relationship-goal slugs the member chose to list.
+/// There are deliberately no impression, click, or viewer columns.
+model SponsorPlacement {
+  id              String       @id @default(uuid())
+  label           SponsorLabel @default(SPONSOR_SPOTLIGHT)
+  sponsorName     String
+  title           String
+  body            String?
+  linkUrl         String
+  targetKinkSlugs String[]
+  targetGoalSlugs String[]
+  isActive        Boolean      @default(true)
+  startsAt        DateTime     @default(now())
+  endsAt          DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([isActive, startsAt])
 }
 
 /// Granter lets viewer see gated content: an adult album, or an incognito profile.
@@ -455,6 +500,7 @@ model ConsentGrant {
 model Subscription {
   id               String    @id @default(uuid())
   userId           String    @unique
+  /// "free" | "supporter". Supporter perks are extras, never core dating features.
   plan             String    @default("free")
   stripeCustomerId String?
   status           String    @default("active")

@@ -50,6 +50,28 @@ export default function Home() {
             you accept a consent request. Likes, messages, and matching stay
             free — always.
           </p>
+
+          <h2 className="mt-12 font-[family-name:var(--font-fraunces)] text-3xl text-forest">
+            Your data isn&apos;t the product
+          </h2>
+          <ul className="mt-3 max-w-2xl space-y-1 text-ink/70">
+            <li>We do not track your activity across the web.</li>
+            <li>We do not sell your personal information.</li>
+            <li>We do not build behavioral advertising profiles.</li>
+            <li>
+              The one small sponsor block you&apos;ll see is chosen only from
+              interests you put on your profile, and only if you opt in.
+            </li>
+          </ul>
+
+          <nav className="mt-10 flex gap-5 text-sm text-forest/80">
+            <Link href="/privacy" className="underline hover:text-ink">
+              Privacy promise
+            </Link>
+            <Link href="/guidelines" className="underline hover:text-ink">
+              Community guidelines
+            </Link>
+          </nav>
         </div>
       </section>
     </div>
