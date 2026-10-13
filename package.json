@@ -35,7 +35,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -50,6 +50,6 @@
     "prisma@6.19.0": true
   },
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   }
 }
