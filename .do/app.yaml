@@ -62,6 +62,24 @@ services:
       - key: AUTH_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: APP_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
+      - key: RESEND_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: EMAIL_FROM
+        scope: RUN_TIME
+      - key: TURNSTILE_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        scope: BUILD_TIME
+      - key: SENTRY_DSN
+        scope: RUN_TIME
+        type: SECRET
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        scope: BUILD_TIME
       - key: VERIFICATION_PROVIDER
         scope: RUN_TIME
         value: persona

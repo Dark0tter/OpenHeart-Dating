@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
@@ -17,6 +18,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Activate your profile to post." },
       { status: 403 },
+    );
+  }
+
+  const limited = await limitFor("postsPerUser", user.id);
+  if (!limited.ok) {
+    return tooManyRequests(
+      limited,
+      "You're posting too often. Try again later.",
     );
   }
 

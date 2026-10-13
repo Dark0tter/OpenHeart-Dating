@@ -4,6 +4,7 @@ import { ReportReason } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { priorityForReason } from "@/lib/safety";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 
 const schema = z.object({
   reportedUserId: z.string().min(1),
@@ -15,6 +16,14 @@ export async function POST(req: Request) {
   const user = await requireUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limited = await limitFor("reportsPerUser", user.id);
+  if (!limited.ok) {
+    return tooManyRequests(
+      limited,
+      "You've filed many reports today. For emergencies, contact local emergency services.",
+    );
   }
 
   const parsed = schema.safeParse(await req.json());

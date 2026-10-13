@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
@@ -90,8 +91,16 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const limited = await limitFor("messagesPerUser", user.id);
+  if (!limited.ok) {
+    return tooManyRequests(limited, "You're sending messages too quickly.");
+  }
+
   const parsed = postSchema.safeParse(await req.json());
-  if (!parsed.success || (!parsed.data.body && !parsed.data.imageUrl && !parsed.data.voiceUrl)) {
+  if (
+    !parsed.success ||
+    (!parsed.data.body && !parsed.data.imageUrl && !parsed.data.voiceUrl)
+  ) {
     return NextResponse.json({ error: "Invalid message" }, { status: 400 });
   }
 

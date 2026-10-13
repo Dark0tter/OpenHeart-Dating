@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/session";
 import { sendLike } from "@/lib/matching";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 
 const schema = z.object({
   toUserId: z.string().min(1),
@@ -11,6 +12,11 @@ export async function POST(req: Request) {
   const user = await requireUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limited = await limitFor("likesPerUser", user.id);
+  if (!limited.ok) {
+    return tooManyRequests(limited, "You've reached today's like limit.");
   }
 
   const parsed = schema.safeParse(await req.json());

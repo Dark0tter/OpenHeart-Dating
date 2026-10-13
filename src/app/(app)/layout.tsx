@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppNav } from "@/components/app-nav";
 import { SponsorSlot } from "@/components/sponsor-slot";
+import { EmailBanner } from "@/components/email-banner";
 import { requireUser } from "@/lib/session";
 import { flagById, flagStyle, THEME_MODES, type ThemeMode } from "@/lib/themes";
 
@@ -30,6 +31,7 @@ export default async function AppLayout({
       style={flagStyle(flag)}
     >
       <AppNav />
+      {user && !user.emailVerified && <EmailBanner email={user.email} />}
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
       <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
         <SponsorSlot />

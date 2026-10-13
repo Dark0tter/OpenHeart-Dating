@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireMember, requireUser } from "@/lib/session";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { acceptRequestTx } from "@/lib/message-requests";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 import { allowedTiers } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
@@ -81,6 +82,14 @@ export async function POST(req: Request) {
     );
   }
 
+  const limited = await limitFor("messageRequestsPerUser", user.id);
+  if (!limited.ok) {
+    return tooManyRequests(
+      limited,
+      "You've sent the most message requests allowed today.",
+    );
+  }
+
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -101,7 +110,10 @@ export async function POST(req: Request) {
     !recipient.profile?.isActive ||
     (await isBlockedEitherWay(user.id, toUserId))
   ) {
-    return NextResponse.json({ error: "Member not available" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Member not available" },
+      { status: 404 },
+    );
   }
 
   const solicitation = await enforceSolicitationPolicy({
@@ -125,7 +137,10 @@ export async function POST(req: Request) {
     },
   });
   if (existingMatch) {
-    return NextResponse.json({ status: "already_connected", matchId: existingMatch.id });
+    return NextResponse.json({
+      status: "already_connected",
+      matchId: existingMatch.id,
+    });
   }
 
   const theirs = await prisma.messageRequest.findFirst({

@@ -7,6 +7,10 @@ import {
   findSolicitation,
   solicitationErrorBody,
 } from "@/lib/moderation/solicitation";
+import { limitFor, tooManyRequests } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request";
+import { BOT_CHECK_FAILED, passesBotCheck } from "@/lib/bot-check";
+import { sendVerificationEmail } from "@/lib/account-email";
 
 const schema = z.object({
   email: z.string().email(),
@@ -14,10 +18,15 @@ const schema = z.object({
   dateOfBirth: z.string(),
   displayName: z.string().min(2).max(40),
   acceptTerms: z.literal(true),
+  botToken: z.string().optional(),
 });
 
 export async function POST(req: Request) {
   try {
+    const ip = await clientIp(req);
+    const limited = await limitFor("registerPerIp", ip);
+    if (!limited.ok) return tooManyRequests(limited);
+
     const body = await req.json();
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
@@ -33,6 +42,10 @@ export async function POST(req: Request) {
         },
         { status: 400 },
       );
+    }
+
+    if (!(await passesBotCheck(parsed.data.botToken, ip))) {
+      return NextResponse.json({ error: BOT_CHECK_FAILED }, { status: 400 });
     }
 
     const dob = new Date(parsed.data.dateOfBirth);
@@ -81,6 +94,8 @@ export async function POST(req: Request) {
       },
       select: { id: true, email: true },
     });
+
+    await sendVerificationEmail(user);
 
     return NextResponse.json({
       user,

@@ -4,9 +4,18 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
+import { AuthShell } from "@/components/auth-shell";
+import { BotCheck, botToken } from "@/components/bot-check";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const ERRORS: Record<string, string> = {
+  rate_limited:
+    "Too many sign-in attempts. Please wait 15 minutes and try again.",
+  bot_check:
+    "We couldn't confirm you're a person. Please refresh the page and try again.",
+};
 
 function LoginForm() {
   const router = useRouter();
@@ -22,27 +31,56 @@ function LoginForm() {
     const res = await signIn("credentials", {
       email: String(fd.get("email")),
       password: String(fd.get("password")),
+      botToken: botToken(fd) ?? "",
       redirect: false,
     });
     setLoading(false);
     if (res?.error) {
-      setError("Invalid email or password");
+      setError((res.code && ERRORS[res.code]) ?? "Invalid email or password");
       return;
     }
-    router.push(params.get("next") || "/feed");
+    const next = params.get("next");
+    router.push(
+      next?.startsWith("/") && !next.startsWith("//") ? next : "/feed",
+    );
   }
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-4">
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
       </div>
       <div>
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required />
+        <div className="flex items-baseline justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-forest underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+        />
       </div>
-      {error && <p className="text-sm text-coral-deep">{error}</p>}
+      <BotCheck />
+      {error && (
+        <p role="alert" className="text-sm text-coral-deep">
+          {error}
+        </p>
+      )}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Log in"}
       </Button>
@@ -52,25 +90,16 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="oh-atmosphere flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
-        >
-          OpenHeart
+    <AuthShell subtitle="Welcome back.">
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+      <p className="mt-6 text-sm text-ink/60">
+        New here?{" "}
+        <Link href="/register" className="text-forest underline">
+          Join free
         </Link>
-        <p className="mt-2 text-sm text-ink/60">Welcome back.</p>
-        <Suspense>
-          <LoginForm />
-        </Suspense>
-        <p className="mt-6 text-sm text-ink/60">
-          New here?{" "}
-          <Link href="/register" className="text-forest underline">
-            Join free
-          </Link>
-        </p>
-      </div>
-    </div>
+      </p>
+    </AuthShell>
   );
 }

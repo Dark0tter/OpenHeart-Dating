@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemePicker } from "@/components/theme-picker";
+import { AccountSecurity } from "@/components/account-security";
 import type { ThemeMode } from "@/lib/themes";
 
 const REASONS = [
@@ -331,6 +332,8 @@ export default function SettingsPage() {
           Submit report
         </Button>
       </form>
+
+      <AccountSecurity />
 
       <Button
         type="button"

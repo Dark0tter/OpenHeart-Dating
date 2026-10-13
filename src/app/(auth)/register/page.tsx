@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
+import { BotCheck, botToken } from "@/components/bot-check";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ export default function RegisterPage() {
       dateOfBirth: String(fd.get("dateOfBirth")),
       displayName: String(fd.get("displayName")),
       acceptTerms: fd.get("acceptTerms") === "on",
+      botToken: botToken(fd),
     };
 
     const res = await fetch("/api/auth/register", {
@@ -114,7 +116,12 @@ export default function RegisterPage() {
               content.
             </span>
           </label>
-          {error && <p className="text-sm text-coral-deep">{error}</p>}
+          <BotCheck />
+          {error && (
+            <p role="alert" className="text-sm text-coral-deep">
+              {error}
+            </p>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Creating…" : "Continue"}
           </Button>

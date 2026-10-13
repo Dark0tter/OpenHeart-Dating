@@ -122,6 +122,12 @@ export async function PATCH(req: Request) {
 
   // Activate only when age-verified (adult content / full access gate)
   if (data.isActive === true) {
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: "Please confirm your email before activating your profile." },
+        { status: 403 },
+      );
+    }
     if (user.verification?.status !== "VERIFIED_ADULT") {
       return NextResponse.json(
         {
