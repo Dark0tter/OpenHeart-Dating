@@ -1,0 +1,89 @@
+# DigitalOcean App Platform spec.
+# Create the managed Postgres cluster "openheart-db" first, then:
+#   doctl apps create --spec .do/app.yaml
+# Secrets marked type: SECRET are set in the App Platform dashboard, never committed.
+name: openheart-dating
+region: nyc
+
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: true
+    cluster_name: openheart-db
+
+jobs:
+  - name: migrate
+    kind: PRE_DEPLOY
+    github:
+      repo: Dark0tter/OpenHeart-Dating
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    environment_slug: node-js
+    build_command: npx prisma generate
+    run_command: npm run db:setup
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+
+services:
+  - name: web
+    github:
+      repo: Dark0tter/OpenHeart-Dating
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    environment_slug: node-js
+    build_command: npm run build
+    run_command: npm start
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 10
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: AUTH_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
+      - key: AUTH_TRUST_HOST
+        scope: RUN_TIME
+        value: "true"
+      - key: AUTH_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: VERIFICATION_PROVIDER
+        scope: RUN_TIME
+        value: persona
+      - key: ALLOW_VERIFICATION_STUB
+        scope: RUN_TIME
+        value: "false"
+      - key: PERSONA_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VERIFF_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: STRIPE_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: S3_BUCKET
+        scope: RUN_TIME
+      - key: S3_REGION
+        scope: RUN_TIME
+      - key: S3_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: S3_SECRET
+        scope: RUN_TIME
+        type: SECRET

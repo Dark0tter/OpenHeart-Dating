@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: openheart
+      POSTGRES_PASSWORD: openheart
+      POSTGRES_DB: openheart
+    volumes:
+      - openheart_pg:/var/lib/postgresql/data
+
+volumes:
+  openheart_pg:

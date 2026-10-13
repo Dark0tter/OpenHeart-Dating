@@ -1,103 +1,57 @@
-import Image from "next/image";
+import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="oh-atmosphere oh-grain relative min-h-screen overflow-hidden">
+      <SiteHeader />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-end px-6 pb-16 pt-8 md:justify-center md:px-10 md:pb-24">
+        <div className="max-w-xl">
+          <h1 className="animate-oh-rise font-[family-name:var(--font-fraunces)] text-5xl leading-[1.05] tracking-tight text-forest md:text-7xl">
+            OpenHeart
+          </h1>
+          <p className="animate-oh-rise-delay mt-5 max-w-md text-lg leading-relaxed text-ink/75 md:text-xl">
+            Dating, connection, identity, and kink without artificial paywalls.
+          </p>
+          <div className="animate-oh-fade mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/register"
+              className="rounded-md bg-coral px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-coral-deep"
+            >
+              Create free account
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-md border border-forest/20 bg-cream/50 px-6 py-3 text-sm font-medium text-forest backdrop-blur-sm transition-colors hover:bg-cream"
+            >
+              Log in
+            </Link>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Dominant visual plane — atmosphere as full-bleed hero */}
+      <div
+        aria-hidden
+        className="animate-oh-pulse pointer-events-none absolute inset-0 -z-0"
+      >
+        <div className="absolute -right-24 top-10 h-[70vh] w-[70vw] max-w-3xl rounded-full bg-forest/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-[40vh] w-full bg-gradient-to-t from-forest/15 to-transparent" />
+      </div>
+
+      <section className="relative z-10 border-t border-forest/10 bg-cream/40 px-6 py-16 md:px-10">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
+            Built for privacy and consent
+          </h2>
+          <p className="mt-3 max-w-2xl text-ink/70">
+            Public, limited, or incognito profiles. Explicit media hidden until
+            you accept a consent request. Likes, messages, and matching stay
+            free — always.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

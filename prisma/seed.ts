@@ -1,0 +1,91 @@
+import { PrismaClient } from "@prisma/client";
+import {
+  ACCESSIBILITY_TAGS,
+  BODY_TAGS,
+  ETHNICITY_TAGS,
+  GOAL_TAGS,
+  IDENTITY_TAGS,
+  KINK_CATEGORIES,
+  ORIENTATION_TAGS,
+  slugify,
+} from "../src/lib/constants/tags";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  for (const label of IDENTITY_TAGS) {
+    await prisma.identityTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of ORIENTATION_TAGS) {
+    await prisma.orientationTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of GOAL_TAGS) {
+    await prisma.goalTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of BODY_TAGS) {
+    await prisma.bodyTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of ETHNICITY_TAGS) {
+    await prisma.ethnicityTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of ACCESSIBILITY_TAGS) {
+    await prisma.accessibilityTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const [categoryName, names] of Object.entries(KINK_CATEGORIES)) {
+    const categorySlug = slugify(categoryName);
+    const category = await prisma.kinkCategory.upsert({
+      where: { slug: categorySlug },
+      create: { slug: categorySlug, name: categoryName },
+      update: { name: categoryName },
+    });
+    for (const name of names) {
+      const slug = slugify(`${categoryName}-${name}`);
+      await prisma.kink.upsert({
+        where: { slug },
+        create: { slug, name, categoryId: category.id },
+        update: { name, categoryId: category.id },
+      });
+    }
+  }
+
+  console.log("Seeded identity, orientation, goal, body, ethnicity, accessibility, and kink tags.");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

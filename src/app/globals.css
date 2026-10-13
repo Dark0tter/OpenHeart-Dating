@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --oh-ink: #1a2420;
+  --oh-forest: #2d4a3e;
+  --oh-sage: #6b8f7a;
+  --oh-mist: #e8efe9;
+  --oh-bloom: #f3ebe3;
+  --oh-coral: #c45c4a;
+  --oh-coral-deep: #9e3f30;
+  --oh-cream: #faf6f1;
+  --background: var(--oh-bloom);
+  --foreground: var(--oh-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--oh-ink);
+  --color-forest: var(--oh-forest);
+  --color-sage: var(--oh-sage);
+  --color-mist: var(--oh-mist);
+  --color-bloom: var(--oh-bloom);
+  --color-coral: var(--oh-coral);
+  --color-coral-deep: var(--oh-coral-deep);
+  --color-cream: var(--oh-cream);
+  --font-sans: var(--font-figtree);
+  --font-display: var(--font-fraunces);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-figtree), system-ui, sans-serif;
+}
+
+.oh-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(107, 143, 122, 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(196, 92, 74, 0.16), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(45, 74, 62, 0.12), transparent 45%),
+    linear-gradient(165deg, #f7f1ea 0%, #e8efe9 45%, #f3ebe3 100%);
+}
+
+.oh-grain {
+  position: relative;
+}
+
+.oh-grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes oh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes oh-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes oh-pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-oh-rise {
+  animation: oh-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-oh-rise-delay {
+  animation: oh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.animate-oh-fade {
+  animation: oh-fade 1.2s ease both;
+}
+
+.animate-oh-pulse {
+  animation: oh-pulse-soft 4s ease-in-out infinite;
 }
