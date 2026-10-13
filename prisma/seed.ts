@@ -2,7 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import {
   ACCESSIBILITY_TAGS,
   BODY_TAGS,
+  categoryTier,
   ETHNICITY_TAGS,
+  kinkTier,
   GOAL_TAGS,
   IDENTITY_TAGS,
   KINK_CATEGORIES,
@@ -74,17 +76,19 @@ async function main() {
   for (const [categoryName, names] of Object.entries(KINK_CATEGORIES)) {
     const categorySlug = slugify(categoryName);
     const description = KINK_CATEGORY_NOTES[categoryName] ?? null;
+    const tier = categoryTier(categoryName);
     const category = await prisma.kinkCategory.upsert({
       where: { slug: categorySlug },
-      create: { slug: categorySlug, name: categoryName, description },
-      update: { name: categoryName, description },
+      create: { slug: categorySlug, name: categoryName, description, tier },
+      update: { name: categoryName, description, tier },
     });
     for (const name of new Set(names)) {
       const slug = slugify(`${categoryName}-${name}`);
+      const tier = kinkTier(categoryName, name);
       await prisma.kink.upsert({
         where: { slug },
-        create: { slug, name, categoryId: category.id },
-        update: { name, categoryId: category.id },
+        create: { slug, name, categoryId: category.id, tier },
+        update: { name, categoryId: category.id, tier },
       });
     }
   }

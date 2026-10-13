@@ -42,6 +42,7 @@ function OnboardingInner() {
     goals: Tag[];
     relationshipStyles: Tag[];
     kinks: KinkCategory[];
+    contentRestricted?: boolean;
   } | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [identity, setIdentity] = useState<string[]>([]);
@@ -269,6 +270,12 @@ function OnboardingInner() {
             invited to that group&apos;s room. No and Hard limit are shown on
             your profile so others know your boundaries.
           </p>
+          {tags.contentRestricted && (
+            <p className="mt-2 text-sm text-ink/60">
+              The app shows a shorter list. You can see and edit the full list
+              on the OpenHeart website, and anything you set there is kept.
+            </p>
+          )}
           <div className="mt-3 space-y-2">
             {tags.kinks.map((cat) => {
               const chosen = cat.kinks.filter((k) => kinks[k.id]).length;

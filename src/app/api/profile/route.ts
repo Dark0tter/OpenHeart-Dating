@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { slugify } from "@/lib/constants/tags";
 import { syncRoomInvites } from "@/lib/rooms";
+import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
@@ -49,6 +50,9 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const tiers = await allowedTiers(user);
+  const restricted = isRestricted(tiers);
+
   const profile = await prisma.profile.findUnique({
     where: { userId: user.id },
     include: {
@@ -59,10 +63,16 @@ export async function GET() {
       bodyTags: { include: { tag: true } },
       ethnicityTags: { include: { tag: true } },
       accessibilityTags: { include: { tag: true } },
-      kinks: { include: { kink: { include: { category: true } } } },
+      kinks: {
+        where: { kink: { tier: { in: tiers } } },
+        include: { kink: { include: { category: true } } },
+      },
       seekingIdentityTags: { include: { tag: true } },
       seekingOrientationTags: { include: { tag: true } },
-      photos: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] },
+      photos: {
+        where: restricted ? { visibility: { not: "ADULT" } } : {},
+        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+      },
     },
   });
 
@@ -70,6 +80,7 @@ export async function GET() {
     profile,
     verification: user.verification,
     dateOfBirth: user.dateOfBirth,
+    contentRestricted: restricted,
   });
 }
 
@@ -89,6 +100,7 @@ export async function PATCH(req: Request) {
 
   const data = parsed.data;
   const profileId = user.profile.id;
+  const tiers = await allowedTiers(user);
 
   const solicitation = await enforceSolicitationPolicy({
     userId: user.id,
@@ -254,13 +266,29 @@ export async function PATCH(req: Request) {
     }
 
     if (data.kinks) {
-      await tx.profileKink.deleteMany({ where: { profileId } });
+      // Only replace kinks this client can see; ones hidden from the app stay.
+      await tx.profileKink.deleteMany({
+        where: { profileId, kink: { tier: { in: tiers } } },
+      });
+      const allowed = new Set(
+        (
+          await tx.kink.findMany({
+            where: {
+              id: { in: data.kinks.map((k) => k.kinkId) },
+              tier: { in: tiers },
+            },
+            select: { id: true },
+          })
+        ).map((k) => k.id),
+      );
       await tx.profileKink.createMany({
-        data: data.kinks.map((k) => ({
-          profileId,
-          kinkId: k.kinkId,
-          level: k.level,
-        })),
+        data: data.kinks
+          .filter((k) => allowed.has(k.kinkId))
+          .map((k) => ({
+            profileId,
+            kinkId: k.kinkId,
+            level: k.level,
+          })),
         skipDuplicates: true,
       });
     }

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/session";
+import { allowedTiers, isRestricted } from "@/lib/content-policy";
 
 export async function GET() {
+  const tiers = await allowedTiers(await requireUser());
+
   const [
     identity,
     orientation,
@@ -29,8 +33,19 @@ export async function GET() {
     prisma.ethnicityTag.findMany({ orderBy: { label: "asc" } }),
     prisma.accessibilityTag.findMany({ orderBy: { label: "asc" } }),
     prisma.kinkCategory.findMany({
+      where: { tier: { in: tiers } },
       orderBy: { name: "asc" },
-      include: { kinks: { orderBy: { name: "asc" } } },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        kinks: {
+          where: { tier: { in: tiers } },
+          orderBy: { name: "asc" },
+          select: { id: true, slug: true, name: true },
+        },
+      },
     }),
   ]);
 
@@ -42,6 +57,7 @@ export async function GET() {
     body,
     ethnicity,
     accessibility,
-    kinks,
+    kinks: kinks.filter((c) => c.kinks.length > 0),
+    contentRestricted: isRestricted(tiers),
   });
 }

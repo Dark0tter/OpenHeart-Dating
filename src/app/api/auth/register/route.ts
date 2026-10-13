@@ -13,6 +13,7 @@ const schema = z.object({
   password: z.string().min(8).max(128),
   dateOfBirth: z.string(),
   displayName: z.string().min(2).max(40),
+  acceptTerms: z.literal(true),
 });
 
 export async function POST(req: Request) {
@@ -20,8 +21,16 @@ export async function POST(req: Request) {
     const body = await req.json();
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
+      const termsMissing = parsed.error.issues.some(
+        (i) => i.path[0] === "acceptTerms",
+      );
       return NextResponse.json(
-        { error: "Invalid registration data", details: parsed.error.flatten() },
+        {
+          error: termsMissing
+            ? "Please accept the Terms and Community Guidelines to join."
+            : "Invalid registration data",
+          details: parsed.error.flatten(),
+        },
         { status: 400 },
       );
     }
@@ -60,6 +69,7 @@ export async function POST(req: Request) {
         email,
         passwordHash,
         dateOfBirth: dob,
+        termsAcceptedAt: new Date(),
         verification: { create: { status: "NOT_VERIFIED" } },
         profile: {
           create: {

@@ -519,6 +519,153 @@ export const KINK_CATEGORIES: Record<string, string[]> = {
   ],
 };
 
+/**
+ * Mobile app content tiers (see `ContentTier` in the Prisma schema). The iOS
+ * and Android apps share one policy built to the stricter of Apple's and
+ * Google's rules, so nothing here differs by platform. When unsure, go higher.
+ */
+export type ContentTierName = "STANDARD" | "ADULT_TEXT" | "WEB_ONLY";
+
+const TIER_RANK: Record<ContentTierName, number> = {
+  STANDARD: 0,
+  ADULT_TEXT: 1,
+  WEB_ONLY: 2,
+};
+
+/** Categories not listed are STANDARD. */
+export const KINK_CATEGORY_TIERS: Record<string, ContentTierName> = {
+  "Edge Play": "WEB_ONLY",
+  "Caregiver / Little (adults only)": "WEB_ONLY",
+  "Sex & Toys": "ADULT_TEXT",
+  "Humiliation & Degradation": "ADULT_TEXT",
+  "Chastity & Denial": "ADULT_TEXT",
+  "Group Play": "ADULT_TEXT",
+  "Exhibitionism & Voyeurism": "ADULT_TEXT",
+  "Pet Play": "ADULT_TEXT",
+};
+
+/** Raises individual kinks above their category's tier. */
+export const KINK_TIER_OVERRIDES: Record<
+  string,
+  Partial<Record<ContentTierName, string[]>>
+> = {
+  BDSM: {
+    ADULT_TEXT: [
+      "Master",
+      "Slave",
+      "Daddy",
+      "Mommy",
+      "Sadist",
+      "Masochist",
+      "Sadomasochist",
+    ],
+  },
+  Roleplay: {
+    WEB_ONLY: ["Teacher", "Student"],
+    ADULT_TEXT: [
+      "Doctor / Patient",
+      "Medical Play",
+      "Police / Prisoner",
+      "Captor / Captive",
+      "Interrogation",
+    ],
+  },
+  Fetishes: {
+    ADULT_TEXT: [
+      "Armpits",
+      "Breasts",
+      "Butts",
+      "Sweat",
+      "Scent",
+      "Spit",
+      "Watersports",
+      "Lactation",
+      "Pregnancy",
+      "Wet & Messy",
+      "Food Play",
+      "Smoking",
+      "Feminization",
+    ],
+  },
+  "Power Exchange": {
+    ADULT_TEXT: [
+      "Owner Property",
+      "Consensual Slavery",
+      "Punishment",
+      "Domestic Discipline",
+    ],
+  },
+  "Bondage & Rope": {
+    ADULT_TEXT: [
+      "Suspension",
+      "Predicament Bondage",
+      "Hogtie",
+      "Gags",
+      "Mummification",
+      "Straitjackets",
+      "Vacuum Bed",
+    ],
+  },
+  "Impact Play": {
+    ADULT_TEXT: [
+      "Caning",
+      "Whipping",
+      "Single Tail",
+      "Slapping",
+      "Face Slapping",
+      "Marks & Bruises",
+    ],
+  },
+  "Sensation Play": {
+    ADULT_TEXT: [
+      "Nipple Play",
+      "Clamps",
+      "Clothespins",
+      "Electro Play",
+      "Violet Wand",
+      "TENS Units",
+      "Cupping",
+      "Vibrators",
+      "Pain & Pleasure",
+    ],
+  },
+  "Gear & Materials": {
+    ADULT_TEXT: ["Gas Masks", "Heavy Rubber"],
+  },
+  Primal: {
+    ADULT_TEXT: ["Rough Sex", "Consensual Struggle", "Hunting Games"],
+  },
+  "Service & Protocol": {
+    ADULT_TEXT: ["Body Service", "Sensual Service"],
+  },
+  "Mind Play": {
+    ADULT_TEXT: [
+      "Mindfuck",
+      "Psychological Play",
+      "Corruption Fantasy",
+      "Brainwashing Fantasy",
+      "Bimbofication",
+      "Himbofication",
+    ],
+  },
+};
+
+export function categoryTier(category: string): ContentTierName {
+  return KINK_CATEGORY_TIERS[category] ?? "STANDARD";
+}
+
+export function kinkTier(category: string, name: string): ContentTierName {
+  let tier = categoryTier(category);
+  for (const [override, names] of Object.entries(
+    KINK_TIER_OVERRIDES[category] ?? {},
+  ) as [ContentTierName, string[]][]) {
+    if (names.includes(name) && TIER_RANK[override] > TIER_RANK[tier]) {
+      tier = override;
+    }
+  }
+  return tier;
+}
+
 export function slugify(label: string): string {
   return label
     .toLowerCase()

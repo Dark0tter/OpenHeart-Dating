@@ -77,6 +77,9 @@ services:
       - key: STRIPE_SECRET_KEY
         scope: RUN_TIME
         type: SECRET
+      # Public safety / child-safety contact shown on /terms and /child-safety.
+      - key: SUPPORT_EMAIL
+        scope: RUN_AND_BUILD_TIME
       - key: S3_BUCKET
         scope: RUN_TIME
       - key: S3_REGION

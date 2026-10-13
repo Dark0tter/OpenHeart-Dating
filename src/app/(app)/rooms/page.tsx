@@ -18,6 +18,7 @@ type Room = {
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [restricted, setRestricted] = useState(false);
 
   async function load() {
     const res = await fetch("/api/rooms");
@@ -27,6 +28,7 @@ export default function RoomsPage() {
       return;
     }
     setRooms(data.rooms);
+    setRestricted(Boolean(data.contentRestricted));
   }
 
   useEffect(() => {
@@ -68,6 +70,11 @@ export default function RoomsPage() {
         profile, you&apos;re invited to matching rooms. If you click with
         someone, ask to talk privately.
       </p>
+      {restricted && (
+        <p className="mt-2 text-sm text-ink/60">
+          More rooms are available on the OpenHeart website.
+        </p>
+      )}
       {error && (
         <p className="mt-4 text-sm text-coral-deep">
           {error}{" "}

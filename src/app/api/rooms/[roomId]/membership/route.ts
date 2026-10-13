@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { RoomInviteStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
+import {
+  allowedTiers,
+  roomAllowed,
+  WEB_ONLY_ERROR,
+} from "@/lib/content-policy";
 
 type Ctx = { params: Promise<{ roomId: string }> };
 
@@ -19,6 +24,9 @@ export async function POST(_req: Request, ctx: Ctx) {
   });
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
+  }
+  if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
+    return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });
   }
 
   await prisma.$transaction([

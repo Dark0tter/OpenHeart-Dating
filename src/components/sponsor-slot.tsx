@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { auth } from "@/lib/auth";
+import { requireUser } from "@/lib/session";
+import { allowedTiers } from "@/lib/content-policy";
 import { pickSponsorPlacement } from "@/lib/sponsors";
 
 const LABELS = {
@@ -13,8 +14,11 @@ const LABELS = {
 export async function SponsorSlot() {
   let placement;
   try {
-    const session = await auth();
-    placement = await pickSponsorPlacement(session?.user?.id ?? null);
+    const user = await requireUser();
+    placement = await pickSponsorPlacement(
+      user?.id ?? null,
+      await allowedTiers(user),
+    );
   } catch {
     return null;
   }

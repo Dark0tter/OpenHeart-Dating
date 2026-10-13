@@ -11,6 +11,7 @@ type Message = {
   body: string | null;
   createdAt: string;
   readAt: string | null;
+  mediaHidden?: boolean;
 };
 
 export default function ChatPage() {
@@ -70,12 +71,15 @@ export default function ChatPage() {
             <div
               key={m.id}
               className={`max-w-[80%] rounded-md px-3 py-2 text-sm ${
-                mine
-                  ? "ml-auto bg-forest text-cream"
-                  : "bg-mist text-ink"
+                mine ? "ml-auto bg-forest text-cream" : "bg-mist text-ink"
               }`}
             >
               {m.body}
+              {m.mediaHidden && (
+                <span className="block text-xs italic opacity-70">
+                  Media is only shown on the OpenHeart website.
+                </span>
+              )}
             </div>
           );
         })}

@@ -4,13 +4,15 @@ import { AdPreference } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { isSupporter } from "@/lib/supporter";
+import { isAppRequest } from "@/lib/content-policy";
 
 const schema = z
   .object({
     adPreference: z.nativeEnum(AdPreference).optional(),
     showOnline: z.boolean().optional(),
+    appAdultContent: z.boolean().optional(),
   })
-  .refine((v) => v.adPreference !== undefined || v.showOnline !== undefined);
+  .refine((v) => Object.values(v).some((x) => x !== undefined));
 
 export async function GET() {
   const user = await requireUser();
@@ -20,6 +22,9 @@ export async function GET() {
   return NextResponse.json({
     adPreference: user.adPreference,
     showOnline: user.showOnline,
+    appAdultContent: user.appAdultContent,
+    verifiedAdult: user.verification?.status === "VERIFIED_ADULT",
+    inApp: await isAppRequest(),
     isSupporter: await isSupporter(user.id),
   });
 }
@@ -45,10 +50,29 @@ export async function PATCH(req: Request) {
     );
   }
 
+  if (parsed.data.appAdultContent !== undefined) {
+    // Store rules: adult content in the apps may only be enabled off-app.
+    if (await isAppRequest()) {
+      return NextResponse.json(
+        { error: "Change this setting on the OpenHeart website." },
+        { status: 403 },
+      );
+    }
+    if (
+      parsed.data.appAdultContent &&
+      user.verification?.status !== "VERIFIED_ADULT"
+    ) {
+      return NextResponse.json(
+        { error: "Verify your age before turning this on." },
+        { status: 403 },
+      );
+    }
+  }
+
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: parsed.data,
-    select: { adPreference: true, showOnline: true },
+    select: { adPreference: true, showOnline: true, appAdultContent: true },
   });
   return NextResponse.json(updated);
 }

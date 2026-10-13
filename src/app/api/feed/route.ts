@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { blockedUserIds } from "@/lib/safety";
 import { incognitoUserIdsVisibleTo } from "@/lib/discovery";
+import { allowedTiers } from "@/lib/content-policy";
+import { textFilterFor } from "@/lib/moderation/app-text";
 
 const PAGE_SIZE = 20;
 
@@ -59,6 +61,7 @@ export async function GET(req: Request) {
     },
   });
 
+  const filterText = textFilterFor(await allowedTiers(user));
   const hasMore = posts.length > PAGE_SIZE;
   const page = posts.slice(0, PAGE_SIZE);
 
@@ -72,7 +75,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     posts: visible.map((p) => ({
       id: p.id,
-      body: p.body,
+      body: filterText(p.body),
       createdAt: p.createdAt,
       mine: p.authorId === user.id,
       author: {

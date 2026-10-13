@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { allowedTiers, isRestricted } from "@/lib/content-policy";
+import { textFilterFor } from "@/lib/moderation/app-text";
 import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
@@ -54,7 +56,23 @@ export async function GET(
     data: { readAt: new Date() },
   });
 
-  return NextResponse.json({ messages });
+  const tiers = await allowedTiers(user);
+  const filterText = textFilterFor(tiers);
+  const hideMedia = isRestricted(tiers);
+
+  return NextResponse.json({
+    messages: messages.map((m) => ({
+      ...m,
+      body: m.body === null ? null : filterText(m.body),
+      ...(hideMedia
+        ? {
+            imageUrl: null,
+            voiceUrl: null,
+            mediaHidden: Boolean(m.imageUrl || m.voiceUrl),
+          }
+        : {}),
+    })),
+  });
 }
 
 export async function POST(

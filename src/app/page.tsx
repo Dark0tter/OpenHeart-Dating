@@ -64,12 +64,18 @@ export default function Home() {
             </li>
           </ul>
 
-          <nav className="mt-10 flex gap-5 text-sm text-forest/80">
+          <nav className="mt-10 flex flex-wrap gap-5 text-sm text-forest/80">
             <Link href="/privacy" className="underline hover:text-ink">
               Privacy promise
             </Link>
             <Link href="/guidelines" className="underline hover:text-ink">
               Community guidelines
+            </Link>
+            <Link href="/terms" className="underline hover:text-ink">
+              Terms
+            </Link>
+            <Link href="/child-safety" className="underline hover:text-ink">
+              Child safety
             </Link>
           </nav>
         </div>

@@ -6,6 +6,12 @@ import { requireMember } from "@/lib/session";
 import { blockedUserIds } from "@/lib/safety";
 import { touchRoomPresence } from "@/lib/rooms";
 import {
+  allowedTiers,
+  roomAllowed,
+  WEB_ONLY_ERROR,
+} from "@/lib/content-policy";
+import { textFilterFor } from "@/lib/moderation/app-text";
+import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
 } from "@/lib/moderation/solicitation";
@@ -35,6 +41,11 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!membership?.room.isActive) {
     return NextResponse.json({ error: "Join this room first." }, { status: 403 });
   }
+  const tiers = await allowedTiers(user);
+  if (!(await roomAllowed(roomId, tiers))) {
+    return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });
+  }
+  const filterText = textFilterFor(tiers);
 
   await touchRoomPresence(roomId, user.id, membership.lastSeenAt);
 
@@ -66,7 +77,7 @@ export async function GET(req: Request, ctx: Ctx) {
     roomName: membership.room.name,
     messages: rows.map((m) => ({
       id: m.id,
-      body: m.body,
+      body: filterText(m.body),
       createdAt: m.createdAt,
       mine: m.senderId === user.id,
       sender: {
@@ -86,6 +97,9 @@ export async function POST(req: Request, ctx: Ctx) {
   const membership = await memberRoom(roomId, user.id);
   if (!membership?.room.isActive) {
     return NextResponse.json({ error: "Join this room first." }, { status: 403 });
+  }
+  if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
+    return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });
   }
 
   const parsed = postSchema.safeParse(await req.json());

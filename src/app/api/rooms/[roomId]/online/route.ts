@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 import { roomOnlineMembers } from "@/lib/rooms";
+import {
+  allowedTiers,
+  roomAllowed,
+  WEB_ONLY_ERROR,
+} from "@/lib/content-policy";
 
 export async function GET(
   _req: Request,
@@ -17,6 +22,9 @@ export async function GET(
   });
   if (!membership) {
     return NextResponse.json({ error: "Join this room first." }, { status: 403 });
+  }
+  if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
+    return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });
   }
 
   return NextResponse.json({

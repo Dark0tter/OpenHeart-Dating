@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { requireMember, requireUser } from "@/lib/session";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { acceptRequestTx } from "@/lib/message-requests";
+import { allowedTiers } from "@/lib/content-policy";
+import { textFilterFor } from "@/lib/moderation/app-text";
 import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
@@ -46,10 +48,12 @@ export async function GET() {
     }),
   ]);
 
+  const filterText = textFilterFor(await allowedTiers(user));
+
   return NextResponse.json({
     incoming: incoming.map((r) => ({
       id: r.id,
-      body: r.body,
+      body: filterText(r.body),
       createdAt: r.createdAt,
       from: {
         id: r.fromUser.id,
@@ -58,7 +62,7 @@ export async function GET() {
     })),
     outgoing: outgoing.map((r) => ({
       id: r.id,
-      body: r.body,
+      body: filterText(r.body),
       createdAt: r.createdAt,
       to: {
         id: r.toUser.id,

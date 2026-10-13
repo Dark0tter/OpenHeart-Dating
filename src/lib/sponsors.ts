@@ -1,16 +1,29 @@
-import { AdPreference, KinkInterestLevel, Prisma } from "@prisma/client";
+import {
+  AdPreference,
+  ContentTier,
+  KinkInterestLevel,
+  Prisma,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isSupporter } from "@/lib/supporter";
 
-const POSITIVE_LEVELS: KinkInterestLevel[] = ["FAVORITE", "INTERESTED", "CURIOUS"];
+const POSITIVE_LEVELS: KinkInterestLevel[] = [
+  "FAVORITE",
+  "INTERESTED",
+  "CURIOUS",
+];
 
 /**
  * Picks at most one placement using only what the member put on their profile.
  * Nothing about the viewer is stored or sent to the sponsor.
  */
-export async function pickSponsorPlacement(userId: string | null) {
+export async function pickSponsorPlacement(
+  userId: string | null,
+  tiers: ContentTier[],
+) {
   const now = new Date();
   const active: Prisma.SponsorPlacementWhereInput = {
+    contentTier: { in: tiers },
     isActive: true,
     startsAt: { lte: now },
     OR: [{ endsAt: null }, { endsAt: { gt: now } }],
@@ -22,7 +35,9 @@ export async function pickSponsorPlacement(userId: string | null) {
 
   if (!userId) {
     return pickRandom(
-      await prisma.sponsorPlacement.findMany({ where: { ...active, ...untargeted } }),
+      await prisma.sponsorPlacement.findMany({
+        where: { ...active, ...untargeted },
+      }),
     );
   }
 
@@ -39,14 +54,19 @@ export async function pickSponsorPlacement(userId: string | null) {
 
   if (preference !== AdPreference.PROFILE_INTERESTS) {
     return pickRandom(
-      await prisma.sponsorPlacement.findMany({ where: { ...active, ...untargeted } }),
+      await prisma.sponsorPlacement.findMany({
+        where: { ...active, ...untargeted },
+      }),
     );
   }
 
   const profile = await prisma.profile.findUnique({
     where: { userId },
     select: {
-      kinks: { select: { level: true, kink: { select: { slug: true } } } },
+      kinks: {
+        where: { kink: { tier: { in: tiers } } },
+        select: { level: true, kink: { select: { slug: true } } },
+      },
       goalTags: { select: { tag: { select: { slug: true } } } },
     },
   });
@@ -75,7 +95,9 @@ export async function pickSponsorPlacement(userId: string | null) {
   if (targeted.length > 0) return pickRandom(targeted);
 
   return pickRandom(
-    await prisma.sponsorPlacement.findMany({ where: { ...active, ...untargeted } }),
+    await prisma.sponsorPlacement.findMany({
+      where: { ...active, ...untargeted },
+    }),
   );
 }
 

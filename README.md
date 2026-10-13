@@ -28,6 +28,26 @@ Adding entries is safe. Renaming an entry, or moving a kink to a different categ
 
 Kinks are intentionally excluded if they involve minors, animals, incest, real non-consent, or financial domination.
 
+## Mobile app content policy
+
+The iOS and Android apps run the same code under one policy, built to the stricter of Apple's and Google's rules on every point, so neither platform needs its own version. The server enforces it, so an app can't show more than it's allowed.
+
+- **How the app is detected.** The native shell appends `OpenHeartApp` to its WebView user agent (Capacitor: `appendUserAgent`) and sends `x-openheart-client: app` on direct API calls. See `src/lib/content-policy.ts`.
+- **Three content tiers** (`ContentTier`):
+  - `STANDARD`: shown everywhere.
+  - `ADULT_TEXT`: shown in the apps only to verified adults who turned on "Show the full interest list" on the website. The setting can't be changed from inside the app.
+  - `WEB_ONLY`: never shown in the apps.
+- **What's web-only:** Edge Play, Caregiver / Little, Teacher/Student roleplay, adult photos, and media in private messages.
+- **Where tiers are set:** each kink and category in `src/lib/constants/tags.ts`, and each sponsor ad via `SponsorPlacement.contentTier`. Ads default to `WEB_ONLY` until someone reviews them.
+- **Explicit words** in rooms, posts, message requests and private messages are masked in the apps unless the member opted in. See `src/lib/moderation/app-text.ts`.
+- **Hidden rooms** don't appear in the app's room list, and the app can't join, read or post in them. Kinks hidden from the app are kept when a member saves their profile from the app.
+- **Store requirements also covered:**
+  - In-app account deletion (Safety page and `DELETE /api/account`).
+  - Accepting the Terms at sign-up.
+  - A `/terms` page with a zero-tolerance policy and a 24-hour report-review commitment.
+  - A `/child-safety` page (Google Play's Child Safety Standards).
+  - A published contact address (`SUPPORT_EMAIL`).
+
 ## How people meet
 
 - **Rooms.** Seeding creates a Welcome room, one room per kink category and one per relationship goal. Any member can join any room.

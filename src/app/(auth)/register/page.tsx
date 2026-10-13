@@ -23,6 +23,7 @@ export default function RegisterPage() {
       password: String(fd.get("password")),
       dateOfBirth: String(fd.get("dateOfBirth")),
       displayName: String(fd.get("displayName")),
+      acceptTerms: fd.get("acceptTerms") === "on",
     };
 
     const res = await fetch("/api/auth/register", {
@@ -60,7 +61,12 @@ export default function RegisterPage() {
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
           <div>
             <Label htmlFor="displayName">Display name</Label>
-            <Input id="displayName" name="displayName" required maxLength={40} />
+            <Input
+              id="displayName"
+              name="displayName"
+              required
+              maxLength={40}
+            />
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
@@ -80,6 +86,34 @@ export default function RegisterPage() {
             <Label htmlFor="dateOfBirth">Date of birth</Label>
             <Input id="dateOfBirth" name="dateOfBirth" type="date" required />
           </div>
+          <label className="flex items-start gap-2 text-sm text-ink/80">
+            <input
+              type="checkbox"
+              name="acceptTerms"
+              required
+              className="mt-1"
+            />
+            <span>
+              I&apos;m 18 or older and agree to the{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-forest underline"
+              >
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/guidelines"
+                target="_blank"
+                className="text-forest underline"
+              >
+                Community Guidelines
+              </Link>
+              . OpenHeart has zero tolerance for abusive users and objectionable
+              content.
+            </span>
+          </label>
           {error && <p className="text-sm text-coral-deep">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Creating…" : "Continue"}

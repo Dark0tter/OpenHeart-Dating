@@ -3,6 +3,11 @@ import { RoomInviteStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 import { interestRoomIds } from "@/lib/rooms";
+import {
+  allowedTiers,
+  isRestricted,
+  roomTierWhere,
+} from "@/lib/content-policy";
 
 export async function GET() {
   const user = await requireMember();
@@ -13,9 +18,11 @@ export async function GET() {
     );
   }
 
+  const tiers = await allowedTiers(user);
+
   const [rooms, memberships, invites, matching] = await Promise.all([
     prisma.chatRoom.findMany({
-      where: { isActive: true },
+      where: { isActive: true, ...roomTierWhere(tiers) },
       orderBy: [{ kind: "asc" }, { name: "asc" }],
       include: { _count: { select: { members: true } } },
     }),
@@ -44,5 +51,6 @@ export async function GET() {
       invited: invited.has(r.id) && !joined.has(r.id),
       matchesProfile: matching.has(r.id),
     })),
+    contentRestricted: isRestricted(tiers),
   });
 }

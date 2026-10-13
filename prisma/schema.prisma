@@ -36,6 +36,17 @@ enum PhotoVisibility {
   ADULT
 }
 
+/// Where content may appear. The iOS and Android apps share one policy that
+/// satisfies the stricter of Apple's and Google's store rules.
+enum ContentTier {
+  /// Shown everywhere, including the mobile apps by default.
+  STANDARD
+  /// Mobile apps show it only to verified adults who opted in on the website.
+  ADULT_TEXT
+  /// Never shown in the mobile apps.
+  WEB_ONLY
+}
+
 enum KinkInterestLevel {
   FAVORITE
   INTERESTED
@@ -106,6 +117,9 @@ model User {
   adPreference    AdPreference  @default(GENERIC)
   /// Lets members appear in a room's online list. Incognito profiles never do.
   showOnline      Boolean       @default(true)
+  /// Lets ADULT_TEXT content show in the mobile apps. Can only be changed on the website.
+  appAdultContent Boolean       @default(false)
+  termsAcceptedAt DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   lastActiveAt    DateTime      @default(now())
@@ -280,6 +294,7 @@ model KinkCategory {
   slug        String     @unique
   name        String
   description String?
+  tier        ContentTier @default(STANDARD)
   kinks       Kink[]
   rooms       ChatRoom[]
 }
@@ -290,6 +305,8 @@ model Kink {
   categoryId  String
   name        String
   description String?
+  /// Effective tier: never lower than the category's.
+  tier        ContentTier   @default(STANDARD)
   category    KinkCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   profiles    ProfileKink[]
 
@@ -597,6 +614,8 @@ model SponsorPlacement {
   linkUrl         String
   targetKinkSlugs String[]
   targetGoalSlugs String[]
+  /// Set from the creative itself; explicit creatives must not reach the apps.
+  contentTier     ContentTier  @default(WEB_ONLY)
   isActive        Boolean      @default(true)
   startsAt        DateTime     @default(now())
   endsAt          DateTime?
