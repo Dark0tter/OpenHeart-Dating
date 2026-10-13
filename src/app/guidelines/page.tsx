@@ -20,6 +20,7 @@ const NOT_ALLOWED = [
   "Buy Me a Coffee, Ko-fi, or other tip jars",
   "Promoting OnlyFans, Fansly, or other paid-content subscriptions",
   "\"Spoil me\" profiles or repeated requests for money or gifts",
+  "Financial domination (findom), paypig, or tribute arrangements of any kind",
   "Escort advertising, spam, affiliate or recruitment schemes, and scams",
 ];
 

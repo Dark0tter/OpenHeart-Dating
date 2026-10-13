@@ -6,7 +6,8 @@ export type SolicitationCategory =
   | "payment"
   | "tip_jar"
   | "paid_content"
-  | "money_request";
+  | "money_request"
+  | "findom";
 
 type Rule = {
   category: SolicitationCategory;
@@ -38,6 +39,12 @@ const RULES: Rule[] = [
 
   { category: "money_request", label: "Request for money or gifts", on: "raw", pattern: /\bspoil\s+me\b/ },
   { category: "money_request", label: "Request for money or gifts", on: "raw", pattern: /\bsend\s+(?:me\s+)?(?:money|cash|gifts?|tributes?)\b/ },
+
+  // Findom is not part of OpenHeart, as an interest or as solicitation.
+  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bf[i1!]n\s*-?\s*d[o0]m/ },
+  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bfinancial\s+(?:dom\w*|slave\w*|submission|sub)\b/ },
+  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\b(?:pay|cash|money)\s*-?\s*(?:pig|slave|piggy|dom|domme)s?\b/ },
+  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bhuman\s*-?\s*atm\b|\bwallet\s+drain\w*/ },
 ];
 
 function normalizeRaw(text: string): string {
@@ -144,7 +151,7 @@ export function solicitationErrorBody(labels: string[]) {
   return {
     code: "FINANCIAL_SOLICITATION",
     error:
-      "OpenHeart doesn't allow wishlists, payment or tip links, paid-content promotion, or requests for money or gifts. " +
+      "OpenHeart doesn't allow wishlists, payment or tip links, paid-content promotion, findom, or requests for money or gifts. " +
       `Please remove: ${labels.join(", ")}.`,
     matched: labels,
   };

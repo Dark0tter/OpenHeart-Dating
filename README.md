@@ -79,7 +79,7 @@ Members are the customers, not the product.
 
 ## Financial solicitation policy
 
-`src/lib/moderation/solicitation.ts` blocks wishlists (Amazon, Throne), payment links and cashtags (Cash App, Venmo, PayPal.me, Zelle), tip jars (Buy Me a Coffee, Ko-fi), and paid-content promotion (OnlyFans, Fansly, Patreon, etc.) in display names, profiles, and messages. Blocked content isn't saved, and an `AUTOMATED` `FINANCIAL_SOLICITATION` report goes to the moderation queue (HIGH priority after 3 attempts in 30 days). Nothing is banned automatically: warnings, suspensions, and verification-based bans are moderator decisions with appeals. Public pages: `/privacy`, `/guidelines`.
+`src/lib/moderation/solicitation.ts` blocks wishlists (Amazon, Throne), payment links and cashtags (Cash App, Venmo, PayPal.me, Zelle), tip jars (Buy Me a Coffee, Ko-fi), paid-content promotion (OnlyFans, Fansly, Patreon, etc.), and financial domination (findom, paypig, human ATM, etc.) in display names, profiles, and messages. Findom is excluded from the platform entirely and is not in the kink taxonomy. Blocked content isn't saved, and an `AUTOMATED` `FINANCIAL_SOLICITATION` report goes to the moderation queue (HIGH priority after 3 attempts in 30 days). Nothing is banned automatically: warnings, suspensions, and verification-based bans are moderator decisions with appeals. Public pages: `/privacy`, `/guidelines`.
 
 ## Legal / compliance checklist (ops)
 
