@@ -193,7 +193,7 @@ export default function RoomPage() {
   );
 
   return (
-    <div className="flex h-[75vh] flex-col">
+    <div className="flex h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] flex-col md:h-[75vh]">
       <div className="flex items-baseline justify-between">
         <h1 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
           {roomName || "Room"}

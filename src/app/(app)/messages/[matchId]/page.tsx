@@ -60,7 +60,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[70vh] flex-col">
+    <div className="flex h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] flex-col md:h-[70vh]">
       <h1 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
         Messages
       </h1>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Figtree, Fraunces } from "next/font/google";
 import { Providers } from "@/app/providers";
 import "./globals.css";
@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   other: {
     "X-Robots-Tag": "noindex, nofollow",
   },
+};
+
+/** `cover` lets the app shell draw under the iPhone notch and home bar; nav bars pad with safe-area insets. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
