@@ -54,7 +54,7 @@ export default function ChildSafetyPage() {
             Reporting
           </h2>
           <p className="mt-2">
-            Anyone can report a member from the Safety page by choosing
+            Anyone can report a member from the Settings page by choosing
             &quot;Underage user or child safety&quot;. These reports go to the
             top of our moderation queue. You can also contact our child-safety
             team directly at <ContactLine />.

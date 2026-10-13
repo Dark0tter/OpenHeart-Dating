@@ -6,6 +6,8 @@ import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemePicker } from "@/components/theme-picker";
+import type { ThemeMode } from "@/lib/themes";
 
 const REASONS = [
   "HARASSMENT",
@@ -39,6 +41,10 @@ export default function SettingsPage() {
   const [appAdult, setAppAdult] = useState<boolean | null>(null);
   const [verifiedAdult, setVerifiedAdult] = useState(false);
   const [inApp, setInApp] = useState(false);
+  const [theme, setTheme] = useState<{
+    mode: ThemeMode;
+    flag: string | null;
+  } | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
@@ -104,6 +110,7 @@ export default function SettingsPage() {
         setAppAdult(Boolean(d.appAdultContent));
         setVerifiedAdult(Boolean(d.verifiedAdult));
         setInApp(Boolean(d.inApp));
+        setTheme({ mode: d.themeMode ?? "system", flag: d.themeFlag ?? null });
       });
   }, []);
 
@@ -156,7 +163,7 @@ export default function SettingsPage() {
     <div className="max-w-xl space-y-10">
       <div>
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
-          Safety
+          Settings &amp; safety
         </h1>
         <p className="mt-1 text-sm text-ink/60">
           Block immediately removes messages, likes, matching, and search
@@ -169,6 +176,10 @@ export default function SettingsPage() {
         <p className="rounded-md bg-mist px-3 py-2 text-sm text-forest">
           {msg}
         </p>
+      )}
+
+      {theme && (
+        <ThemePicker initialMode={theme.mode} initialFlag={theme.flag} />
       )}
 
       <fieldset className="space-y-2">

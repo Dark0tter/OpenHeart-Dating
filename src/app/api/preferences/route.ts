@@ -5,12 +5,19 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { isSupporter } from "@/lib/supporter";
 import { isAppRequest } from "@/lib/content-policy";
+import { FLAG_IDS, THEME_MODES } from "@/lib/themes";
 
 const schema = z
   .object({
     adPreference: z.nativeEnum(AdPreference).optional(),
     showOnline: z.boolean().optional(),
     appAdultContent: z.boolean().optional(),
+    themeMode: z.enum(THEME_MODES).optional(),
+    themeFlag: z
+      .string()
+      .refine((id) => FLAG_IDS.includes(id))
+      .nullable()
+      .optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined));
 
@@ -23,6 +30,8 @@ export async function GET() {
     adPreference: user.adPreference,
     showOnline: user.showOnline,
     appAdultContent: user.appAdultContent,
+    themeMode: user.themeMode,
+    themeFlag: user.themeFlag,
     verifiedAdult: user.verification?.status === "VERIFIED_ADULT",
     inApp: await isAppRequest(),
     isSupporter: await isSupporter(user.id),
@@ -72,7 +81,13 @@ export async function PATCH(req: Request) {
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: parsed.data,
-    select: { adPreference: true, showOnline: true, appAdultContent: true },
+    select: {
+      adPreference: true,
+      showOnline: true,
+      appAdultContent: true,
+      themeMode: true,
+      themeFlag: true,
+    },
   });
   return NextResponse.json(updated);
 }

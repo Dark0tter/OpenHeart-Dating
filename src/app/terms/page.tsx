@@ -70,10 +70,10 @@ export default function TermsPage() {
           <p className="mt-2">
             You can block anyone at any time, and blocking takes effect
             immediately. You can report any member from a chat room or from the
-            Safety page. We review reports within 24 hours and remove violating
-            content and accounts. Child-safety and emergency reports are handled
-            first. Suspensions and bans are reviewed by a person and can be
-            appealed.
+            Settings page. We review reports within 24 hours and remove
+            violating content and accounts. Child-safety and emergency reports
+            are handled first. Suspensions and bans are reviewed by a person and
+            can be appealed.
           </p>
         </section>
 
@@ -93,8 +93,8 @@ export default function TermsPage() {
             Your account and data
           </h2>
           <p className="mt-2">
-            You can permanently delete your account at any time from the Safety
-            page, on the website or in the app. See our{" "}
+            You can permanently delete your account at any time from the
+            Settings page, on the website or in the app. See our{" "}
             <Link href="/privacy" className="underline">
               privacy promise
             </Link>{" "}

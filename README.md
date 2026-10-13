@@ -42,11 +42,17 @@ The iOS and Android apps run the same code under one policy, built to the strict
 - **Explicit words** in rooms, posts, message requests and private messages are masked in the apps unless the member opted in. See `src/lib/moderation/app-text.ts`.
 - **Hidden rooms** don't appear in the app's room list, and the app can't join, read or post in them. Kinks hidden from the app are kept when a member saves their profile from the app.
 - **Store requirements also covered:**
-  - In-app account deletion (Safety page and `DELETE /api/account`).
+  - In-app account deletion (Settings page and `DELETE /api/account`).
   - Accepting the Terms at sign-up.
   - A `/terms` page with a zero-tolerance policy and a 24-hour report-review commitment.
   - A `/child-safety` page (Google Play's Child Safety Standards).
   - A published contact address (`SUPPORT_EMAIL`).
+
+## Themes
+
+Signed-in members choose a theme in Settings: Light, Dark, or Match my device, plus an optional pride flag accent (19 flags, including Rainbow, Progress, Trans, Bi, Pan, Lesbian, Gay men, Nonbinary, Ace, Aro, Intersex, Polyamorous, and Leather). The theme is saved on the account (`User.themeMode`, `User.themeFlag`), so it's the same on the website and in both apps.
+
+Flag colors live in `src/lib/themes.ts`; each flag's accents were picked to meet WCAG AA contrast in both light and dark mode. The public pages (landing, sign-up, terms) keep the default look.
 
 ## How people meet
 

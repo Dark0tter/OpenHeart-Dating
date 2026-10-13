@@ -11,6 +11,110 @@
   --oh-cream: #faf6f1;
   --background: var(--oh-bloom);
   --foreground: var(--oh-ink);
+  --oh-glow-1: rgba(107, 143, 122, 0.28);
+  --oh-glow-2: rgba(196, 92, 74, 0.16);
+  --oh-glow-3: rgba(45, 74, 62, 0.12);
+  --oh-base-1: #f7f1ea;
+  --oh-base-2: #e8efe9;
+  --oh-base-3: #f3ebe3;
+}
+
+/*
+ * Member themes (set on the signed-in app shell from their account, so the
+ * web and both mobile apps match). Variables that reference other variables
+ * are redeclared here because custom properties resolve where declared.
+ */
+[data-mode="dark"] {
+  color-scheme: dark;
+  --oh-ink: #e6ede8;
+  --oh-forest: #a8d5bd;
+  --oh-sage: #86b09a;
+  --oh-mist: #24312b;
+  --oh-bloom: #111815;
+  --oh-coral: #ec8a76;
+  --oh-coral-deep: #f4a99a;
+  --oh-cream: #182520;
+  --background: #111815;
+  --foreground: #e6ede8;
+  --oh-glow-1: rgba(107, 143, 122, 0.16);
+  --oh-glow-2: rgba(236, 138, 118, 0.08);
+  --oh-glow-3: rgba(168, 213, 189, 0.06);
+  --oh-base-1: #0f1613;
+  --oh-base-2: #131c18;
+  --oh-base-3: #111815;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mode="system"] {
+    color-scheme: dark;
+    --oh-ink: #e6ede8;
+    --oh-forest: #a8d5bd;
+    --oh-sage: #86b09a;
+    --oh-mist: #24312b;
+    --oh-bloom: #111815;
+    --oh-coral: #ec8a76;
+    --oh-coral-deep: #f4a99a;
+    --oh-cream: #182520;
+    --background: #111815;
+    --foreground: #e6ede8;
+    --oh-glow-1: rgba(107, 143, 122, 0.16);
+    --oh-glow-2: rgba(236, 138, 118, 0.08);
+    --oh-glow-3: rgba(168, 213, 189, 0.06);
+    --oh-base-1: #0f1613;
+    --oh-base-2: #131c18;
+    --oh-base-3: #111815;
+  }
+}
+
+/* Pride flag accents, layered on light or dark. Colors come from src/lib/themes.ts. */
+[data-flag="on"] {
+  --oh-coral: var(--flag-a-l);
+  --oh-coral-deep: color-mix(in oklab, var(--flag-a-l) 80%, black);
+  --oh-sage: var(--flag-b-l);
+  --oh-glow-1: color-mix(in srgb, var(--flag-c1) 26%, transparent);
+  --oh-glow-2: color-mix(in srgb, var(--flag-c2) 20%, transparent);
+  --oh-glow-3: color-mix(in srgb, var(--flag-c3) 16%, transparent);
+}
+
+[data-mode="dark"][data-flag="on"] {
+  --oh-coral: var(--flag-a-d);
+  --oh-coral-deep: color-mix(in oklab, var(--flag-a-d) 75%, white);
+  --oh-sage: var(--flag-b-d);
+  --oh-glow-1: color-mix(in srgb, var(--flag-c1) 16%, transparent);
+  --oh-glow-2: color-mix(in srgb, var(--flag-c2) 12%, transparent);
+  --oh-glow-3: color-mix(in srgb, var(--flag-c3) 10%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mode="system"][data-flag="on"] {
+    --oh-coral: var(--flag-a-d);
+    --oh-coral-deep: color-mix(in oklab, var(--flag-a-d) 75%, white);
+    --oh-sage: var(--flag-b-d);
+    --oh-glow-1: color-mix(in srgb, var(--flag-c1) 16%, transparent);
+    --oh-glow-2: color-mix(in srgb, var(--flag-c2) 12%, transparent);
+    --oh-glow-3: color-mix(in srgb, var(--flag-c3) 10%, transparent);
+  }
+}
+
+.oh-flag-stripe {
+  display: none;
+}
+
+[data-flag="on"] .oh-flag-stripe {
+  display: block;
+  height: 4px;
+  background: var(--flag-stripe);
+}
+
+/* Keep overscroll (and the mobile apps' bounce area) in the theme's background. */
+body:has([data-mode="dark"]) {
+  background: #111815;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:has([data-mode="system"]) {
+    background: #111815;
+  }
 }
 
 @theme inline {
@@ -35,11 +139,12 @@ body {
 }
 
 .oh-atmosphere {
+  color: var(--oh-ink);
   background:
-    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(107, 143, 122, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(196, 92, 74, 0.16), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(45, 74, 62, 0.12), transparent 45%),
-    linear-gradient(165deg, #f7f1ea 0%, #e8efe9 45%, #f3ebe3 100%);
+    radial-gradient(ellipse 80% 60% at 10% 20%, var(--oh-glow-1), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, var(--oh-glow-2), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, var(--oh-glow-3), transparent 45%),
+    linear-gradient(165deg, var(--oh-base-1) 0%, var(--oh-base-2) 45%, var(--oh-base-3) 100%);
 }
 
 .oh-grain {

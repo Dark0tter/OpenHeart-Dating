@@ -10,7 +10,7 @@ const links = [
   { href: "/search", label: "Search" },
   { href: "/messages", label: "Messages" },
   { href: "/profile", label: "Profile" },
-  { href: "/settings", label: "Safety" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function AppNav() {
@@ -18,6 +18,7 @@ export function AppNav() {
 
   return (
     <nav className="sticky top-0 z-30 border-b border-forest/10 bg-bloom/90 backdrop-blur-md">
+      <div className="oh-flag-stripe" aria-hidden />
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link
           href="/feed"

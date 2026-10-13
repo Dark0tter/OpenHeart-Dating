@@ -120,6 +120,10 @@ model User {
   /// Lets ADULT_TEXT content show in the mobile apps. Can only be changed on the website.
   appAdultContent Boolean       @default(false)
   termsAcceptedAt DateTime?
+  /// "system" | "light" | "dark"; see src/lib/themes.ts.
+  themeMode       String        @default("system")
+  /// Pride flag theme id, or null for none.
+  themeFlag       String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   lastActiveAt    DateTime      @default(now())

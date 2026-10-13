@@ -6,6 +6,6 @@ export function ContactLine() {
       {SUPPORT_EMAIL}
     </a>
   ) : (
-    <span>the Report tool on the Safety page</span>
+    <span>the Report tool on the Settings page</span>
   );
 }
