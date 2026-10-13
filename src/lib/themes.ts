@@ -194,7 +194,7 @@ export const FLAG_THEMES: FlagTheme[] = [
     label: "Demisexual",
     stripes: ["#FFFFFF", "#FFFFFF", "#6E0070", "#D2D2D2", "#D2D2D2"],
     swatch:
-      "linear-gradient(115deg, #000000 0 30%, transparent 30%), linear-gradient(to bottom, #FFFFFF 0 42%, #6E0070 42% 58%, #D2D2D2 58%)",
+      "linear-gradient(to top right, #000000 50%, transparent 50%) top left / 40% 50% no-repeat, linear-gradient(to bottom right, #000000 50%, transparent 50%) bottom left / 40% 50% no-repeat, linear-gradient(to bottom, #FFFFFF 0 42%, #6E0070 42% 58%, #D2D2D2 58%)",
     accentLight: "#6E0070",
     accentDark: "#D08FD3",
     secondaryLight: "#555555",
@@ -258,7 +258,7 @@ export const FLAG_THEMES: FlagTheme[] = [
       "#000000",
     ],
     swatch:
-      "radial-gradient(circle at 20% 22%, #E40303 0 10%, transparent 11%), linear-gradient(to bottom, #000 0 11%, #23238E 11% 22%, #000 22% 33%, #23238E 33% 44%, #FFF 44% 56%, #23238E 56% 67%, #000 67% 78%, #23238E 78% 89%, #000 89%)",
+      "radial-gradient(circle at 16% 30%, #E40303 0 4px, transparent 4.5px), linear-gradient(to bottom, #000 0 11%, #23238E 11% 22%, #000 22% 33%, #23238E 33% 44%, #FFF 44% 56%, #23238E 56% 67%, #000 67% 78%, #23238E 78% 89%, #000 89%)",
     accentLight: "#23238E",
     accentDark: "#FF6B6B",
     secondaryLight: "#B31B1B",
