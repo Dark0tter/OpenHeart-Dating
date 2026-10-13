@@ -25,6 +25,7 @@ const updateSchema = z.object({
   identityTagIds: z.array(z.string()).optional(),
   orientationTagIds: z.array(z.string()).optional(),
   goalTagIds: z.array(z.string()).optional(),
+  relationshipStyleTagIds: z.array(z.string()).optional(),
   bodyTagIds: z.array(z.string()).optional(),
   ethnicityTagIds: z.array(z.string()).optional(),
   accessibilityTagIds: z.array(z.string()).optional(),
@@ -54,6 +55,7 @@ export async function GET() {
       identityTags: { include: { tag: true } },
       orientationTags: { include: { tag: true } },
       goalTags: { include: { tag: true } },
+      relationshipStyleTags: { include: { tag: true } },
       bodyTags: { include: { tag: true } },
       ethnicityTags: { include: { tag: true } },
       accessibilityTags: { include: { tag: true } },
@@ -111,8 +113,7 @@ export async function PATCH(req: Request) {
     if (user.verification?.status !== "VERIFIED_ADULT") {
       return NextResponse.json(
         {
-          error:
-            "Age verification required before activating your profile.",
+          error: "Age verification required before activating your profile.",
         },
         { status: 403 },
       );
@@ -191,6 +192,17 @@ export async function PATCH(req: Request) {
       await tx.profileGoalTag.deleteMany({ where: { profileId } });
       await tx.profileGoalTag.createMany({
         data: data.goalTagIds.map((tagId) => ({ profileId, tagId })),
+        skipDuplicates: true,
+      });
+    }
+
+    if (data.relationshipStyleTagIds) {
+      await tx.profileRelationshipStyleTag.deleteMany({ where: { profileId } });
+      await tx.profileRelationshipStyleTag.createMany({
+        data: [...new Set(data.relationshipStyleTagIds)].map((tagId) => ({
+          profileId,
+          tagId,
+        })),
         skipDuplicates: true,
       });
     }

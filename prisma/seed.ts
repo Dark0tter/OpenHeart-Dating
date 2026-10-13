@@ -6,7 +6,9 @@ import {
   GOAL_TAGS,
   IDENTITY_TAGS,
   KINK_CATEGORIES,
+  KINK_CATEGORY_NOTES,
   ORIENTATION_TAGS,
+  RELATIONSHIP_STYLE_TAGS,
   slugify,
 } from "../src/lib/constants/tags";
 
@@ -31,6 +33,14 @@ async function main() {
 
   for (const label of GOAL_TAGS) {
     await prisma.goalTag.upsert({
+      where: { slug: slugify(label) },
+      create: { slug: slugify(label), label },
+      update: { label },
+    });
+  }
+
+  for (const label of RELATIONSHIP_STYLE_TAGS) {
+    await prisma.relationshipStyleTag.upsert({
       where: { slug: slugify(label) },
       create: { slug: slugify(label), label },
       update: { label },
@@ -63,12 +73,13 @@ async function main() {
 
   for (const [categoryName, names] of Object.entries(KINK_CATEGORIES)) {
     const categorySlug = slugify(categoryName);
+    const description = KINK_CATEGORY_NOTES[categoryName] ?? null;
     const category = await prisma.kinkCategory.upsert({
       where: { slug: categorySlug },
-      create: { slug: categorySlug, name: categoryName },
-      update: { name: categoryName },
+      create: { slug: categorySlug, name: categoryName, description },
+      update: { name: categoryName, description },
     });
-    for (const name of names) {
+    for (const name of new Set(names)) {
       const slug = slugify(`${categoryName}-${name}`);
       await prisma.kink.upsert({
         where: { slug },
@@ -90,16 +101,22 @@ async function main() {
   });
 
   for (const category of await prisma.kinkCategory.findMany()) {
+    const description = [
+      `For members interested in ${category.name}.`,
+      category.description,
+    ]
+      .filter(Boolean)
+      .join(" ");
     await prisma.chatRoom.upsert({
       where: { slug: `kink-${category.slug}` },
       create: {
         slug: `kink-${category.slug}`,
         name: category.name,
-        description: `For members interested in ${category.name}.`,
+        description,
         kind: "KINK_CATEGORY",
         kinkCategoryId: category.id,
       },
-      update: { name: category.name, kinkCategoryId: category.id },
+      update: { name: category.name, description, kinkCategoryId: category.id },
     });
   }
 

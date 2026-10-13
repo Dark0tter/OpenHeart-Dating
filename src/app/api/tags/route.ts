@@ -6,15 +6,26 @@ export async function GET() {
     identity,
     orientation,
     goals,
+    relationshipStyles,
     body,
     ethnicity,
     accessibility,
     kinks,
   ] = await Promise.all([
-    prisma.identityTag.findMany({ orderBy: { label: "asc" } }),
-    prisma.orientationTag.findMany({ orderBy: { label: "asc" } }),
+    prisma.identityTag.findMany({
+      where: { isCustom: false },
+      orderBy: { label: "asc" },
+    }),
+    prisma.orientationTag.findMany({
+      where: { isCustom: false },
+      orderBy: { label: "asc" },
+    }),
     prisma.goalTag.findMany({ orderBy: { label: "asc" } }),
-    prisma.bodyTag.findMany({ orderBy: { label: "asc" } }),
+    prisma.relationshipStyleTag.findMany({ orderBy: { label: "asc" } }),
+    prisma.bodyTag.findMany({
+      where: { isCustom: false },
+      orderBy: { label: "asc" },
+    }),
     prisma.ethnicityTag.findMany({ orderBy: { label: "asc" } }),
     prisma.accessibilityTag.findMany({ orderBy: { label: "asc" } }),
     prisma.kinkCategory.findMany({
@@ -27,6 +38,7 @@ export async function GET() {
     identity,
     orientation,
     goals,
+    relationshipStyles,
     body,
     ethnicity,
     accessibility,

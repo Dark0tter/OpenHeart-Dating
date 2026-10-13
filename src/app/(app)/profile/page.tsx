@@ -15,6 +15,7 @@ export default function ProfilePage() {
       identityTags: { tag: { label: string } }[];
       orientationTags: { tag: { label: string } }[];
       goalTags: { tag: { label: string } }[];
+      relationshipStyleTags: { tag: { label: string } }[];
     } | null;
     verification: { status: string } | null;
   } | null>(null);
@@ -49,6 +50,7 @@ export default function ProfilePage() {
           ...p.identityTags,
           ...p.orientationTags,
           ...p.goalTags,
+          ...p.relationshipStyleTags,
         ].map((t, i) => (
           <span
             key={`${t.tag.label}-${i}`}

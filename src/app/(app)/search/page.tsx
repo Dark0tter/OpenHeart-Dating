@@ -15,6 +15,7 @@ type Card = {
   identity: string[];
   orientation: string[];
   goals: string[];
+  relationshipStyles: string[];
   photos: { id: string; url: string }[];
 };
 
@@ -49,7 +50,9 @@ export default function SearchPage() {
       setStatus(data.error ?? "Like failed");
       return;
     }
-    setStatus(data.isMatch ? "It's a match — messaging is free." : "Like sent.");
+    setStatus(
+      data.isMatch ? "It's a match — messaging is free." : "Like sent.",
+    );
     setProfiles((p) => p.filter((x) => x.userId !== userId));
   }
 
@@ -59,8 +62,9 @@ export default function SearchPage() {
         Search
       </h1>
       <p className="mt-1 text-sm text-ink/60">
-        Incognito members only appear once they have liked you, matched with you, or granted you access. Filtering uses identity tags, not
-        binary gender logic.
+        Incognito members only appear once they have liked you, matched with
+        you, or granted you access. Filtering uses identity tags, not binary
+        gender logic.
       </p>
       {error && <p className="mt-4 text-sm text-coral-deep">{error}</p>}
       {status && (
@@ -95,7 +99,12 @@ export default function SearchPage() {
                 {p.bio || "No bio yet."}
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {[...p.identity, ...p.orientation, ...p.goals]
+                {[
+                  ...p.identity,
+                  ...p.orientation,
+                  ...p.goals,
+                  ...p.relationshipStyles,
+                ]
                   .slice(0, 8)
                   .map((t) => (
                     <span

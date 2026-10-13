@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ type Tag = { id: string; label: string; category?: string };
 type KinkCategory = {
   id: string;
   name: string;
+  description: string | null;
   kinks: { id: string; name: string }[];
 };
 type KinkLevel = "FAVORITE" | "INTERESTED" | "CURIOUS" | "NO" | "HARD_LIMIT";
@@ -23,7 +24,14 @@ const KINK_LEVELS: { value: KinkLevel; label: string }[] = [
   { value: "HARD_LIMIT", label: "Hard limit" },
 ];
 
-type TagLink = { tagId: string };
+type TagLink = { tagId: string; tag: { label: string; isCustom?: boolean } };
+
+const ids = (links: TagLink[] | undefined) => (links ?? []).map((l) => l.tagId);
+
+const customTags = (links: TagLink[] | undefined): Tag[] =>
+  (links ?? [])
+    .filter((l) => l.tag.isCustom)
+    .map((l) => ({ id: l.tagId, label: l.tag.label }));
 
 function OnboardingInner() {
   const router = useRouter();
@@ -32,12 +40,18 @@ function OnboardingInner() {
     identity: Tag[];
     orientation: Tag[];
     goals: Tag[];
+    relationshipStyles: Tag[];
     kinks: KinkCategory[];
   } | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [identity, setIdentity] = useState<string[]>([]);
   const [orientation, setOrientation] = useState<string[]>([]);
+  const [myCustomIdentity, setMyCustomIdentity] = useState<Tag[]>([]);
+  const [myCustomOrientation, setMyCustomOrientation] = useState<Tag[]>([]);
+  const [customIdentity, setCustomIdentity] = useState("");
+  const [customOrientation, setCustomOrientation] = useState("");
   const [goals, setGoals] = useState<string[]>([]);
+  const [styles, setStyles] = useState<string[]>([]);
   const [seeking, setSeeking] = useState<string[]>([]);
   const [kinks, setKinks] = useState<Record<string, KinkLevel>>({});
   const [bio, setBio] = useState("");
@@ -48,43 +62,45 @@ function OnboardingInner() {
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const loadProfile = useCallback(async () => {
+    const d = await fetch("/api/profile").then((r) => r.json());
+    if (d.verification?.status === "VERIFIED_ADULT") setVerified(true);
+    const p = d.profile;
+    if (p) {
+      setBio(p.bio ?? "");
+      setPronouns(p.pronouns ?? "");
+      setVisibility(p.visibility ?? "PUBLIC");
+      setIsActive(Boolean(p.isActive));
+      setIdentity(ids(p.identityTags));
+      setOrientation(ids(p.orientationTags));
+      setMyCustomIdentity(customTags(p.identityTags));
+      setMyCustomOrientation(customTags(p.orientationTags));
+      setGoals(ids(p.goalTags));
+      setStyles(ids(p.relationshipStyleTags));
+      setSeeking(ids(p.seekingIdentityTags));
+      setKinks(
+        Object.fromEntries(
+          (p.kinks ?? []).map((k: { kinkId: string; level: KinkLevel }) => [
+            k.kinkId,
+            k.level,
+          ]),
+        ),
+      );
+    }
+    setLoaded(true);
+  }, []);
+
   useEffect(() => {
     fetch("/api/tags")
       .then((r) => r.json())
       .then(setTags)
       .catch(() => setMessage("Could not load tags — is the database seeded?"));
-    fetch("/api/profile")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.verification?.status === "VERIFIED_ADULT") setVerified(true);
-        const p = d.profile;
-        if (p) {
-          const ids = (links: TagLink[] | undefined) =>
-            (links ?? []).map((l) => l.tagId);
-          setBio(p.bio ?? "");
-          setPronouns(p.pronouns ?? "");
-          setVisibility(p.visibility ?? "PUBLIC");
-          setIsActive(Boolean(p.isActive));
-          setIdentity(ids(p.identityTags));
-          setOrientation(ids(p.orientationTags));
-          setGoals(ids(p.goalTags));
-          setSeeking(ids(p.seekingIdentityTags));
-          setKinks(
-            Object.fromEntries(
-              (p.kinks ?? []).map((k: { kinkId: string; level: KinkLevel }) => [
-                k.kinkId,
-                k.level,
-              ]),
-            ),
-          );
-        }
-        setLoaded(true);
-      });
+    loadProfile();
     if (params.get("verify") === "success") {
       setVerified(true);
       setMessage("Age verification complete. You can activate your profile.");
     }
-  }, [params]);
+  }, [params, loadProfile]);
 
   function toggle(list: string[], id: string, set: (v: string[]) => void) {
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -118,7 +134,14 @@ function OnboardingInner() {
         identityTagIds: identity,
         orientationTagIds: orientation,
         goalTagIds: goals,
+        relationshipStyleTagIds: styles,
         seekingIdentityTagIds: seeking,
+        ...(customIdentity.trim()
+          ? { customIdentity: customIdentity.trim() }
+          : {}),
+        ...(customOrientation.trim()
+          ? { customOrientation: customOrientation.trim() }
+          : {}),
         kinks: Object.entries(kinks).map(([kinkId, level]) => ({
           kinkId,
           level,
@@ -136,6 +159,9 @@ function OnboardingInner() {
       router.push("/rooms");
       return;
     }
+    setCustomIdentity("");
+    setCustomOrientation("");
+    await loadProfile();
     const invites = Number(data.newRoomInvites ?? 0);
     setMessage(
       isActive
@@ -185,23 +211,47 @@ function OnboardingInner() {
           />
         </div>
 
-        <TagPicker
-          title="I identify as"
-          tags={tags.identity}
-          selected={identity}
-          onToggle={(id) => toggle(identity, id, setIdentity)}
-        />
-        <TagPicker
-          title="Orientation"
-          tags={tags.orientation}
-          selected={orientation}
-          onToggle={(id) => toggle(orientation, id, setOrientation)}
-        />
+        <div>
+          <TagPicker
+            title="I identify as"
+            tags={[...tags.identity, ...myCustomIdentity]}
+            selected={identity}
+            onToggle={(id) => toggle(identity, id, setIdentity)}
+          />
+          <Input
+            className="mt-2"
+            value={customIdentity}
+            onChange={(e) => setCustomIdentity(e.target.value)}
+            maxLength={40}
+            placeholder="Not listed? Write your own (added when you save)"
+          />
+        </div>
+        <div>
+          <TagPicker
+            title="Orientation"
+            tags={[...tags.orientation, ...myCustomOrientation]}
+            selected={orientation}
+            onToggle={(id) => toggle(orientation, id, setOrientation)}
+          />
+          <Input
+            className="mt-2"
+            value={customOrientation}
+            onChange={(e) => setCustomOrientation(e.target.value)}
+            maxLength={40}
+            placeholder="Not listed? Write your own (added when you save)"
+          />
+        </div>
         <TagPicker
           title="Looking for"
           tags={tags.goals}
           selected={goals}
           onToggle={(id) => toggle(goals, id, setGoals)}
+        />
+        <TagPicker
+          title="Relationship style"
+          tags={tags.relationshipStyles}
+          selected={styles}
+          onToggle={(id) => toggle(styles, id, setStyles)}
         />
         <TagPicker
           title="Seeking identities"
@@ -235,6 +285,11 @@ function OnboardingInner() {
                       </span>
                     )}
                   </summary>
+                  {cat.description && (
+                    <p className="mt-2 rounded bg-mist px-2 py-1.5 text-xs text-forest">
+                      {cat.description}
+                    </p>
+                  )}
                   <ul className="mt-2 space-y-1">
                     {cat.kinks.map((k) => (
                       <li

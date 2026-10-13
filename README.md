@@ -20,6 +20,14 @@ Privacy-first dating for LGBTQIA+ people, kink-positive adults, and users with e
 4. **No messaging paywall** — likes, matches, messages, and filters are free.
 5. **Meet by shared interests** — interest rooms first, private chat when it clicks.
 
+## Taxonomies
+
+All preset lists live in `src/lib/constants/tags.ts` and are seeded by `npm run db:setup`: 27 gender identities, 20 orientations, 14 relationship styles, and 341 kinks in 19 categories. Members can also write in their own identity or orientation; write-ins appear on their own profile but never in the shared pick lists.
+
+Adding entries is safe. Renaming an entry, or moving a kink to a different category, creates a new entry and leaves the old one on existing profiles.
+
+Kinks are intentionally excluded if they involve minors, animals, incest, real non-consent, or financial domination.
+
 ## How people meet
 
 - **Rooms.** Seeding creates a Welcome room, one room per kink category and one per relationship goal. Any member can join any room.

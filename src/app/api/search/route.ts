@@ -46,6 +46,7 @@ export async function GET(req: Request) {
       identity: p.identityTags.map((t) => t.tag.label),
       orientation: p.orientationTags.map((t) => t.tag.label),
       goals: p.goalTags.map((t) => t.tag.label),
+      relationshipStyles: p.relationshipStyleTags.map((t) => t.tag.label),
       photos: p.photos.map((ph) => ({
         id: ph.id,
         url: ph.url,

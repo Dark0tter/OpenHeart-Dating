@@ -195,6 +195,7 @@ model Profile {
   identityTags           ProfileIdentityTag[]
   orientationTags        ProfileOrientationTag[]
   goalTags               ProfileGoalTag[]
+  relationshipStyleTags  ProfileRelationshipStyleTag[]
   bodyTags               ProfileBodyTag[]
   ethnicityTags          ProfileEthnicityTag[]
   accessibilityTags      ProfileAccessibilityTag[]
@@ -245,6 +246,13 @@ model GoalTag {
   rooms    ChatRoom[]
 }
 
+model RelationshipStyleTag {
+  id       String                        @id @default(uuid())
+  slug     String                        @unique
+  label    String
+  profiles ProfileRelationshipStyleTag[]
+}
+
 model BodyTag {
   id       String           @id @default(uuid())
   slug     String           @unique
@@ -268,11 +276,12 @@ model AccessibilityTag {
 }
 
 model KinkCategory {
-  id    String     @id @default(uuid())
-  slug  String     @unique
-  name  String
-  kinks Kink[]
-  rooms ChatRoom[]
+  id          String     @id @default(uuid())
+  slug        String     @unique
+  name        String
+  description String?
+  kinks       Kink[]
+  rooms       ChatRoom[]
 }
 
 model Kink {
@@ -310,6 +319,15 @@ model ProfileGoalTag {
   tagId     String
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   tag       GoalTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, tagId])
+}
+
+model ProfileRelationshipStyleTag {
+  profileId String
+  tagId     String
+  profile   Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tag       RelationshipStyleTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([profileId, tagId])
 }

@@ -132,6 +132,7 @@ export async function searchProfiles(filters: SearchFilters) {
       identityTags: { include: { tag: true } },
       orientationTags: { include: { tag: true } },
       goalTags: { include: { tag: true } },
+      relationshipStyleTags: { include: { tag: true } },
       seekingIdentityTags: true,
       photos: {
         where: { visibility: "PUBLIC" },
