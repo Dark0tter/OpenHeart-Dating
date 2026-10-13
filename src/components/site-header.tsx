@@ -15,14 +15,14 @@ export async function SiteHeader() {
       <nav className="flex items-center gap-3 text-sm md:gap-5">
         {session?.user ? (
           <>
-            <Link href="/search" className="text-forest/80 hover:text-ink">
-              Search
+            <Link href="/feed" className="text-forest/80 hover:text-ink">
+              Feed
             </Link>
-            <Link href="/matches" className="text-forest/80 hover:text-ink">
-              Matches
+            <Link href="/rooms" className="text-forest/80 hover:text-ink">
+              Rooms
             </Link>
-            <Link href="/settings" className="text-forest/80 hover:text-ink">
-              Settings
+            <Link href="/messages" className="text-forest/80 hover:text-ink">
+              Messages
             </Link>
           </>
         ) : (

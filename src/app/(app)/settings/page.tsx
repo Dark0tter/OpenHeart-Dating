@@ -28,13 +28,30 @@ export default function SettingsPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [adPreference, setAdPreference] = useState<string | null>(null);
   const [supporter, setSupporter] = useState(false);
+  const [showOnline, setShowOnline] = useState<boolean | null>(null);
+
+  async function onShowOnline(value: boolean) {
+    const res = await fetch("/api/preferences", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ showOnline: value }),
+    });
+    if (res.ok) {
+      setShowOnline(value);
+      setMsg(value ? "You'll appear in room online lists." : "You're hidden from online lists.");
+    }
+  }
 
   useEffect(() => {
+    const prefill = new URLSearchParams(window.location.search).get("report");
+    if (prefill) setReportId(prefill);
+
     fetch("/api/preferences")
       .then((r) => r.json())
       .then((d) => {
         setAdPreference(d.adPreference ?? "GENERIC");
         setSupporter(Boolean(d.isSupporter));
+        setShowOnline(d.showOnline ?? true);
       });
   }, []);
 
@@ -99,6 +116,23 @@ export default function SettingsPage() {
       {msg && (
         <p className="rounded-md bg-mist px-3 py-2 text-sm text-forest">{msg}</p>
       )}
+
+      <fieldset className="space-y-2">
+        <legend className="font-medium text-forest">Online status</legend>
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={showOnline ?? true}
+            disabled={showOnline === null}
+            onChange={(e) => onShowOnline(e.target.checked)}
+          />
+          Show me in room online lists
+        </label>
+        <p className="text-sm text-ink/60">
+          Incognito profiles never appear in online lists, whatever this is set
+          to.
+        </p>
+      </fieldset>
 
       <fieldset className="space-y-2">
         <legend className="font-medium text-forest">Sponsor block</legend>

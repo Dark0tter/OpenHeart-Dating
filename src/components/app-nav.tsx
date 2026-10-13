@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { href: "/feed", label: "Feed" },
+  { href: "/rooms", label: "Rooms" },
   { href: "/search", label: "Search" },
-  { href: "/matches", label: "Matches" },
   { href: "/messages", label: "Messages" },
   { href: "/profile", label: "Profile" },
   { href: "/settings", label: "Safety" },
@@ -19,7 +20,7 @@ export function AppNav() {
     <nav className="sticky top-0 z-30 border-b border-forest/10 bg-bloom/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link
-          href="/search"
+          href="/feed"
           className="font-[family-name:var(--font-fraunces)] text-xl text-forest"
         >
           OpenHeart

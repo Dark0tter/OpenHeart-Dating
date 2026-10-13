@@ -56,7 +56,42 @@ export async function blockUser(blockerId: string, blockedId: string) {
         ],
       },
     });
+
+    await tx.follow.deleteMany({
+      where: {
+        OR: [
+          { followerId: blockerId, followingId: blockedId },
+          { followerId: blockedId, followingId: blockerId },
+        ],
+      },
+    });
   });
+}
+
+/** Users hidden from viewer in either direction of a block. */
+export async function blockedUserIds(viewerUserId: string): Promise<string[]> {
+  const blocks = await prisma.block.findMany({
+    where: {
+      OR: [{ blockerId: viewerUserId }, { blockedId: viewerUserId }],
+    },
+    select: { blockerId: true, blockedId: true },
+  });
+  return blocks.map((b) =>
+    b.blockerId === viewerUserId ? b.blockedId : b.blockerId,
+  );
+}
+
+export async function isBlockedEitherWay(a: string, b: string) {
+  const block = await prisma.block.findFirst({
+    where: {
+      OR: [
+        { blockerId: a, blockedId: b },
+        { blockerId: b, blockedId: a },
+      ],
+    },
+    select: { id: true },
+  });
+  return Boolean(block);
 }
 
 export function priorityForReason(reason: ReportReason): ReportPriority {

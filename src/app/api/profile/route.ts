@@ -4,6 +4,7 @@ import { KinkInterestLevel, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { slugify } from "@/lib/constants/tags";
+import { syncRoomInvites } from "@/lib/rooms";
 import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
@@ -253,5 +254,7 @@ export async function PATCH(req: Request) {
     }
   });
 
-  return NextResponse.json({ ok: true });
+  const newRoomInvites = await syncRoomInvites(user.id);
+
+  return NextResponse.json({ ok: true, newRoomInvites });
 }

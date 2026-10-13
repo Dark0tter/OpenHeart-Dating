@@ -1,5 +1,6 @@
 import { AccountStatus, ConsentScope, Prisma, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { blockedUserIds, isBlockedEitherWay } from "@/lib/safety";
 import { distanceKm } from "@/lib/utils";
 
 export type SearchFilters = {
@@ -61,18 +62,6 @@ export async function incognitoUserIdsVisibleTo(
   for (const r of requestsFromThem) ids.add(r.fromUserId);
   for (const g of grants) ids.add(g.granterId);
   return ids;
-}
-
-async function blockedUserIds(viewerUserId: string): Promise<string[]> {
-  const blocks = await prisma.block.findMany({
-    where: {
-      OR: [{ blockerId: viewerUserId }, { blockedId: viewerUserId }],
-    },
-    select: { blockerId: true, blockedId: true },
-  });
-  return blocks.map((b) =>
-    b.blockerId === viewerUserId ? b.blockedId : b.blockerId,
-  );
 }
 
 export async function searchProfiles(filters: SearchFilters) {
@@ -245,8 +234,14 @@ export async function assertProfileViewable(opts: {
     return null;
   }
 
-  if (profile.visibility !== Visibility.INCOGNITO) return profile;
   if (opts.viewerUserId === profile.userId) return profile;
+  if (
+    opts.viewerUserId &&
+    (await isBlockedEitherWay(opts.viewerUserId, profile.userId))
+  ) {
+    return null;
+  }
+  if (profile.visibility !== Visibility.INCOGNITO) return profile;
   if (opts.shareToken && profile.shareToken === opts.shareToken) return profile;
   if (!opts.viewerUserId) return null;
 

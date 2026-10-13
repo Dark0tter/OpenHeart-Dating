@@ -8,6 +8,8 @@ export function middleware(request: NextRequest) {
 
   // Soft gate: app routes expect a session cookie from Auth.js
   const isApp =
+    request.nextUrl.pathname.startsWith("/feed") ||
+    request.nextUrl.pathname.startsWith("/rooms") ||
     request.nextUrl.pathname.startsWith("/search") ||
     request.nextUrl.pathname.startsWith("/matches") ||
     request.nextUrl.pathname.startsWith("/messages") ||

@@ -29,7 +29,7 @@ function LoginForm() {
       setError("Invalid email or password");
       return;
     }
-    router.push(params.get("next") || "/search");
+    router.push(params.get("next") || "/feed");
   }
 
   return (

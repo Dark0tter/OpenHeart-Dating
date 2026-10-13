@@ -5,9 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { isSupporter } from "@/lib/supporter";
 
-const schema = z.object({
-  adPreference: z.nativeEnum(AdPreference),
-});
+const schema = z
+  .object({
+    adPreference: z.nativeEnum(AdPreference).optional(),
+    showOnline: z.boolean().optional(),
+  })
+  .refine((v) => v.adPreference !== undefined || v.showOnline !== undefined);
 
 export async function GET() {
   const user = await requireUser();
@@ -16,6 +19,7 @@ export async function GET() {
   }
   return NextResponse.json({
     adPreference: user.adPreference,
+    showOnline: user.showOnline,
     isSupporter: await isSupporter(user.id),
   });
 }
@@ -41,9 +45,10 @@ export async function PATCH(req: Request) {
     );
   }
 
-  await prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: user.id },
-    data: { adPreference: parsed.data.adPreference },
+    data: parsed.data,
+    select: { adPreference: true, showOnline: true },
   });
-  return NextResponse.json({ adPreference: parsed.data.adPreference });
+  return NextResponse.json(updated);
 }

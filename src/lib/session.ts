@@ -17,3 +17,11 @@ export async function requireUser() {
   if (!user || user.accountStatus !== AccountStatus.ACTIVE) return null;
   return user;
 }
+
+/** Rooms, posts, and private requests are for verified adults with an active profile. */
+export async function requireMember() {
+  const user = await requireUser();
+  if (!user?.profile?.isActive) return null;
+  if (user.verification?.status !== "VERIFIED_ADULT") return null;
+  return { ...user, profile: user.profile };
+}

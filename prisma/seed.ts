@@ -78,7 +78,46 @@ async function main() {
     }
   }
 
-  console.log("Seeded identity, orientation, goal, body, ethnicity, accessibility, and kink tags.");
+  await prisma.chatRoom.upsert({
+    where: { slug: "welcome" },
+    create: {
+      slug: "welcome",
+      name: "Welcome & introductions",
+      description: "Say hi, introduce yourself, and meet new members.",
+      kind: "GENERAL",
+    },
+    update: {},
+  });
+
+  for (const category of await prisma.kinkCategory.findMany()) {
+    await prisma.chatRoom.upsert({
+      where: { slug: `kink-${category.slug}` },
+      create: {
+        slug: `kink-${category.slug}`,
+        name: category.name,
+        description: `For members interested in ${category.name}.`,
+        kind: "KINK_CATEGORY",
+        kinkCategoryId: category.id,
+      },
+      update: { name: category.name, kinkCategoryId: category.id },
+    });
+  }
+
+  for (const goal of await prisma.goalTag.findMany()) {
+    await prisma.chatRoom.upsert({
+      where: { slug: `goal-${goal.slug}` },
+      create: {
+        slug: `goal-${goal.slug}`,
+        name: goal.label,
+        description: `For members looking for ${goal.label.toLowerCase()}.`,
+        kind: "GOAL",
+        goalTagId: goal.id,
+      },
+      update: { name: goal.label, goalTagId: goal.id },
+    });
+  }
+
+  console.log("Seeded tag taxonomies and chat rooms.");
 }
 
 main()

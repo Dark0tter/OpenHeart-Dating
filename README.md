@@ -18,6 +18,15 @@ Privacy-first dating for LGBTQIA+ people, kink-positive adults, and users with e
 2. **Privacy first** — `PUBLIC` / `LIMITED` / `INCOGNITO` visibility. Incognito profiles are excluded from search, browse, discovery, and public URLs.
 3. **Consent-centered** — adult albums require verified-adult status + explicit consent grants.
 4. **No messaging paywall** — likes, matches, messages, and filters are free.
+5. **Meet by shared interests** — interest rooms first, private chat when it clicks.
+
+## How people meet
+
+- **Rooms.** Seeding creates a Welcome room, one room per kink category and one per relationship goal. Any member can join any room.
+- **Automatic invites.** Saving a profile invites the member to every room matching their interests: kink categories with something marked Favorite, Interested or Curious, plus their goals. Declined invites are never re-sent. No and Hard limit never trigger an invite.
+- **Online now.** Each room shows who's been active in the last 90 seconds. Members can hide themselves in Settings; incognito members only appear to people already allowed to see them. Room member lists are otherwise never exposed.
+- **Private chat.** Clicking a name in a room lets you send a private message request. Accepting it opens a private conversation.
+- **Home feed.** Posts from everyone you've liked or followed, plus your own. Blocked and hidden incognito authors are filtered out.
 
 ## Quick start
 
@@ -65,6 +74,14 @@ Production build verified with `npm run build`.
 | `POST /api/blocks` | Immediate block (likes/messages/match cleared) |
 | `POST /api/reports` | Reports with high-priority emergency queue |
 | `POST /api/consent` | Grant/deny/revoke `ADULT_ALBUM` or `PROFILE_ACCESS` |
+| `GET /api/rooms` | All rooms, with joined / invited / matches-your-profile flags |
+| `POST/DELETE /api/rooms/[id]/membership` | Join (accepts any pending invite) or leave a room |
+| `DELETE /api/rooms/[id]/invite` | Decline a room invite |
+| `GET/POST /api/rooms/[id]/messages` | Room chat (members only, rate limited, solicitation-checked) |
+| `GET /api/rooms/[id]/online` | Members active in the room right now |
+| `GET/POST /api/message-requests` | Private message requests; accepting opens a conversation |
+| `GET /api/feed` | Posts from people you liked or follow |
+| `POST/DELETE /api/follows`, `POST /api/posts` | Follow people, write posts |
 
 Database migrations live in `prisma/migrations`; `npm run db:setup` applies them (`prisma migrate deploy`) and seeds the tag taxonomies.
 

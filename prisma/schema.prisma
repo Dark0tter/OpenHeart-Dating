@@ -104,6 +104,8 @@ model User {
   statusReason    String?
   statusChangedAt DateTime?
   adPreference    AdPreference  @default(GENERIC)
+  /// Lets members appear in a room's online list. Incognito profiles never do.
+  showOnline      Boolean       @default(true)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   lastActiveAt    DateTime      @default(now())
@@ -125,6 +127,12 @@ model User {
   messageRequestsReceived MessageRequest[] @relation("MessageRequestsReceived")
   consentGrantsGiven      ConsentGrant[]   @relation("ConsentGiven")
   consentGrantsReceived   ConsentGrant[]   @relation("ConsentReceived")
+  roomMemberships         RoomMembership[]
+  roomInvites             RoomInvite[]
+  roomMessages            RoomMessage[]
+  following               Follow[]         @relation("Following")
+  followers               Follow[]         @relation("Followers")
+  posts                   Post[]
 
   @@index([lastActiveAt])
   @@index([accountStatus])
@@ -234,6 +242,7 @@ model GoalTag {
   slug     String           @unique
   label    String
   profiles ProfileGoalTag[]
+  rooms    ChatRoom[]
 }
 
 model BodyTag {
@@ -259,10 +268,11 @@ model AccessibilityTag {
 }
 
 model KinkCategory {
-  id    String @id @default(uuid())
-  slug  String @unique
+  id    String     @id @default(uuid())
+  slug  String     @unique
   name  String
   kinks Kink[]
+  rooms ChatRoom[]
 }
 
 model Kink {
@@ -460,6 +470,102 @@ model Report {
 
   @@index([status, priority, createdAt])
   @@index([reportedUserId, reason, createdAt])
+}
+
+enum RoomKind {
+  GENERAL
+  KINK_CATEGORY
+  GOAL
+}
+
+/// Interest-based group chat. Rosters are never exposed; members only see who posts.
+model ChatRoom {
+  id             String           @id @default(uuid())
+  slug           String           @unique
+  name           String
+  description    String?
+  kind           RoomKind
+  kinkCategoryId String?
+  goalTagId      String?
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  kinkCategory   KinkCategory?    @relation(fields: [kinkCategoryId], references: [id], onDelete: SetNull)
+  goalTag        GoalTag?         @relation(fields: [goalTagId], references: [id], onDelete: SetNull)
+  members        RoomMembership[]
+  invites        RoomInvite[]
+  messages       RoomMessage[]
+}
+
+model RoomMembership {
+  roomId     String
+  userId     String
+  joinedAt   DateTime  @default(now())
+  /// Updated while the member has the room open; drives the online list.
+  lastSeenAt DateTime?
+  room       ChatRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@index([userId])
+  @@index([roomId, lastSeenAt])
+}
+
+enum RoomInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+/// Sent automatically when a member's profile interests match a room. A declined
+/// invite is never re-sent.
+model RoomInvite {
+  id          String           @id @default(uuid())
+  roomId      String
+  userId      String
+  status      RoomInviteStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+  room        ChatRoom         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId, status])
+}
+
+model RoomMessage {
+  id        String    @id @default(uuid())
+  roomId    String
+  senderId  String
+  body      String    @db.Text
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  room      ChatRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender    User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  authorId  String
+  body      String    @db.Text
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId, createdAt])
 }
 
 /// Targeting uses only kink and relationship-goal slugs the member chose to list.
