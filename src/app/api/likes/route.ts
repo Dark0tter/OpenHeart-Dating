@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/session";
 import { sendLike } from "@/lib/matching";
 import { limitFor, tooManyRequests } from "@/lib/rate-limit";
+import { notify } from "@/lib/notify";
 
 const schema = z.object({
   toUserId: z.string().min(1),
@@ -26,6 +27,16 @@ export async function POST(req: Request) {
 
   try {
     const result = await sendLike(user.id, parsed.data.toUserId);
+    if (result.newMatch && result.match) {
+      const link = `/messages/${result.match.id}`;
+      await notify(parsed.data.toUserId, {
+        type: "match",
+        title: `You matched with ${user.profile?.displayName ?? "someone"}!`,
+        body: "Say hi — messaging is free.",
+        link,
+        email: true,
+      });
+    }
     return NextResponse.json(result);
   } catch (e) {
     return NextResponse.json(

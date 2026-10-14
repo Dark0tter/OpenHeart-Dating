@@ -32,8 +32,14 @@ export async function sendLike(fromUserId: string, toUserId: string) {
   });
 
   let match = null;
+  let newMatch = false;
   if (reciprocal) {
     const [userAId, userBId] = orderedPair(fromUserId, toUserId);
+    const before = await prisma.match.findUnique({
+      where: { userAId_userBId: { userAId, userBId } },
+      select: { unmatchedAt: true },
+    });
+    newMatch = !before || before.unmatchedAt !== null;
     match = await prisma.match.upsert({
       where: { userAId_userBId: { userAId, userBId } },
       create: { userAId, userBId },
@@ -41,5 +47,5 @@ export async function sendLike(fromUserId: string, toUserId: string) {
     });
   }
 
-  return { like, match, isMatch: Boolean(match) };
+  return { like, match, isMatch: Boolean(match), newMatch };
 }

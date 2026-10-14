@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ThemePicker } from "@/components/theme-picker";
 import { AccountSecurity } from "@/components/account-security";
 import { AlbumAccess } from "@/components/album-access";
+import { NotificationSettings } from "@/components/notification-settings";
 import type { ThemeMode } from "@/lib/themes";
 
 const REASONS = [
@@ -334,7 +335,12 @@ export default function SettingsPage() {
         </Button>
       </form>
 
-      <AlbumAccess />
+      <div id="notifications" className="scroll-mt-24">
+        <NotificationSettings />
+      </div>
+      <div id="albums" className="scroll-mt-24">
+        <AlbumAccess />
+      </div>
 
       <AccountSecurity />
 

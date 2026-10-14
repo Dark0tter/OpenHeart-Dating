@@ -2,6 +2,7 @@ import { AccountStatus, ReviewStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { appUrl } from "@/lib/request";
+import { notify } from "@/lib/notify";
 import { deleteObject, getObject, putObject } from "@/lib/storage";
 
 /**
@@ -128,6 +129,17 @@ export async function closeReport(opts: {
     reportId: report.id,
     note: opts.resolution,
   });
+  // Reporters hear back, without details about what happened to the other person.
+  if (report.reporterId) {
+    await notify(report.reporterId, {
+      type: "report_update",
+      title: "We reviewed your report",
+      body:
+        opts.status === "resolved"
+          ? "Thank you. We took action based on what you told us."
+          : "Thank you. We didn't find a rule violation this time, but you can always block anyone you don't want to hear from.",
+    });
+  }
 }
 
 /**
@@ -359,6 +371,16 @@ export async function reviewSelfie(opts: {
     action: opts.approve ? "selfie_approve" : "selfie_reject",
     targetUserId: selfie.userId,
     note: opts.note,
+  });
+  await notify(selfie.userId, {
+    type: "selfie_result",
+    title: opts.approve
+      ? "You're photo verified!"
+      : "We couldn't verify your selfie",
+    body: opts.approve
+      ? "The badge now shows on your profile."
+      : (opts.note ?? "You're welcome to try again with a new selfie."),
+    link: "/profile#selfie",
   });
 }
 

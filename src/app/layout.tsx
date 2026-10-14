@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description:
     "Privacy-first dating for LGBTQIA+ people, kink-positive adults, and anyone who needs safer discoverability. Free likes, messages, and matching.",
   robots: { index: false, follow: false },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
   other: {
     "X-Robots-Tag": "noindex, nofollow",
   },

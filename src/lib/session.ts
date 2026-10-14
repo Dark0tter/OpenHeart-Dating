@@ -2,6 +2,9 @@ import { AccountStatus, UserRole } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+/** How stale lastActiveAt may get before a request refreshes it. */
+const ACTIVE_TOUCH_MS = 5 * 60 * 1000;
+
 /**
  * The signed-in user whatever their account status, or null. Sessions issued
  * before the last password change or "sign out everywhere" are rejected.
@@ -43,6 +46,12 @@ export async function currentAccount() {
       },
     });
     return lifted;
+  }
+  if (Date.now() - user.lastActiveAt.getTime() > ACTIVE_TOUCH_MS) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastActiveAt: new Date() },
+    });
   }
   return user;
 }

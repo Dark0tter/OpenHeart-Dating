@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { acceptRequestTx } from "@/lib/message-requests";
+import { notify } from "@/lib/notify";
 
 const schema = z.object({
   action: z.enum(["accept", "deny"]),
@@ -52,5 +53,12 @@ export async function POST(
   }
 
   const match = await prisma.$transaction((tx) => acceptRequestTx(tx, request));
+  await notify(request.fromUserId, {
+    type: "match",
+    title: `${user.profile?.displayName ?? "Someone"} accepted your message request`,
+    body: "You can chat now.",
+    link: `/messages/${match.id}`,
+    email: true,
+  });
   return NextResponse.json({ status: "connected", matchId: match.id });
 }

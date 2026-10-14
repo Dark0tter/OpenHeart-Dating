@@ -10,6 +10,8 @@ import {
   solicitationErrorBody,
 } from "@/lib/moderation/solicitation";
 import { checkForScam } from "@/lib/moderation/scam";
+import { publish } from "@/lib/realtime";
+import { notify } from "@/lib/notify";
 
 const postSchema = z.object({
   body: z.string().min(1).max(4000).optional(),
@@ -42,29 +44,56 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const messages = await prisma.message.findMany({
-    where: { matchId },
-    orderBy: { createdAt: "asc" },
-    take: 200,
-  });
+  const otherId = match.userAId === user.id ? match.userBId : match.userAId;
+  const [latest, other] = await Promise.all([
+    prisma.message.findMany({
+      where: { matchId },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    prisma.user.findUnique({
+      where: { id: otherId },
+      select: {
+        readReceipts: true,
+        profile: { select: { displayName: true } },
+      },
+    }),
+  ]);
+  const messages = latest.reverse();
 
-  // Mark others' messages as read
-  await prisma.message.updateMany({
+  const marked = await prisma.message.updateMany({
+    where: { matchId, senderId: { not: user.id }, readAt: null },
+    data: { readAt: new Date() },
+  });
+  const cleared = await prisma.notification.updateMany({
     where: {
-      matchId,
-      senderId: { not: user.id },
+      userId: user.id,
+      type: "message",
+      link: `/messages/${matchId}`,
       readAt: null,
     },
     data: { readAt: new Date() },
   });
+  if (marked.count > 0 && user.readReceipts) {
+    await publish(otherId, { type: "read", matchId });
+  }
+  if (cleared.count > 0) await publish(user.id, { type: "notification" });
 
   const tiers = await allowedTiers(user);
   const filterText = textFilterFor(tiers);
   const hideMedia = isRestricted(tiers);
+  // Read receipts are mutual: both people must have them on.
+  const showReceipts = user.readReceipts && Boolean(other?.readReceipts);
 
   return NextResponse.json({
+    me: user.id,
+    other: {
+      userId: otherId,
+      displayName: other?.profile?.displayName ?? "Member",
+    },
     messages: messages.map((m) => ({
       ...m,
+      readAt: m.senderId === user.id && !showReceipts ? null : m.readAt,
       // Only the recipient is warned; senders aren't tipped off.
       safetyFlag: m.senderId === user.id ? null : m.safetyFlag,
       body: m.body === null ? null : filterText(m.body),
@@ -134,6 +163,15 @@ export async function POST(
       voiceUrl: parsed.data.voiceUrl,
       safetyFlag,
     },
+  });
+
+  const otherId = match.userAId === user.id ? match.userBId : match.userAId;
+  await publish(otherId, { type: "message", matchId });
+  await notify(otherId, {
+    type: "message",
+    title: `New message from ${user.profile?.displayName ?? "a match"}`,
+    link: `/messages/${matchId}`,
+    email: true,
   });
 
   return NextResponse.json({ message });

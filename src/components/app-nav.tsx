@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notification-bell";
 
 const links: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/feed", label: "Feed", icon: House },
@@ -37,21 +38,24 @@ export function AppNav() {
           >
             OpenHeart
           </Link>
-          <div className="hidden gap-1 text-sm md:flex">
-            {links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  "rounded-md px-3 py-2 whitespace-nowrap transition-colors",
-                  isActive(l.href)
-                    ? "bg-forest text-cream"
-                    : "text-forest/70 hover:bg-mist hover:text-ink",
-                )}
-              >
-                {l.label}
-              </Link>
-            ))}
+          <div className="flex items-center gap-1">
+            <div className="hidden gap-1 text-sm md:flex">
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 whitespace-nowrap transition-colors",
+                    isActive(l.href)
+                      ? "bg-forest text-cream"
+                      : "text-forest/70 hover:bg-mist hover:text-ink",
+                  )}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+            <NotificationBell />
           </div>
         </div>
       </nav>

@@ -144,6 +144,10 @@ model User {
   themeMode       String        @default("system")
   /// Pride flag theme id, or null for none.
   themeFlag       String?
+  /// Email for matches, requests and messages while away. Safety emails always send.
+  notifyEmail     Boolean       @default(true)
+  /// Off: others don't see when you've read their messages, and you don't see theirs.
+  readReceipts    Boolean       @default(true)
   role            UserRole      @default(MEMBER)
   /// Bumped to sign the member out on every device (password change or reset).
   sessionVersion  Int           @default(0)
@@ -154,6 +158,8 @@ model User {
   lastActiveAt    DateTime      @default(now())
 
   authTokens              AuthToken[]
+  notifications           Notification[]
+  pushSubscriptions       PushSubscription[]
   appeals                 Appeal[]
   supportTickets          SupportTicket[]
   selfieVerifications     SelfieVerification[]
@@ -642,6 +648,37 @@ model Report {
 
   @@index([status, priority, createdAt])
   @@index([reportedUserId, reason, createdAt])
+}
+
+/// In-app notification. Message notifications are one row per conversation,
+/// refreshed on each new message, so the list doesn't flood.
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  emailedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@index([userId, type, link])
+}
+
+/// A browser's Web Push endpoint for one member.
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// Append-only record of every staff action, for accountability and appeals.

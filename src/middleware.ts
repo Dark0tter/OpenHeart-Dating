@@ -18,6 +18,7 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/members") ||
     request.nextUrl.pathname.startsWith("/mod") ||
+    request.nextUrl.pathname.startsWith("/notifications") ||
     request.nextUrl.pathname.startsWith("/suspended");
 
   if (isApp) {

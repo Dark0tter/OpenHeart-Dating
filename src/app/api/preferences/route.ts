@@ -11,6 +11,8 @@ const schema = z
   .object({
     adPreference: z.nativeEnum(AdPreference).optional(),
     showOnline: z.boolean().optional(),
+    notifyEmail: z.boolean().optional(),
+    readReceipts: z.boolean().optional(),
     appAdultContent: z.boolean().optional(),
     themeMode: z.enum(THEME_MODES).optional(),
     themeFlag: z
@@ -29,6 +31,8 @@ export async function GET() {
   return NextResponse.json({
     adPreference: user.adPreference,
     showOnline: user.showOnline,
+    notifyEmail: user.notifyEmail,
+    readReceipts: user.readReceipts,
     appAdultContent: user.appAdultContent,
     themeMode: user.themeMode,
     themeFlag: user.themeFlag,
@@ -84,6 +88,8 @@ export async function PATCH(req: Request) {
     select: {
       adPreference: true,
       showOnline: true,
+      notifyEmail: true,
+      readReceipts: true,
       appAdultContent: true,
       themeMode: true,
       themeFlag: true,

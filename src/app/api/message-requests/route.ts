@@ -6,6 +6,7 @@ import { requireMember, requireUser } from "@/lib/session";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { acceptRequestTx } from "@/lib/message-requests";
 import { limitFor, tooManyRequests } from "@/lib/rate-limit";
+import { notify } from "@/lib/notify";
 import { allowedTiers } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
@@ -158,6 +159,13 @@ export async function POST(req: Request) {
       });
       return m;
     });
+    await notify(toUserId, {
+      type: "match",
+      title: `You're connected with ${user.profile.displayName}`,
+      body: "They replied to your message request.",
+      link: `/messages/${match.id}`,
+      email: true,
+    });
     return NextResponse.json({ status: "connected", matchId: match.id });
   }
 
@@ -177,6 +185,13 @@ export async function POST(req: Request) {
 
   const request = await prisma.messageRequest.create({
     data: { fromUserId: user.id, toUserId, body },
+  });
+  await notify(toUserId, {
+    type: "message_request",
+    title: `${user.profile.displayName} sent you a message request`,
+    body: "Only you can decide whether to connect.",
+    link: "/messages",
+    email: true,
   });
   return NextResponse.json({ status: "sent", requestId: request.id });
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRealtime } from "@/components/realtime";
 
 type Message = {
   id: string;
@@ -15,44 +17,86 @@ type Message = {
   safetyFlag?: string | null;
 };
 
+const TYPING_SEND_MS = 3000;
+const TYPING_SHOW_MS = 5000;
+
 export default function ChatPage() {
   const params = useParams<{ matchId: string }>();
+  const matchId = params.matchId;
   const [messages, setMessages] = useState<Message[]>([]);
   const [me, setMe] = useState<string | null>(null);
+  const [other, setOther] = useState<{
+    userId: string;
+    displayName: string;
+  } | null>(null);
   const [body, setBody] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [theyreTyping, setTheyreTyping] = useState(false);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
+  const bottom = useRef<HTMLDivElement>(null);
 
-  async function load() {
-    const [msgRes, profileRes] = await Promise.all([
-      fetch(`/api/messages/${params.matchId}`),
-      fetch("/api/profile"),
-    ]);
-    const msgData = await msgRes.json();
-    const profileData = await profileRes.json();
-    if (msgRes.ok) setMessages(msgData.messages);
-    // profile endpoint doesn't return user id directly — derive from session via likes later
-    // For styling "mine", fetch matches and compare isn't ideal; use a lightweight approach:
-    if (profileData.profile?.userId) setMe(profileData.profile.userId);
-  }
+  const load = useCallback(async () => {
+    const res = await fetch(`/api/messages/${matchId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    setMessages(data.messages);
+    setMe(data.me);
+    setOther(data.other);
+  }, [matchId]);
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 4000);
-    return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.matchId]);
+  }, [load]);
+
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ block: "end" });
+  }, [messages.length, theyreTyping]);
+
+  useRealtime(
+    (e) => {
+      if (!("matchId" in e) || e.matchId !== matchId) return;
+      if (e.type === "typing") {
+        setTheyreTyping(true);
+        if (typingTimer.current) clearTimeout(typingTimer.current);
+        typingTimer.current = setTimeout(
+          () => setTheyreTyping(false),
+          TYPING_SHOW_MS,
+        );
+      } else {
+        if (e.type === "message") setTheyreTyping(false);
+        load();
+      }
+    },
+    { onPoll: load, pollMs: 4000 },
+  );
+
+  function onType(value: string) {
+    setBody(value);
+    const now = Date.now();
+    if (value && now - lastTypingSent.current > TYPING_SEND_MS) {
+      lastTypingSent.current = now;
+      fetch(`/api/messages/${matchId}/typing`, { method: "POST" }).catch(
+        () => {},
+      );
+    }
+  }
 
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!body.trim()) return;
-    const res = await fetch(`/api/messages/${params.matchId}`, {
+    if (!body.trim() || sending) return;
+    setSending(true);
+    const res = await fetch(`/api/messages/${matchId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ body }),
     });
+    setSending(false);
     if (res.ok) {
       setBody("");
       setSendError(null);
+      lastTypingSent.current = 0;
       await load();
     } else {
       const data = await res.json().catch(() => ({}));
@@ -60,56 +104,106 @@ export default function ChatPage() {
     }
   }
 
+  const lastMine = [...messages].reverse().find((m) => m.senderId === me);
+
   return (
     <div className="flex h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] flex-col md:h-[70vh]">
-      <h1 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
-        Messages
-      </h1>
-      <div className="mt-4 flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <h1 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
+          {other ? (
+            <Link href={`/members/${other.userId}`} className="hover:underline">
+              {other.displayName}
+            </Link>
+          ) : (
+            "Messages"
+          )}
+        </h1>
+        <Link
+          href="/messages"
+          className="text-sm text-forest/70 hover:underline"
+        >
+          All messages
+        </Link>
+      </div>
+      <div
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation"
+        className="mt-4 flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4"
+      >
+        {messages.length === 0 && (
+          <p className="text-sm text-ink/55">
+            Say hi! A question about something on their profile is a great
+            start.
+          </p>
+        )}
         {messages.map((m) => {
-          const mine = me && m.senderId === me;
+          const mine = me !== null && m.senderId === me;
           return (
             <div
               key={m.id}
-              className={`max-w-[80%] rounded-md px-3 py-2 text-sm ${
-                mine ? "ml-auto bg-forest text-cream" : "bg-mist text-ink"
-              }`}
+              className={mine ? "ml-auto max-w-[80%]" : "max-w-[80%]"}
             >
-              {m.body}
-              {m.mediaHidden && (
-                <span className="block text-xs italic opacity-70">
-                  Media is only shown on the OpenHeart website.
-                </span>
-              )}
-              {m.safetyFlag && (
-                <span
-                  role="note"
-                  className="mt-2 block rounded bg-coral/15 px-2 py-1 text-xs text-coral-deep"
-                >
-                  Be careful: this looks like a common scam ({m.safetyFlag}).
-                  Never send money, gift cards or codes to someone you
-                  haven&apos;t met, and keep chatting here until you trust them.{" "}
-                  <a href="/safety" className="underline">
-                    Safety tips
-                  </a>
-                </span>
+              <div
+                className={`rounded-md px-3 py-2 text-sm ${
+                  mine ? "bg-forest text-cream" : "bg-mist text-ink"
+                }`}
+              >
+                {m.body}
+                {m.mediaHidden && (
+                  <span className="block text-xs italic opacity-70">
+                    Media is only shown on the OpenHeart website.
+                  </span>
+                )}
+                {m.safetyFlag && (
+                  <span
+                    role="note"
+                    className="mt-2 block rounded bg-coral/15 px-2 py-1 text-xs text-coral-deep"
+                  >
+                    Be careful: this looks like a common scam ({m.safetyFlag}).
+                    Never send money, gift cards or codes to someone you
+                    haven&apos;t met, and keep chatting here until you trust
+                    them.{" "}
+                    <Link href="/safety" className="underline">
+                      Safety tips
+                    </Link>
+                  </span>
+                )}
+              </div>
+              {mine && m.id === lastMine?.id && m.readAt && (
+                <p className="mt-0.5 text-right text-[11px] text-ink/50">
+                  Seen
+                </p>
               )}
             </div>
           );
         })}
+        {theyreTyping && (
+          <p className="text-xs italic text-ink/55">
+            {other?.displayName ?? "They"} {other ? "is" : "are"} typing…
+          </p>
+        )}
+        <div ref={bottom} />
       </div>
       {sendError && (
-        <p className="mt-3 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral-deep">
+        <p
+          role="alert"
+          className="mt-3 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral-deep"
+        >
           {sendError}
         </p>
       )}
       <form onSubmit={send} className="mt-3 flex gap-2">
         <Input
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => onType(e.target.value)}
           placeholder="Write a message…"
+          aria-label="Message"
+          maxLength={4000}
         />
-        <Button type="submit">Send</Button>
+        <Button type="submit" disabled={sending || !body.trim()}>
+          Send
+        </Button>
       </form>
     </div>
   );

@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/session";
 import { isVerifiedAdult } from "@/lib/verification";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { photoSrc, primaryPhotoWhere } from "@/lib/photos";
+import { notify } from "@/lib/notify";
 
 const ALBUM_SCOPES = [
   ConsentScope.PRIVATE_ALBUM,
@@ -131,6 +132,11 @@ export async function POST(req: Request) {
       );
       if (error) return NextResponse.json({ error }, { status: 403 });
       await grant(user.id, request.requesterId, request.scope);
+      await notify(request.requesterId, {
+        type: "album_granted",
+        title: `${user.profile?.displayName ?? "A member"} shared their private photos with you`,
+        link: `/members/${user.id}`,
+      });
     }
     await prisma.consentRequest.update({
       where: { id: request.id },
@@ -199,6 +205,13 @@ export async function POST(req: Request) {
         respondedAt: null,
       },
     });
+    await notify(otherUserId, {
+      type: "album_request",
+      title: `${user.profile?.displayName ?? "A member"} asked to see your private photos`,
+      body: "Nothing is shared unless you say yes.",
+      link: "/settings#albums",
+      email: true,
+    });
     return NextResponse.json({
       ok: true,
       status: "requested",
@@ -210,6 +223,11 @@ export async function POST(req: Request) {
     const error = await grantError(user.id, otherUserId, scope);
     if (error) return NextResponse.json({ error }, { status: 403 });
     const g = await grant(user.id, otherUserId, scope);
+    await notify(otherUserId, {
+      type: "album_granted",
+      title: `${user.profile?.displayName ?? "A member"} shared their private photos with you`,
+      link: `/members/${user.id}`,
+    });
     return NextResponse.json({ grant: g });
   }
 
