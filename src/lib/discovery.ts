@@ -112,6 +112,7 @@ const rankInclude = {
   goalTags: { include: { tag: true } },
   relationshipStyleTags: { include: { tag: true } },
   seekingIdentityTags: true,
+  seekingOrientationTags: true,
   kinks: { select: { kinkId: true, level: true } },
   _count: { select: { prompts: true } },
   photos: {
@@ -136,6 +137,8 @@ function toRankProfile(p: RankedRow): RankProfile {
   return {
     identityIds: p.identityTags.map((t) => t.tagId),
     seekingIdentityIds: p.seekingIdentityTags.map((t) => t.tagId),
+    orientationIds: p.orientationTags.map((t) => t.tagId),
+    seekingOrientationIds: p.seekingOrientationTags.map((t) => t.tagId),
     goalIds: p.goalTags.map((t) => t.tagId),
     styleIds: p.relationshipStyleTags.map((t) => t.tagId),
     kinks: p.kinks,

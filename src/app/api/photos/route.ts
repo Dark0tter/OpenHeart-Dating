@@ -13,7 +13,7 @@ import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { galleryFor, MAX_PHOTOS, photoSrc } from "@/lib/photos";
 import { ImageError, processUpload } from "@/lib/images";
 import { photoReviewMode, scanImage } from "@/lib/moderation/image-scan";
-import { putObject } from "@/lib/storage";
+import { deleteObject, putObject } from "@/lib/storage";
 import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 
 /** GET /api/photos?userId=… — the photos this viewer may see. */
@@ -120,23 +120,29 @@ export async function POST(req: Request) {
   ]);
 
   const autoApprove = scan.verdict === "clear" && photoReviewMode() === "post";
-  const photo = await prisma.photo.create({
-    data: {
-      id,
-      profileId: user.profile.id,
-      url: photoSrc(id),
-      storageKey,
-      thumbKey,
-      contentHash: processed.contentHash,
-      width: processed.width,
-      height: processed.height,
-      visibility,
-      status: autoApprove ? ReviewStatus.APPROVED : ReviewStatus.PENDING,
-      rejectionReason: scan.verdict === "review" ? scan.reason : null,
-      isPrimary: count === 0,
-      sortOrder: count,
-    },
-  });
+  let photo;
+  try {
+    photo = await prisma.photo.create({
+      data: {
+        id,
+        profileId: user.profile.id,
+        url: photoSrc(id),
+        storageKey,
+        thumbKey,
+        contentHash: processed.contentHash,
+        width: processed.width,
+        height: processed.height,
+        visibility,
+        status: autoApprove ? ReviewStatus.APPROVED : ReviewStatus.PENDING,
+        rejectionReason: scan.verdict === "review" ? scan.reason : null,
+        isPrimary: count === 0,
+        sortOrder: count,
+      },
+    });
+  } catch (e) {
+    await Promise.all([deleteObject(storageKey), deleteObject(thumbKey)]);
+    throw e;
+  }
 
   return NextResponse.json({
     photo: {

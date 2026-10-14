@@ -9,6 +9,7 @@ const MEMBER_PAGES = [
   "/search",
   "/members",
   "/matches",
+  "/likes",
   "/messages",
   "/events",
   "/rooms",

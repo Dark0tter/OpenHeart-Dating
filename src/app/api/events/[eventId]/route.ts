@@ -99,7 +99,11 @@ const patchSchema = z.object({
   address: z.string().trim().max(300).nullable().optional(),
   onlineUrl: z.string().trim().url().max(500).nullable().optional(),
   capacity: z.number().int().min(1).max(10000).nullable().optional(),
+  startsAt: z.coerce.date().optional(),
+  endsAt: z.coerce.date().nullable().optional(),
 });
+
+const MAX_DAYS_AHEAD = 365;
 
 export async function PATCH(req: Request, ctx: Ctx) {
   const user = await requireUser();
@@ -127,7 +131,63 @@ export async function PATCH(req: Request, ctx: Ctx) {
       status: 422,
     });
   }
-  await prisma.event.update({ where: { id: eventId }, data: parsed.data });
+  const data = parsed.data;
+  const startsAt = data.startsAt ?? event.startsAt;
+  const endsAt = data.endsAt === undefined ? event.endsAt : data.endsAt;
+  if (endsAt && endsAt <= startsAt) {
+    return NextResponse.json(
+      { error: "The end time must be after the start." },
+      { status: 400 },
+    );
+  }
+  const now = Date.now();
+  if (
+    data.startsAt &&
+    data.startsAt.getTime() !== event.startsAt.getTime() &&
+    (data.startsAt.getTime() < now - 3600_000 ||
+      data.startsAt.getTime() > now + MAX_DAYS_AHEAD * 86400_000)
+  ) {
+    return NextResponse.json(
+      { error: "Pick a start time within the next year." },
+      { status: 400 },
+    );
+  }
+  if (data.capacity != null) {
+    const going = await prisma.eventRsvp.count({
+      where: { eventId, status: "going" },
+    });
+    if (data.capacity < going) {
+      return NextResponse.json(
+        {
+          error: `${going} people are already going. Capacity can't be lower.`,
+        },
+        { status: 400 },
+      );
+    }
+  }
+
+  await prisma.event.update({ where: { id: eventId }, data });
+
+  const moved =
+    startsAt.getTime() !== event.startsAt.getTime() ||
+    (endsAt?.getTime() ?? null) !== (event.endsAt?.getTime() ?? null) ||
+    (data.venueName !== undefined && data.venueName !== event.venueName) ||
+    (data.address !== undefined && data.address !== event.address) ||
+    (data.onlineUrl !== undefined && data.onlineUrl !== event.onlineUrl);
+  if (moved) {
+    const rsvps = await prisma.eventRsvp.findMany({
+      where: { eventId },
+      select: { userId: true },
+    });
+    for (const r of rsvps) {
+      await notify(r.userId, {
+        type: "event",
+        title: `"${data.title ?? event.title}" has new time or place details`,
+        link: `/events/${eventId}`,
+        email: true,
+      });
+    }
+  }
   return NextResponse.json({ ok: true });
 }
 

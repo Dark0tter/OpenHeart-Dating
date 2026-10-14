@@ -55,6 +55,9 @@ function OnboardingInner() {
     orientation: Tag[];
     goals: Tag[];
     relationshipStyles: Tag[];
+    body: Tag[];
+    ethnicity: Tag[];
+    accessibility: Tag[];
     kinks: KinkCategory[];
     contentRestricted?: boolean;
   } | null>(null);
@@ -74,6 +77,10 @@ function OnboardingInner() {
   const [goals, setGoals] = useState<string[]>([]);
   const [styles, setStyles] = useState<string[]>([]);
   const [seeking, setSeeking] = useState<string[]>([]);
+  const [seekingOrientation, setSeekingOrientation] = useState<string[]>([]);
+  const [bodyTags, setBodyTags] = useState<string[]>([]);
+  const [ethnicityTags, setEthnicityTags] = useState<string[]>([]);
+  const [accessibilityTags, setAccessibilityTags] = useState<string[]>([]);
   const [kinks, setKinks] = useState<Record<string, KinkLevel>>({});
   const [bio, setBio] = useState("");
   const [limitsNote, setLimitsNote] = useState("");
@@ -141,6 +148,10 @@ function OnboardingInner() {
       setGoals(ids(p.goalTags));
       setStyles(ids(p.relationshipStyleTags));
       setSeeking(ids(p.seekingIdentityTags));
+      setSeekingOrientation(ids(p.seekingOrientationTags));
+      setBodyTags(ids(p.bodyTags));
+      setEthnicityTags(ids(p.ethnicityTags));
+      setAccessibilityTags(ids(p.accessibilityTags));
       setKinks(
         Object.fromEntries(
           (p.kinks ?? []).map((k: { kinkId: string; level: KinkLevel }) => [
@@ -282,6 +293,10 @@ function OnboardingInner() {
         goalTagIds: goals,
         relationshipStyleTagIds: styles,
         seekingIdentityTagIds: seeking,
+        seekingOrientationTagIds: seekingOrientation,
+        bodyTagIds: bodyTags,
+        ethnicityTagIds: ethnicityTags,
+        accessibilityTagIds: accessibilityTags,
         ...(customIdentity.trim()
           ? { customIdentity: customIdentity.trim() }
           : {}),
@@ -579,6 +594,38 @@ function OnboardingInner() {
               selected={styles}
               onToggle={(id) => toggle(styles, id, setStyles)}
             />
+            <div className="space-y-4 rounded-md border border-forest/15 bg-cream/50 p-4">
+              <p className="text-sm text-ink/70">
+                Optional. Share only what you&apos;re comfortable with. These
+                show on your profile; nobody can filter people out by ethnicity.
+              </p>
+              {tags.body.length > 0 && (
+                <TagPicker
+                  title="Body type"
+                  tags={tags.body}
+                  selected={bodyTags}
+                  onToggle={(id) => toggle(bodyTags, id, setBodyTags)}
+                />
+              )}
+              {tags.ethnicity.length > 0 && (
+                <TagPicker
+                  title="Ethnicity"
+                  tags={tags.ethnicity}
+                  selected={ethnicityTags}
+                  onToggle={(id) => toggle(ethnicityTags, id, setEthnicityTags)}
+                />
+              )}
+              {tags.accessibility.length > 0 && (
+                <TagPicker
+                  title="Accessibility"
+                  tags={tags.accessibility}
+                  selected={accessibilityTags}
+                  onToggle={(id) =>
+                    toggle(accessibilityTags, id, setAccessibilityTags)
+                  }
+                />
+              )}
+            </div>
           </>
         )}
 
@@ -596,6 +643,19 @@ function OnboardingInner() {
                 tags={tags.identity}
                 selected={seeking}
                 onToggle={(id) => toggle(seeking, id, setSeeking)}
+              />
+              <p className="mt-1 text-xs text-ink/70">
+                Leave empty to be open to everyone.
+              </p>
+            </div>
+            <div>
+              <TagPicker
+                title="Orientations I'd like to meet"
+                tags={tags.orientation}
+                selected={seekingOrientation}
+                onToggle={(id) =>
+                  toggle(seekingOrientation, id, setSeekingOrientation)
+                }
               />
               <p className="mt-1 text-xs text-ink/70">
                 Leave empty to be open to everyone.
@@ -775,6 +835,16 @@ function OnboardingInner() {
                   Incognito — hidden until I like or message someone
                 </option>
               </select>
+              {visibility === "INCOGNITO" && (
+                <p className="mt-1 text-xs text-ink/70">
+                  You can also share a private link or show your profile to
+                  specific people in{" "}
+                  <Link href="/settings#incognito" className="underline">
+                    Settings
+                  </Link>
+                  .
+                </p>
+              )}
             </div>
 
             {!isActive && (

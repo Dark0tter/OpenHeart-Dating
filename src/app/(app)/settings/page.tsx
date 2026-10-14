@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { BlockedList } from "@/components/blocked-list";
+import { IncognitoAccess } from "@/components/incognito-access";
 import { FormEvent, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { forgetThisDevice } from "@/lib/native-app";
@@ -34,7 +36,6 @@ const REASON_LABELS: Partial<Record<(typeof REASONS)[number], string>> = {
 };
 
 export default function SettingsPage() {
-  const [blockId, setBlockId] = useState("");
   const [reportId, setReportId] = useState("");
   const [reason, setReason] = useState<(typeof REASONS)[number]>("HARASSMENT");
   const [details, setDetails] = useState("");
@@ -133,19 +134,6 @@ export default function SettingsPage() {
     } else {
       setMsg(data.error);
     }
-  }
-
-  async function onBlock(e: FormEvent) {
-    e.preventDefault();
-    const res = await fetch("/api/blocks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: blockId }),
-    });
-    const data = await res.json();
-    setMsg(
-      res.ok ? "User blocked. Messages, likes, and match removed." : data.error,
-    );
   }
 
   async function onReport(e: FormEvent) {
@@ -292,21 +280,9 @@ export default function SettingsPage() {
         )}
       </fieldset>
 
-      <form onSubmit={onBlock} className="space-y-3">
-        <h2 className="font-medium text-forest">Block user</h2>
-        <div>
-          <Label htmlFor="blockId">User ID</Label>
-          <Input
-            id="blockId"
-            value={blockId}
-            onChange={(e) => setBlockId(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit" variant="danger">
-          Block
-        </Button>
-      </form>
+      <IncognitoAccess />
+
+      <BlockedList />
 
       <form onSubmit={onReport} id="report" className="scroll-mt-20 space-y-3">
         <h2 className="font-medium text-forest">Report user</h2>

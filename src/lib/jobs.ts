@@ -3,7 +3,7 @@ import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { expireCalls } from "@/lib/calls";
-import { finishHeldDeletions } from "@/lib/account-deletion";
+import { deleteAccount, finishHeldDeletions } from "@/lib/account-deletion";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -194,13 +194,85 @@ async function cleanup(now: Date) {
   }
 
   const deletedAccounts = await finishHeldDeletions(prisma);
+  const pruned = await pruneOldRecords(now);
+  const abandonedAccounts = await deleteAbandonedSignups(now);
 
   return {
     deletedAccounts,
+    abandonedAccounts,
+    ...pruned,
     checkIns: checkIns.count,
     notifications: notifications.count,
     rateLimitBuckets: buckets.count,
     authTokens: tokens.count,
     messages: purged,
   };
+}
+
+/** People with an open report or a legal hold keep their removed posts and chat until it's settled. */
+async function usersUnderReview() {
+  const rows = await prisma.report.findMany({
+    where: { OR: [{ legalHold: true }, { status: "open" }] },
+    select: { reportedUserId: true },
+    distinct: ["reportedUserId"],
+  });
+  return rows.map((r) => r.reportedUserId);
+}
+
+async function pruneOldRecords(now: Date) {
+  const monthAgo = new Date(now.getTime() - 30 * DAY);
+  const held = await usersUnderReview();
+  const [posts, roomMessages, calls, unread, devices] = await Promise.all([
+    prisma.post.deleteMany({
+      where: { deletedAt: { lt: monthAgo }, authorId: { notIn: held } },
+    }),
+    prisma.roomMessage.deleteMany({
+      where: { deletedAt: { lt: monthAgo }, senderId: { notIn: held } },
+    }),
+    prisma.call.deleteMany({
+      where: {
+        status: { in: ["ended", "declined", "missed"] },
+        createdAt: { lt: new Date(now.getTime() - 90 * DAY) },
+      },
+    }),
+    prisma.notification.deleteMany({
+      where: {
+        readAt: null,
+        createdAt: { lt: new Date(now.getTime() - 180 * DAY) },
+      },
+    }),
+    // Apple and Google stop delivering to phones that haven't opened the app in this long.
+    prisma.deviceToken.deleteMany({
+      where: { lastSeenAt: { lt: new Date(now.getTime() - 270 * DAY) } },
+    }),
+  ]);
+  return {
+    removedPosts: posts.count,
+    removedRoomMessages: roomMessages.count,
+    oldCalls: calls.count,
+    oldUnreadNotifications: unread.count,
+    staleDevices: devices.count,
+  };
+}
+
+/**
+ * Sign-ups that never confirmed their email, never went live and haven't
+ * been back in 30 days are removed, so we don't hold data nobody is using.
+ */
+async function deleteAbandonedSignups(now: Date) {
+  const abandoned = await prisma.user.findMany({
+    where: {
+      emailVerified: null,
+      accountStatus: "ACTIVE",
+      role: "MEMBER",
+      lastActiveAt: { lt: new Date(now.getTime() - 30 * DAY) },
+      createdAt: { lt: new Date(now.getTime() - 30 * DAY) },
+      OR: [{ profile: null }, { profile: { isActive: false } }],
+      reportsAgainst: { none: {} },
+    },
+    select: { id: true },
+    take: 50,
+  });
+  for (const u of abandoned) await deleteAccount(prisma, u.id);
+  return abandoned.length;
 }

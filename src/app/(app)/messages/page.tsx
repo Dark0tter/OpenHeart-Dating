@@ -76,7 +76,10 @@ export default function MessagesPage() {
       </h1>
       <p className="mt-1 text-sm text-ink/70">
         Private chats open when someone accepts your request or you match.
-        Messaging is never paywalled.
+        Messaging is never paywalled.{" "}
+        <Link href="/likes" className="text-coral underline">
+          See who liked you
+        </Link>
       </p>
 
       {incoming.length > 0 && (

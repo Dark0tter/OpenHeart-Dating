@@ -156,6 +156,12 @@ export async function POST(req: Request) {
   }
 
   if (action === "request") {
+    if (scope === ConsentScope.PROFILE_ACCESS) {
+      return NextResponse.json(
+        { error: "Only the profile owner can share their profile." },
+        { status: 400 },
+      );
+    }
     if (await isBlockedEitherWay(user.id, otherUserId)) {
       return NextResponse.json(
         { error: "Cannot interact with this user" },
@@ -223,9 +229,16 @@ export async function POST(req: Request) {
     const error = await grantError(user.id, otherUserId, scope);
     if (error) return NextResponse.json({ error }, { status: 403 });
     const g = await grant(user.id, otherUserId, scope);
+    const name = user.profile?.displayName ?? "A member";
     await notify(otherUserId, {
-      type: "album_granted",
-      title: `${user.profile?.displayName ?? "A member"} shared their private photos with you`,
+      type:
+        scope === ConsentScope.PROFILE_ACCESS
+          ? "profile_shared"
+          : "album_granted",
+      title:
+        scope === ConsentScope.PROFILE_ACCESS
+          ? `${name} shared their profile with you`
+          : `${name} shared their private photos with you`,
       link: `/members/${user.id}`,
     });
     return NextResponse.json({ grant: g });

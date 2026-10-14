@@ -8,6 +8,8 @@ import { nearbyWhere } from "@/lib/discovery";
 const base: RankProfile = {
   identityIds: ["woman"],
   seekingIdentityIds: [],
+  orientationIds: [],
+  seekingOrientationIds: [],
   goalIds: ["dating"],
   styleIds: [],
   kinks: [],
@@ -49,6 +51,16 @@ describe("ranking", () => {
     const fits = scoreMatch(viewer, { ...base });
     const doesnt = scoreMatch(viewer, { ...base, identityIds: ["man"] });
     expect(fits.total).toBeGreaterThan(doesnt.total);
+  });
+
+  it("counts the orientations someone wants to meet", () => {
+    const viewer = { ...base, seekingOrientationIds: ["queer"] };
+    const fits = scoreMatch(viewer, { ...base, orientationIds: ["queer"] });
+    const doesnt = scoreMatch(viewer, {
+      ...base,
+      orientationIds: ["straight"],
+    });
+    expect(fits.mutualFit).toBeGreaterThan(doesnt.mutualFit);
   });
 
   it("pushes someone's hard limits down", () => {

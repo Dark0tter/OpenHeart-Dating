@@ -12,6 +12,8 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/rooms") ||
     request.nextUrl.pathname.startsWith("/search") ||
     request.nextUrl.pathname.startsWith("/matches") ||
+    request.nextUrl.pathname.startsWith("/likes") ||
+    request.nextUrl.pathname.startsWith("/supporter") ||
     request.nextUrl.pathname.startsWith("/messages") ||
     request.nextUrl.pathname.startsWith("/profile") ||
     request.nextUrl.pathname.startsWith("/settings") ||

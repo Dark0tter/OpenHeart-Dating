@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EventEditForm } from "@/components/event-edit-form";
 import { formatWhen, KIND_SHORT, type EventKindId } from "@/lib/event-format";
 
 type EventDetail = {
@@ -41,6 +42,7 @@ export default function EventPage() {
   const [canModerate, setCanModerate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/events/${eventId}`);
@@ -228,10 +230,34 @@ export default function EventPage() {
         </section>
       )}
 
+      {editing && (
+        <EventEditForm
+          event={event}
+          onDone={async (saved) => {
+            setEditing(false);
+            if (saved) {
+              setNotice("Event updated.");
+              await load();
+            }
+          }}
+        />
+      )}
+
       {!event.cancelled && (event.isHost || canModerate) && (
-        <Button type="button" variant="danger" onClick={cancel}>
-          Cancel event
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {event.isHost && !editing && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setEditing(true)}
+            >
+              Edit event
+            </Button>
+          )}
+          <Button type="button" variant="danger" onClick={cancel}>
+            Cancel event
+          </Button>
+        </div>
       )}
 
       <p className="text-xs text-ink/70">

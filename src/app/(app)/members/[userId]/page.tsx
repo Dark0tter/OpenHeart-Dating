@@ -26,6 +26,7 @@ type Member = {
   goals: string[];
   relationshipStyles: string[];
   body: string[];
+  ethnicity: string[];
   accessibility: string[];
   kinks: {
     favorite: string[];
@@ -48,6 +49,8 @@ type Data = {
     likedYou: boolean;
     matchId: string | null;
     following: boolean;
+    youAreIncognito?: boolean;
+    profileShared?: boolean;
     albumRequests: Partial<Record<"PRIVATE_ALBUM" | "ADULT_ALBUM", string>>;
   };
   adultAllowedHere: boolean;
@@ -83,7 +86,10 @@ export default function MemberPage() {
   const [note, setNote] = useState("");
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/members/${userId}`);
+    const share = new URLSearchParams(window.location.search).get("share");
+    const res = await fetch(
+      `/api/members/${userId}${share ? `?share=${encodeURIComponent(share)}` : ""}`,
+    );
     const body = await res.json();
     if (!res.ok) setError(body.error ?? "This member isn't available.");
     else setData(body);
@@ -205,16 +211,22 @@ export default function MemberPage() {
           ) : (
             <Button
               type="button"
-              disabled={r.youLiked}
+              variant={r.youLiked ? "ghost" : "primary"}
               onClick={() =>
-                call(
-                  "/api/likes",
-                  json("POST", { toUserId: userId }),
-                  "Like sent.",
-                )
+                r.youLiked
+                  ? call(
+                      "/api/likes",
+                      json("DELETE", { toUserId: userId }),
+                      "Like taken back.",
+                    )
+                  : call(
+                      "/api/likes",
+                      json("POST", { toUserId: userId }),
+                      "Like sent.",
+                    )
               }
             >
-              {r.youLiked ? "Liked" : "Like"}
+              {r.youLiked ? "Liked · Undo" : "Like"}
             </Button>
           )}
           <Button
@@ -236,6 +248,29 @@ export default function MemberPage() {
           >
             {r.following ? "Following" : "Follow"}
           </Button>
+          {r.youAreIncognito && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() =>
+                call(
+                  "/api/consent",
+                  json("POST", {
+                    action: r.profileShared ? "revoke" : "grant",
+                    otherUserId: userId,
+                    scope: "PROFILE_ACCESS",
+                  }),
+                  r.profileShared
+                    ? "Your profile is hidden from them again."
+                    : "They can now see your profile.",
+                )
+              }
+            >
+              {r.profileShared
+                ? "Hide my profile from them"
+                : "Let them see my profile"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -266,6 +301,7 @@ export default function MemberPage() {
         <Chips title="Looking for" items={m.goals} />
         <Chips title="Relationship style" items={m.relationshipStyles} />
         <Chips title="Body" items={m.body} />
+        <Chips title="Ethnicity" items={m.ethnicity} />
         <Chips title="Accessibility" items={m.accessibility} />
         <Chips title="Favorite interests" items={m.kinks.favorite} />
         <Chips title="Into" items={m.kinks.interested} />

@@ -11,6 +11,7 @@ export type NotificationType =
   | "message_request"
   | "album_request"
   | "album_granted"
+  | "profile_shared"
   | "selfie_result"
   | "report_update"
   | "verification"

@@ -5,6 +5,8 @@ import { scoreMatch, type RankProfile } from "@/lib/ranking";
 const base: RankProfile = {
   identityIds: ["a"],
   seekingIdentityIds: [],
+  orientationIds: [],
+  seekingOrientationIds: [],
   goalIds: [],
   styleIds: [],
   kinks: [],

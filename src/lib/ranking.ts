@@ -4,6 +4,8 @@ import { clashPenalty, type KinkLevel as Level } from "@/lib/limits";
 export type RankProfile = {
   identityIds: string[];
   seekingIdentityIds: string[];
+  orientationIds: string[];
+  seekingOrientationIds: string[];
   goalIds: string[];
   styleIds: string[];
   kinks: { kinkId: string; level: Level }[];
@@ -26,6 +28,16 @@ const KINK_WEIGHT: Partial<Record<Level, number>> = {
 function overlap(a: string[], b: string[]): number {
   const set = new Set(a);
   return b.filter((x) => set.has(x)).length;
+}
+
+function wants(seeker: RankProfile, other: RankProfile): boolean {
+  const identityOk =
+    seeker.seekingIdentityIds.length === 0 ||
+    overlap(seeker.seekingIdentityIds, other.identityIds) > 0;
+  const orientationOk =
+    seeker.seekingOrientationIds.length === 0 ||
+    overlap(seeker.seekingOrientationIds, other.orientationIds) > 0;
+  return identityOk && orientationOk;
 }
 
 export type ScoreBreakdown = {
@@ -52,12 +64,8 @@ export function scoreMatch(
   now = Date.now(),
 ): ScoreBreakdown {
   // Seeking works both ways: an empty seeking list means "open to anyone".
-  const viewerWants =
-    viewer.seekingIdentityIds.length === 0 ||
-    overlap(viewer.seekingIdentityIds, candidate.identityIds) > 0;
-  const candidateWants =
-    candidate.seekingIdentityIds.length === 0 ||
-    overlap(candidate.seekingIdentityIds, viewer.identityIds) > 0;
+  const viewerWants = wants(viewer, candidate);
+  const candidateWants = wants(candidate, viewer);
   const mutualFit = (viewerWants ? 3 : -3) + (candidateWants ? 3 : -3);
 
   const sharedGoals =

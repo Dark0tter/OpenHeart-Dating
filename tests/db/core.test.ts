@@ -607,3 +607,56 @@ describe("account deletion", () => {
     expect(await prisma.user.count({ where: { id: user.id } })).toBe(0);
   });
 });
+
+describe("retention clean-up", () => {
+  it("erases deleted posts after 30 days unless the author is under review", async () => {
+    const author = await makeUser();
+    const reported = await makeUser();
+    const old = new Date(Date.now() - 31 * DAY);
+    const gone = await prisma.post.create({
+      data: { authorId: author.id, body: "bye", deletedAt: old },
+    });
+    const recent = await prisma.post.create({
+      data: { authorId: author.id, body: "hi", deletedAt: new Date() },
+    });
+    const kept = await prisma.post.create({
+      data: { authorId: reported.id, body: "evidence", deletedAt: old },
+    });
+    await prisma.report.create({
+      data: {
+        reporterId: author.id,
+        reportedUserId: reported.id,
+        reason: "HARASSMENT",
+      },
+    });
+
+    await runJobs(new Date());
+    expect(await prisma.post.count({ where: { id: gone.id } })).toBe(0);
+    expect(await prisma.post.count({ where: { id: recent.id } })).toBe(1);
+    expect(await prisma.post.count({ where: { id: kept.id } })).toBe(1);
+  });
+
+  it("removes sign-ups that never confirmed their email and went quiet", async () => {
+    const longAgo = new Date(Date.now() - 40 * DAY);
+    const abandoned = await makeUser();
+    await prisma.user.update({
+      where: { id: abandoned.id },
+      data: { createdAt: longAgo, lastActiveAt: longAgo },
+    });
+    const confirmed = await makeUser();
+    await prisma.user.update({
+      where: { id: confirmed.id },
+      data: {
+        createdAt: longAgo,
+        lastActiveAt: longAgo,
+        emailVerified: longAgo,
+      },
+    });
+    const fresh = await makeUser();
+
+    await runJobs(new Date());
+    expect(await prisma.user.count({ where: { id: abandoned.id } })).toBe(0);
+    expect(await prisma.user.count({ where: { id: confirmed.id } })).toBe(1);
+    expect(await prisma.user.count({ where: { id: fresh.id } })).toBe(1);
+  });
+});

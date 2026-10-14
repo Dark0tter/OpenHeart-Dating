@@ -69,6 +69,14 @@ export default function PrivacyPage() {
           can&apos;t be turned back into those details.
         </p>
         <p className="mt-3 text-ink/75">
+          We don&apos;t hold on to things nobody needs. Posts and room messages
+          you delete are erased for good after 30 days, chats after an unmatch
+          after 30 days, call history after 90 days, and sign-ups that never
+          confirmed their email and haven&apos;t been back in 30 days are
+          deleted. Anything tied to an open safety report is kept until the
+          report is settled.
+        </p>
+        <p className="mt-3 text-ink/75">
           Profiles and messages are automatically checked for payment links,
           wishlists, and paid-content promotion. Matching content is not posted,
           and a note goes to our moderation team for review.

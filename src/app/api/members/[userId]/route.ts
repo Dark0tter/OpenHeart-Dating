@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ConsentScope, KinkInterestLevel } from "@prisma/client";
+import { ConsentScope, KinkInterestLevel, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 import { assertProfileViewable } from "@/lib/discovery";
@@ -27,7 +27,7 @@ const SHOWN_LEVELS: KinkInterestLevel[] = [
   KinkInterestLevel.HARD_LIMIT,
 ];
 
-export async function GET(_req: Request, ctx: Ctx) {
+export async function GET(req: Request, ctx: Ctx) {
   const viewer = await requireMember();
   if (!viewer) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,6 +37,7 @@ export async function GET(_req: Request, ctx: Ctx) {
   const visible = await assertProfileViewable({
     profileUserId: userId,
     viewerUserId: viewer.id,
+    shareToken: new URL(req.url).searchParams.get("share"),
   });
   if (!visible) {
     return NextResponse.json(
@@ -65,6 +66,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       goalTags: { include: { tag: true } },
       relationshipStyleTags: { include: { tag: true } },
       bodyTags: { include: { tag: true } },
+      ethnicityTags: { include: { tag: true } },
       accessibilityTags: { include: { tag: true } },
       kinks: {
         where: { level: { in: SHOWN_LEVELS }, kink: { tier: { in: tiers } } },
@@ -84,6 +86,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     following,
     albumRequests,
     viewerKinks,
+    profileShared,
   ] = await Promise.all([
     galleryFor(userId, viewer, adultAllowedHere),
     prisma.like.findUnique({
@@ -124,6 +127,15 @@ export async function GET(_req: Request, ctx: Ctx) {
           },
           select: { kinkId: true, level: true },
         }),
+    prisma.consentGrant.findFirst({
+      where: {
+        granterId: viewer.id,
+        viewerId: userId,
+        scope: ConsentScope.PROFILE_ACCESS,
+        revokedAt: null,
+      },
+      select: { id: true },
+    }),
   ]);
 
   const clashes = findClashes(
@@ -177,6 +189,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       goals: profile.goalTags.map((t) => t.tag.label),
       relationshipStyles: profile.relationshipStyleTags.map((t) => t.tag.label),
       body: profile.bodyTags.map((t) => t.tag.label),
+      ethnicity: profile.ethnicityTags.map((t) => t.tag.label),
       accessibility: profile.accessibilityTags.map((t) => t.tag.label),
       kinks: {
         favorite: kinksAt(KinkInterestLevel.FAVORITE),
@@ -199,6 +212,8 @@ export async function GET(_req: Request, ctx: Ctx) {
       likedYou: Boolean(likedYou),
       matchId: match?.id ?? null,
       following: Boolean(following),
+      youAreIncognito: viewer.profile?.visibility === Visibility.INCOGNITO,
+      profileShared: Boolean(profileShared),
       albumRequests: Object.fromEntries(
         albumRequests.map((r) => [r.scope, r.status]),
       ) as Partial<Record<ConsentScope, string>>,
