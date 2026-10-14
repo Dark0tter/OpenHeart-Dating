@@ -19,6 +19,7 @@ import {
 type Ctx = { params: Promise<{ roomId: string }> };
 
 const MIN_SECONDS_BETWEEN_MESSAGES = 2;
+const HISTORY_PAGE = 50;
 
 const postSchema = z.object({
   body: z.string().trim().min(1).max(2000),
@@ -62,8 +63,11 @@ export async function GET(req: Request, ctx: Ctx) {
 
   await touchRoomPresence(roomId, user.id, membership.lastSeenAt);
 
-  const after = new URL(req.url).searchParams.get("after");
+  const params = new URL(req.url).searchParams;
+  const after = params.get("after");
   const afterDate = after ? new Date(after) : null;
+  const before = params.get("before");
+  const beforeDate = before && !after ? new Date(before) : null;
   const blocked = await blockedUserIds(user.id);
 
   const rows = await prisma.roomMessage.findMany({
@@ -74,16 +78,20 @@ export async function GET(req: Request, ctx: Ctx) {
       sender: { accountStatus: AccountStatus.ACTIVE },
       ...(afterDate && !Number.isNaN(afterDate.getTime())
         ? { createdAt: { gt: afterDate } }
-        : {}),
+        : beforeDate && !Number.isNaN(beforeDate.getTime())
+          ? { createdAt: { lt: beforeDate } }
+          : {}),
     },
     orderBy: { createdAt: afterDate ? "asc" : "desc" },
-    take: afterDate ? 100 : 50,
+    take: afterDate ? 100 : HISTORY_PAGE + 1,
     include: {
       sender: {
         select: { id: true, profile: { select: { displayName: true } } },
       },
     },
   });
+  const hasMore = !afterDate && rows.length > HISTORY_PAGE;
+  if (hasMore) rows.pop();
   if (!afterDate) rows.reverse();
 
   const deletedIds = (
@@ -116,6 +124,7 @@ export async function GET(req: Request, ctx: Ctx) {
       hostIds,
     },
     deletedIds,
+    hasMore,
     youAreHost: membership.isHost || isStaff(user.role),
     mutedUntil:
       membership.mutedUntil && membership.mutedUntil > new Date()

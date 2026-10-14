@@ -36,6 +36,8 @@ export default function RoomPage() {
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const lastSeen = useRef<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const [hasEarlier, setHasEarlier] = useState(false);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
 
   const poll = useCallback(async () => {
     const after = lastSeen.current;
@@ -49,7 +51,10 @@ export default function RoomPage() {
     }
     setRoomName(data.roomName);
     setRoom(data.room);
-    if (!after) setHostIds(data.room.hostIds);
+    if (!after) {
+      setHostIds(data.room.hostIds);
+      setHasEarlier(Boolean(data.hasMore));
+    }
     setYouAreHost(data.youAreHost);
     setMutedUntil(data.mutedUntil);
     if (data.deletedIds?.length) {
@@ -88,9 +93,30 @@ export default function RoomPage() {
     return () => clearInterval(t);
   }, [pollOnline]);
 
+  async function loadEarlier() {
+    const oldest = messages[0];
+    if (!oldest || loadingEarlier) return;
+    setLoadingEarlier(true);
+    const res = await fetch(
+      `/api/rooms/${roomId}/messages?before=${encodeURIComponent(oldest.createdAt)}`,
+    );
+    setLoadingEarlier(false);
+    if (!res.ok) return;
+    const data = await res.json();
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id));
+      return [
+        ...data.messages.filter((m: RoomMessage) => !seen.has(m.id)),
+        ...prev,
+      ];
+    });
+    setHasEarlier(Boolean(data.hasMore));
+  }
+
+  const newestId = messages[messages.length - 1]?.id;
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "end" });
-  }, [messages.length]);
+  }, [newestId]);
 
   async function send(e: FormEvent) {
     e.preventDefault();
@@ -305,6 +331,18 @@ export default function RoomPage() {
             aria-label="Room messages"
             className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4"
           >
+            {hasEarlier && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={loadEarlier}
+                  disabled={loadingEarlier}
+                  className="text-sm text-forest underline disabled:opacity-50"
+                >
+                  {loadingEarlier ? "Loading…" : "Load earlier messages"}
+                </button>
+              </div>
+            )}
             {messages.map((m) => (
               <div key={m.id} className={m.mine ? "text-right" : ""}>
                 <div className="text-xs text-ink/70">

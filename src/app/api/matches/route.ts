@@ -35,6 +35,7 @@ export async function GET() {
       userB: { accountStatus: "ACTIVE" },
     },
     orderBy: { createdAt: "desc" },
+    take: 500,
     include: {
       userA: otherUser,
       userB: otherUser,
@@ -45,13 +46,19 @@ export async function GET() {
     },
   });
 
+  const lastActivity = (m: (typeof matches)[number]) =>
+    (m.messages[0]?.createdAt ?? m.createdAt).getTime();
+  matches.sort((a, b) => lastActivity(b) - lastActivity(a));
+
   return NextResponse.json({
     matches: matches.map((m) => {
       const other = m.userAId === user.id ? m.userB : m.userA;
       const photo = other.profile?.photos[0];
+      const last = m.messages[0];
       return {
         id: m.id,
         createdAt: m.createdAt,
+        unread: Boolean(last && last.senderId !== user.id && !last.readAt),
         lastMessage: m.messages[0]
           ? {
               ...m.messages[0],

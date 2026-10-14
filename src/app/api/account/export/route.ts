@@ -38,6 +38,13 @@ export async function GET() {
     appeals,
     checkIns,
     selfies,
+    calls,
+    roomMemberships,
+    roomInvites,
+    roomBans,
+    subscription,
+    pushSubscriptions,
+    deviceTokens,
   ] = await Promise.all([
     prisma.profile.findUnique({
       where: { userId: id },
@@ -47,6 +54,10 @@ export async function GET() {
         goalTags: { include: { tag: true } },
         relationshipStyleTags: { include: { tag: true } },
         seekingIdentityTags: { include: { tag: true } },
+        seekingOrientationTags: { include: { tag: true } },
+        bodyTags: { include: { tag: true } },
+        ethnicityTags: { include: { tag: true } },
+        accessibilityTags: { include: { tag: true } },
         kinks: { include: { kink: { select: { name: true } } } },
         prompts: true,
         photos: {
@@ -59,7 +70,15 @@ export async function GET() {
       include: {
         messages: {
           orderBy: { createdAt: "asc" },
-          select: { senderId: true, body: true, createdAt: true, readAt: true },
+          select: {
+            senderId: true,
+            body: true,
+            imageUrl: true,
+            voiceUrl: true,
+            safetyFlag: true,
+            createdAt: true,
+            readAt: true,
+          },
         },
       },
     }),
@@ -100,6 +119,40 @@ export async function GET() {
       where: { userId: id },
       select: { status: true, createdAt: true, reviewedAt: true },
     }),
+    prisma.call.findMany({
+      where: { OR: [{ callerId: id }, { calleeId: id }] },
+      select: {
+        matchId: true,
+        callerId: true,
+        calleeId: true,
+        video: true,
+        status: true,
+        createdAt: true,
+        answeredAt: true,
+        endedAt: true,
+      },
+    }),
+    prisma.roomMembership.findMany({ where: { userId: id } }),
+    prisma.roomInvite.findMany({ where: { userId: id } }),
+    prisma.roomBan.findMany({ where: { userId: id } }),
+    prisma.subscription.findUnique({
+      where: { userId: id },
+      select: {
+        plan: true,
+        status: true,
+        currentPeriodEnd: true,
+        showBadge: true,
+        createdAt: true,
+      },
+    }),
+    prisma.pushSubscription.findMany({
+      where: { userId: id },
+      select: { createdAt: true },
+    }),
+    prisma.deviceToken.findMany({
+      where: { userId: id },
+      select: { platform: true, createdAt: true, lastSeenAt: true },
+    }),
   ]);
 
   const data = {
@@ -128,6 +181,7 @@ export async function GET() {
         appAdultContent: user.appAdultContent,
         notifyEmail: user.notifyEmail,
         readReceipts: user.readReceipts,
+        allowCalls: user.allowCalls,
         themeMode: user.themeMode,
         themeFlag: user.themeFlag,
       },
@@ -159,6 +213,15 @@ export async function GET() {
     appeals,
     safetyCheckIns: checkIns,
     selfieVerifications: selfies,
+    calls,
+    roomMemberships,
+    roomInvites,
+    roomBans,
+    supporter: subscription,
+    notificationDevices: {
+      browsers: pushSubscriptions,
+      phones: deviceTokens,
+    },
   };
 
   return new NextResponse(JSON.stringify(data, null, 2), {

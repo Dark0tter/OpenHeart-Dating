@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { limitFor, tooManyRequests } from "@/lib/rate-limit";
-import { allowedTiers, isRestricted } from "@/lib/content-policy";
+import { allowedTiers } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
   enforceSolicitationPolicy,
@@ -13,10 +13,10 @@ import { checkForScam } from "@/lib/moderation/scam";
 import { publish } from "@/lib/realtime";
 import { notify } from "@/lib/notify";
 
+// Text only: photos are shared through private album access, which is
+// moderated and consent-based, never as arbitrary links.
 const postSchema = z.object({
-  body: z.string().min(1).max(4000).optional(),
-  imageUrl: z.string().url().optional(),
-  voiceUrl: z.string().url().optional(),
+  body: z.string().trim().min(1).max(4000),
 });
 
 async function getAuthorizedMatch(matchId: string, userId: string) {
@@ -29,8 +29,10 @@ async function getAuthorizedMatch(matchId: string, userId: string) {
   });
 }
 
+const PAGE = 100;
+
 export async function GET(
-  _req: Request,
+  req: Request,
   ctx: { params: Promise<{ matchId: string }> },
 ) {
   const user = await requireUser();
@@ -45,11 +47,18 @@ export async function GET(
   }
 
   const otherId = match.userAId === user.id ? match.userBId : match.userAId;
+  const beforeParam = new URL(req.url).searchParams.get("before");
+  const before = beforeParam ? new Date(beforeParam) : null;
   const [latest, other] = await Promise.all([
     prisma.message.findMany({
-      where: { matchId },
+      where: {
+        matchId,
+        ...(before && !Number.isNaN(before.getTime())
+          ? { createdAt: { lt: before } }
+          : {}),
+      },
       orderBy: { createdAt: "desc" },
-      take: 200,
+      take: PAGE + 1,
     }),
     prisma.user.findUnique({
       where: { id: otherId },
@@ -59,7 +68,8 @@ export async function GET(
       },
     }),
   ]);
-  const messages = latest.reverse();
+  const hasMore = latest.length > PAGE;
+  const messages = latest.slice(0, PAGE).reverse();
 
   const marked = await prisma.message.updateMany({
     where: { matchId, senderId: { not: user.id }, readAt: null },
@@ -81,12 +91,12 @@ export async function GET(
 
   const tiers = await allowedTiers(user);
   const filterText = textFilterFor(tiers);
-  const hideMedia = isRestricted(tiers);
   // Read receipts are mutual: both people must have them on.
   const showReceipts = user.readReceipts && Boolean(other?.readReceipts);
 
   return NextResponse.json({
     me: user.id,
+    hasMore,
     other: {
       userId: otherId,
       displayName: other?.profile?.displayName ?? "Member",
@@ -97,13 +107,6 @@ export async function GET(
       // Only the recipient is warned; senders aren't tipped off.
       safetyFlag: m.senderId === user.id ? null : m.safetyFlag,
       body: m.body === null ? null : filterText(m.body),
-      ...(hideMedia
-        ? {
-            imageUrl: null,
-            voiceUrl: null,
-            mediaHidden: Boolean(m.imageUrl || m.voiceUrl),
-          }
-        : {}),
     })),
   });
 }
@@ -129,10 +132,7 @@ export async function POST(
   }
 
   const parsed = postSchema.safeParse(await req.json());
-  if (
-    !parsed.success ||
-    (!parsed.data.body && !parsed.data.imageUrl && !parsed.data.voiceUrl)
-  ) {
+  if (!parsed.success) {
     return NextResponse.json({ error: "Invalid message" }, { status: 400 });
   }
 
@@ -159,8 +159,6 @@ export async function POST(
       matchId,
       senderId: user.id,
       body: parsed.data.body,
-      imageUrl: parsed.data.imageUrl,
-      voiceUrl: parsed.data.voiceUrl,
       safetyFlag,
     },
   });

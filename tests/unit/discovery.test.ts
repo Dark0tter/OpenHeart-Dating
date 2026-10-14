@@ -3,6 +3,7 @@ import { approxDistanceLabel, distanceKm, orderedPair } from "@/lib/utils";
 import { coarse } from "@/lib/geocode";
 import { scoreMatch, type RankProfile } from "@/lib/ranking";
 import { profileCompleteness } from "@/lib/profile-completeness";
+import { nearbyWhere } from "@/lib/discovery";
 
 const base: RankProfile = {
   identityIds: ["woman"],
@@ -110,5 +111,47 @@ describe("profile completeness", () => {
 describe("match pairs", () => {
   it("orders a pair the same way regardless of who acts", () => {
     expect(orderedPair("b", "a")).toEqual(orderedPair("a", "b"));
+  });
+});
+
+describe("nearbyWhere", () => {
+  type Box = {
+    OR: [
+      unknown,
+      {
+        latitude: { gte: number; lte: number };
+        longitude?: { gte: number; lte: number };
+      },
+    ];
+  };
+
+  it("skips the box when there's no location or radius", () => {
+    expect(nearbyWhere(null, 10, 50)).toBeNull();
+    expect(nearbyWhere(40, 10, undefined)).toBeNull();
+  });
+
+  it("contains every point within the radius", () => {
+    const lat = 40.7;
+    const lng = -74;
+    const box = (nearbyWhere(lat, lng, 50) as Box).OR[1];
+    for (const [dLat, dLng] of [
+      [0.44, 0],
+      [-0.44, 0],
+      [0, 0.58],
+      [0, -0.58],
+    ]) {
+      const pLat = lat + dLat;
+      const pLng = lng + dLng;
+      expect(distanceKm(lat, lng, pLat, pLng)).toBeLessThanOrEqual(50);
+      expect(pLat).toBeGreaterThanOrEqual(box.latitude.gte);
+      expect(pLat).toBeLessThanOrEqual(box.latitude.lte);
+      expect(pLng).toBeGreaterThanOrEqual(box.longitude!.gte);
+      expect(pLng).toBeLessThanOrEqual(box.longitude!.lte);
+    }
+  });
+
+  it("drops the longitude limit across the date line", () => {
+    const box = (nearbyWhere(10, 179.9, 100) as Box).OR[1];
+    expect(box.longitude).toBeUndefined();
   });
 });

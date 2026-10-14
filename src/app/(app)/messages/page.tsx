@@ -16,6 +16,7 @@ type Request = {
 
 type Conversation = {
   id: string;
+  unread?: boolean;
   lastMessage: { body: string | null } | null;
   otherUser: { id: string; displayName: string; age: number };
 };
@@ -25,18 +26,26 @@ export default function MessagesPage() {
   const [incoming, setIncoming] = useState<Request[]>([]);
   const [outgoing, setOutgoing] = useState<Request[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
 
   async function load() {
     const [reqRes, matchRes] = await Promise.all([
       fetch("/api/message-requests"),
       fetch("/api/matches"),
-    ]);
-    if (reqRes.ok) {
+    ]).catch(() => [null, null] as const);
+    if (!reqRes?.ok && !matchRes?.ok) {
+      setStatus("error");
+      return;
+    }
+    setStatus("ready");
+    if (reqRes?.ok) {
       const d = await reqRes.json();
       setIncoming(d.incoming);
       setOutgoing(d.outgoing);
     }
-    if (matchRes.ok) {
+    if (matchRes?.ok) {
       const d = await matchRes.json();
       setConversations(d.matches);
     }
@@ -123,16 +132,31 @@ export default function MessagesPage() {
                   <p className="font-medium text-ink">
                     {c.otherUser.displayName}, {c.otherUser.age}
                   </p>
-                  <p className="line-clamp-1 text-sm text-ink/70">
+                  <p
+                    className={`line-clamp-1 text-sm ${c.unread ? "font-medium text-ink" : "text-ink/70"}`}
+                  >
                     {c.lastMessage?.body ?? "Say hello"}
                   </p>
                 </div>
-                <span className="text-sm text-coral">Open</span>
+                <span className="text-sm text-coral">
+                  {c.unread ? "New" : "Open"}
+                </span>
               </Link>
             </li>
           ))}
         </ul>
-        {conversations.length === 0 && (
+        {status === "loading" && (
+          <p className="mt-3 text-sm text-ink/70">Loading…</p>
+        )}
+        {status === "error" && (
+          <p role="alert" className="mt-3 text-sm text-coral-deep">
+            Couldn&apos;t load your messages.{" "}
+            <button type="button" onClick={load} className="underline">
+              Try again
+            </button>
+          </p>
+        )}
+        {status === "ready" && conversations.length === 0 && (
           <EmptyState
             className="mt-3"
             title="No private chats yet"

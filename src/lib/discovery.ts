@@ -33,7 +33,33 @@ export type SearchFilters = {
 };
 
 /** Candidates considered per search; ranking happens on this pool. */
-const POOL_SIZE = 300;
+const POOL_SIZE = 600;
+
+/**
+ * A latitude/longitude box around the viewer that contains the search
+ * radius, so the database only returns people who could be in range.
+ * Members without a location are kept (their distance is unknown).
+ */
+export function nearbyWhere(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+  km: number | undefined,
+): Prisma.ProfileWhereInput | null {
+  if (lat == null || lng == null || km == null) return null;
+  const dLat = km / 111;
+  const cos = Math.cos((lat * Math.PI) / 180);
+  const box: Prisma.ProfileWhereInput = {
+    latitude: { gte: lat - dLat, lte: lat + dLat },
+  };
+  // Near the poles or the date line a longitude box isn't meaningful.
+  if (cos > 0.05) {
+    const dLng = km / (111 * cos);
+    if (lng - dLng >= -180 && lng + dLng <= 180) {
+      box.longitude = { gte: lng - dLng, lte: lng + dLng };
+    }
+  }
+  return { OR: [{ latitude: null }, box] };
+}
 
 /**
  * Incognito owners the viewer may see: an active match, the incognito owner
@@ -134,7 +160,13 @@ export async function searchProfiles(filters: SearchFilters) {
     incognitoUserIdsVisibleTo(filters.viewerUserId),
   ]);
 
+  const nearby = nearbyWhere(
+    filters.viewerLat,
+    filters.viewerLng,
+    filters.maxDistanceKm,
+  );
   const where: Prisma.ProfileWhereInput = {
+    ...(nearby ? { AND: [nearby] } : {}),
     isActive: true,
     userId: { not: filters.viewerUserId, notIn: blocked },
     OR: [

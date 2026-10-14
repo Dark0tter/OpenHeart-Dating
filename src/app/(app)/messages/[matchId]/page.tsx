@@ -15,9 +15,17 @@ type Message = {
   body: string | null;
   createdAt: string;
   readAt: string | null;
-  mediaHidden?: boolean;
   safetyFlag?: string | null;
 };
+
+/** Combines two oldest-first lists; entries in `b` win (fresher read state). */
+function mergeMessages(a: Message[], b: Message[]): Message[] {
+  const byId = new Map(a.map((m) => [m.id, m]));
+  for (const m of b) byId.set(m.id, m);
+  return [...byId.values()].sort((x, y) =>
+    x.createdAt < y.createdAt ? -1 : x.createdAt > y.createdAt ? 1 : 0,
+  );
+}
 
 const TYPING_SEND_MS = 3000;
 const TYPING_SHOW_MS = 5000;
@@ -26,6 +34,9 @@ export default function ChatPage() {
   const params = useParams<{ matchId: string }>();
   const matchId = params.matchId;
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const loadedOnce = useRef(false);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [me, setMe] = useState<string | null>(null);
   const [other, setOther] = useState<{
     userId: string;
@@ -47,18 +58,41 @@ export default function ChatPage() {
     if (res.status === 404) setEnded(true);
     if (!res.ok) return;
     const data = await res.json();
-    setMessages(data.messages);
+    setMessages((prev) => mergeMessages(prev, data.messages));
+    if (!loadedOnce.current) {
+      loadedOnce.current = true;
+      setHasMore(Boolean(data.hasMore));
+    }
     setMe(data.me);
     setOther(data.other);
   }, [matchId]);
 
+  async function loadEarlier() {
+    const oldest = messages[0];
+    if (!oldest || loadingEarlier) return;
+    setLoadingEarlier(true);
+    const res = await fetch(
+      `/api/messages/${matchId}?before=${encodeURIComponent(oldest.createdAt)}`,
+    );
+    setLoadingEarlier(false);
+    if (!res.ok) return;
+    const data = await res.json();
+    setMessages((prev) => mergeMessages(data.messages, prev));
+    setHasMore(Boolean(data.hasMore));
+  }
+
   useEffect(() => {
+    setMessages([]);
+    setHasMore(false);
+    loadedOnce.current = false;
     load();
   }, [load]);
 
+  const newestId = messages[messages.length - 1]?.id;
+
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "end" });
-  }, [messages.length, theyreTyping]);
+  }, [newestId, theyreTyping]);
 
   useRealtime(
     (e) => {
@@ -218,6 +252,18 @@ export default function ChatPage() {
         aria-label="Conversation"
         className="mt-4 flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4"
       >
+        {hasMore && (
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={loadEarlier}
+              disabled={loadingEarlier}
+              className="text-sm text-forest underline disabled:opacity-50"
+            >
+              {loadingEarlier ? "Loading…" : "Load earlier messages"}
+            </button>
+          </div>
+        )}
         {messages.length === 0 && (
           <p className="text-sm text-ink/70">
             Say hi! A question about something on their profile is a great
@@ -237,11 +283,6 @@ export default function ChatPage() {
                 }`}
               >
                 {m.body}
-                {m.mediaHidden && (
-                  <span className="block text-xs italic opacity-70">
-                    Media is only shown on the OpenHeart website.
-                  </span>
-                )}
                 {m.safetyFlag && (
                   <span
                     role="note"

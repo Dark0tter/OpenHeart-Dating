@@ -98,6 +98,8 @@ export default function SettingsPage() {
           ? "You'll appear in room online lists."
           : "You're hidden from online lists.",
       );
+    } else {
+      setMsg("Couldn't save that. Please try again.");
     }
   }
 

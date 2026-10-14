@@ -20,11 +20,18 @@ export default function FeedPage() {
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = useCallback(async (cursor?: string) => {
-    const res = await fetch(`/api/feed${cursor ? `?cursor=${cursor}` : ""}`);
-    const data = await res.json();
-    if (!res.ok) return;
+    const res = await fetch(
+      `/api/feed${cursor ? `?cursor=${cursor}` : ""}`,
+    ).catch(() => null);
+    const data = res?.ok ? await res.json().catch(() => null) : null;
+    if (!data) {
+      setLoadFailed(true);
+      return;
+    }
+    setLoadFailed(false);
     setPosts((prev) => (cursor ? [...prev, ...data.posts] : data.posts));
     setNextCursor(data.nextCursor);
     setLoaded(true);
@@ -114,6 +121,23 @@ export default function FeedPage() {
         ))}
       </ul>
 
+      {!loaded && !loadFailed && (
+        <p className="mt-8 text-sm text-ink/70">Loading…</p>
+      )}
+      {loadFailed && (
+        <p role="alert" className="mt-8 text-sm text-coral-deep">
+          Couldn&apos;t load the feed.{" "}
+          <button
+            type="button"
+            onClick={() =>
+              load(posts.length ? (nextCursor ?? undefined) : undefined)
+            }
+            className="underline"
+          >
+            Try again
+          </button>
+        </p>
+      )}
       {loaded && posts.length === 0 && (
         <EmptyState
           title="Your feed is quiet for now"
