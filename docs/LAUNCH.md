@@ -55,7 +55,7 @@ Before real members sign up:
 Store review tips:
 
 - Give reviewers a demo account that has a match and a conversation.
-- Answer the content questions honestly: the apps never show adult photos, sponsors in the apps are always general-audience, and nothing is sold inside the apps.
+- Answer the content questions honestly: the apps never show adult photos, sponsors in the apps are always general-audience, and the apps have no purchases, donations or paid perks of any kind.
 - Fill in Apple's App Privacy section and Google's Data safety form from `/privacy`. You collect: email, profile content, approximate location (if shared), photos, and messages. You don't track or sell any of it.
 - Point out that block, report, account deletion, and the 18+ age check are all built in. Reviewers look for these on dating apps.
 
@@ -66,5 +66,5 @@ Store review tips:
   - Use a pay-per-gigabyte service such as Cloudflare's TURN or Metered.
 
   Then fill in `TURN_URLS`, `TURN_USERNAME`, `TURN_CREDENTIAL`. Wait until members report calls failing to connect.
-- **Payments for Supporter.** Stripe's rules ban dating sites with adult content and fetish services, so don't use it (leave `STRIPE_SECRET_KEY` empty). Adult-friendly processors are CCBill, Segpay, Epoch and Verotel. Expect an application review, a setup fee from some, and higher fees than mainstream processors. Until then, grant Supporter by hand from `/mod/users/<id>` when someone pays you some other way. Once a processor is chosen, its webhook calls `grantSupporter` / `endSupporter` in `src/lib/supporter.ts`.
+- **Taking donations (website only).** Donations are voluntary and never required. The apps don't show or mention them, so Apple and Google take no cut and there's nothing for their reviewers to flag. Stripe's rules ban dating sites with adult content and fetish services, so don't use it (leave `STRIPE_SECRET_KEY` empty). Adult-friendly processors are CCBill, Segpay, Epoch and Verotel; ask each whether they support one-off donations or "tips" for a for-profit site, since some only do subscriptions. Expect an application review, a setup fee from some, and higher fees than mainstream processors. Unless you form a registered nonprofit, donations are business income, not tax-deductible gifts; the site already says so. Until a processor is connected, give donors the badge by hand from `/mod/users/<id>`. Once one is chosen, its webhook calls `grantSupporter` / `endSupporter` in `src/lib/supporter.ts`.
 - **Moderators.** One admin can run the site with phone alerts and the daily summary email. Add moderators when the daily summary regularly lists more than you can review in 24 hours.

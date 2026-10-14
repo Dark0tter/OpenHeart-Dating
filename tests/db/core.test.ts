@@ -483,6 +483,23 @@ describe("supporters", () => {
       where: { id: u.id },
       data: { adPreference: "NONE" },
     });
+    await prisma.sponsorPlacement.deleteMany();
+    const p = await prisma.sponsorPlacement.create({
+      data: {
+        sponsorName: "Test sponsor",
+        title: "Hello",
+        linkUrl: "https://example.org",
+        targetKinkSlugs: [],
+        targetGoalSlugs: [],
+        contentTier: "STANDARD",
+        approvedAt: new Date(),
+      },
+    });
+    expect(await pickSponsorPlacement(u.id, ["STANDARD"])).toBeNull();
+    expect(
+      (await pickSponsorPlacement(u.id, ["STANDARD"], { app: true }))?.id,
+    ).toBe(p.id);
+
     await endSupporter(u.id);
     expect(await isSupporter(u.id)).toBe(false);
     const after = await prisma.user.findUniqueOrThrow({ where: { id: u.id } });

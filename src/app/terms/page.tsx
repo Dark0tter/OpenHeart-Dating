@@ -93,6 +93,20 @@ export default function TermsPage() {
 
         <section>
           <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
+            Donations
+          </h2>
+          <p className="mt-2">
+            OpenHeart is free to use. Donations are optional gifts that help
+            keep it running; they are never required to use any part of
+            OpenHeart, and they don&apos;t buy access to features, matches, or
+            other members. Donations aren&apos;t tax-deductible. Donors may get
+            a cosmetic thank-you (a badge and the option to hide the sponsor
+            block) on the website only.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
             Your account and data
           </h2>
           <p className="mt-2">

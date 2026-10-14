@@ -2,14 +2,14 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Supporter perks are extras — a badge and no sponsor block — never core
- * dating features. Memberships can be granted by an admin today; a payment
- * processor can set them automatically once one is connected.
+ * Supporter is a voluntary, website-only donation. Its thank-you perks are
+ * cosmetic and never apply inside the apps (store payment rules). An admin
+ * grants it by hand until a payment processor is connected.
  */
 export const SUPPORTER_PERKS = [
-  "A Supporter badge on your profile (you can hide it)",
-  "No sponsor block anywhere",
-  "Keeping OpenHeart free, independent, and ad-tracker-free for everyone",
+  "A Supporter badge on your profile on the website (you can hide it)",
+  "The option to hide the sponsor block on the website",
+  "Keeping OpenHeart free, independent, and tracker-free for everyone",
 ];
 
 const DAY = 24 * 60 * 60 * 1000;

@@ -132,7 +132,8 @@ export async function pickSponsorPlacement(
   ]);
   const preference = user?.adPreference ?? AdPreference.GENERIC;
 
-  if (supporter && preference === AdPreference.NONE) return null;
+  // Supporter is a website-only donation, so its perks never apply in the apps.
+  if (supporter && !app && preference === AdPreference.NONE) return null;
 
   if (preference !== AdPreference.PROFILE_INTERESTS) {
     return pick(

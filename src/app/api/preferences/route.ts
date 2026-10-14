@@ -29,6 +29,7 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const inApp = await isAppRequest();
   return NextResponse.json({
     adPreference: user.adPreference,
     showOnline: user.showOnline,
@@ -39,8 +40,8 @@ export async function GET() {
     themeMode: user.themeMode,
     themeFlag: user.themeFlag,
     verifiedAdult: user.verification?.status === "VERIFIED_ADULT",
-    inApp: await isAppRequest(),
-    isSupporter: await isSupporter(user.id),
+    inApp,
+    isSupporter: inApp ? false : await isSupporter(user.id),
   });
 }
 
@@ -57,10 +58,10 @@ export async function PATCH(req: Request) {
 
   if (
     parsed.data.adPreference === AdPreference.NONE &&
-    !(await isSupporter(user.id))
+    ((await isAppRequest()) || !(await isSupporter(user.id)))
   ) {
     return NextResponse.json(
-      { error: "Hiding the sponsor block is a supporter perk." },
+      { error: "This option is only available on the website." },
       { status: 403 },
     );
   }

@@ -4,7 +4,7 @@ export const SUPPORT_CATEGORIES = [
   { id: "child_safety", label: "Child safety (urgent)" },
   { id: "privacy", label: "Privacy or data request" },
   { id: "bug", label: "Something isn't working" },
-  { id: "billing", label: "Supporter membership" },
+  { id: "billing", label: "Donations or Supporter badge" },
   { id: "law_enforcement", label: "Law enforcement request" },
   { id: "feedback", label: "Feedback or idea" },
   { id: "other", label: "Something else" },

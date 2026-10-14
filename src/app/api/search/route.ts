@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/session";
 import { searchProfiles, type SearchSort } from "@/lib/discovery";
 import { activityLabel, ageFromDob, approxDistanceLabel } from "@/lib/utils";
 import { photoSrc } from "@/lib/photos";
-import { allowedTiers } from "@/lib/content-policy";
+import { allowedTiers, isAppRequest } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import { supporterBadges } from "@/lib/supporter";
 
@@ -46,9 +46,9 @@ export async function GET(req: Request) {
     page: num(searchParams.get("page")) ?? 0,
     limit: num(searchParams.get("limit")) ?? 24,
   });
-  const supporters = await supporterBadges(
-    results.map((r) => r.profile.userId),
-  );
+  const supporters = (await isAppRequest())
+    ? new Set<string>()
+    : await supporterBadges(results.map((r) => r.profile.userId));
 
   return NextResponse.json({
     hasLocation: user.profile.latitude != null,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SupportForm } from "@/components/support-form";
 import { currentAccount } from "@/lib/session";
+import { isAppRequest } from "@/lib/content-policy";
 
 export const metadata: Metadata = { title: "Support — OpenHeart" };
 
@@ -26,7 +27,10 @@ export default async function SupportPage() {
           If someone is in immediate danger, contact local emergency services
           first. In the US you can also call or text 988 for crisis support.
         </p>
-        <SupportForm defaultEmail={user?.email ?? ""} />
+        <SupportForm
+          defaultEmail={user?.email ?? ""}
+          inApp={await isAppRequest()}
+        />
       </main>
     </div>
   );

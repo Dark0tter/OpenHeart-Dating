@@ -5,7 +5,12 @@ import { requireUser } from "@/lib/session";
 import { isAppRequest } from "@/lib/content-policy";
 import { SUPPORTER_PERKS, supporterStatus } from "@/lib/supporter";
 
+// Store rules: donations live on the website only, never inside the apps.
+const notInApp = () =>
+  NextResponse.json({ error: "Not found" }, { status: 404 });
+
 export async function GET() {
+  if (await isAppRequest()) return notInApp();
   const user = await requireUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,13 +21,13 @@ export async function GET() {
     until: status.until,
     showBadge: status.showBadge,
     perks: SUPPORTER_PERKS,
-    inApp: await isAppRequest(),
   });
 }
 
 const schema = z.object({ showBadge: z.boolean() });
 
 export async function PATCH(req: Request) {
+  if (await isAppRequest()) return notInApp();
   const user = await requireUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

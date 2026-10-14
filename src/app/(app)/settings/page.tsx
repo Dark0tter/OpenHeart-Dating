@@ -252,13 +252,17 @@ export default function SettingsPage() {
             value: "PROFILE_INTERESTS",
             label: "Match listings to the interests on my profile",
           },
-          {
-            value: "NONE",
-            label: supporter
-              ? "No sponsor block"
-              : "No sponsor block (supporters)",
-            disabled: !supporter,
-          },
+          ...(inApp
+            ? []
+            : [
+                {
+                  value: "NONE",
+                  label: supporter
+                    ? "No sponsor block"
+                    : "No sponsor block (Supporter donors)",
+                  disabled: !supporter,
+                },
+              ]),
         ].map((o) => (
           <label
             key={o.value}
@@ -268,18 +272,22 @@ export default function SettingsPage() {
               type="radio"
               name="adPreference"
               value={o.value}
-              checked={adPreference === o.value}
+              checked={
+                (inApp && adPreference === "NONE"
+                  ? "GENERIC"
+                  : adPreference) === o.value
+              }
               disabled={o.disabled || adPreference === null}
               onChange={() => onAdPreference(o.value)}
             />
             {o.label}
           </label>
         ))}
-        <Link href="/supporter" className="text-sm text-forest underline">
-          {supporter
-            ? "Your Supporter membership"
-            : "About Supporter membership"}
-        </Link>
+        {adPreference !== null && !inApp && (
+          <Link href="/supporter" className="text-sm text-forest underline">
+            {supporter ? "Your Supporter badge" : "Donate to support OpenHeart"}
+          </Link>
+        )}
       </fieldset>
 
       <form onSubmit={onBlock} className="space-y-3">

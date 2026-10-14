@@ -3,7 +3,7 @@ import { ConsentScope, KinkInterestLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { assertProfileViewable } from "@/lib/discovery";
-import { allowedTiers, isRestricted } from "@/lib/content-policy";
+import { allowedTiers, isAppRequest, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import { galleryFor } from "@/lib/photos";
 import { promptQuestion } from "@/lib/constants/prompts";
@@ -169,7 +169,9 @@ export async function GET(_req: Request, ctx: Ctx) {
       activity: activityLabel(profile.user.lastActiveAt),
       ageVerified: profile.user.verification?.status === "VERIFIED_ADULT",
       photoVerified: Boolean(profile.user.photoVerifiedAt),
-      supporter: (await supporterBadges([userId])).has(userId),
+      supporter:
+        !(await isAppRequest()) &&
+        (await supporterBadges([userId])).has(userId),
       identity: profile.identityTags.map((t) => t.tag.label),
       orientation: profile.orientationTags.map((t) => t.tag.label),
       goals: profile.goalTags.map((t) => t.tag.label),

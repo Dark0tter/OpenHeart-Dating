@@ -7,7 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SUPPORT_CATEGORIES } from "@/lib/constants/support";
 
-export function SupportForm({ defaultEmail }: { defaultEmail: string }) {
+export function SupportForm({
+  defaultEmail,
+  inApp = false,
+}: {
+  defaultEmail: string;
+  inApp?: boolean;
+}) {
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -68,11 +74,13 @@ export function SupportForm({ defaultEmail }: { defaultEmail: string }) {
           required
           className="h-11 w-full rounded-md border border-forest/15 bg-cream/80 px-3 text-sm"
         >
-          {SUPPORT_CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
+          {SUPPORT_CATEGORIES.filter((c) => !inApp || c.id !== "billing").map(
+            (c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ),
+          )}
         </select>
       </div>
       <div>
