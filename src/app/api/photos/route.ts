@@ -96,10 +96,12 @@ export async function POST(req: Request) {
         reason: ReportReason.OTHER,
         priority: ReportPriority.HIGH,
         details: `Blocked photo upload: ${scan.reason}`,
+        evidenceKey: `evidence/${randomUUID()}/upload`,
+        legalHold: true,
       },
     });
     await putObject(
-      `evidence/${report.id}/upload`,
+      report.evidenceKey!,
       original,
       file.type || "application/octet-stream",
     );

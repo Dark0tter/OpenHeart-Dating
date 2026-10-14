@@ -1,11 +1,21 @@
+import Link from "next/link";
 import { SUPPORT_EMAIL } from "@/lib/constants/site";
 
 export function ContactLine() {
-  return SUPPORT_EMAIL ? (
-    <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">
-      {SUPPORT_EMAIL}
-    </a>
-  ) : (
-    <span>the Report tool on the Settings page</span>
+  return (
+    <>
+      <Link href="/support" className="underline">
+        our support form
+      </Link>
+      {SUPPORT_EMAIL && (
+        <>
+          {" "}
+          or{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">
+            {SUPPORT_EMAIL}
+          </a>
+        </>
+      )}
+    </>
   );
 }

@@ -12,6 +12,7 @@ type Message = {
   createdAt: string;
   readAt: string | null;
   mediaHidden?: boolean;
+  safetyFlag?: string | null;
 };
 
 export default function ChatPage() {
@@ -78,6 +79,19 @@ export default function ChatPage() {
               {m.mediaHidden && (
                 <span className="block text-xs italic opacity-70">
                   Media is only shown on the OpenHeart website.
+                </span>
+              )}
+              {m.safetyFlag && (
+                <span
+                  role="note"
+                  className="mt-2 block rounded bg-coral/15 px-2 py-1 text-xs text-coral-deep"
+                >
+                  Be careful: this looks like a common scam ({m.safetyFlag}).
+                  Never send money, gift cards or codes to someone you
+                  haven&apos;t met, and keep chatting here until you trust them.{" "}
+                  <a href="/safety" className="underline">
+                    Safety tips
+                  </a>
                 </span>
               )}
             </div>

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { AppNav } from "@/components/app-nav";
 import { SponsorSlot } from "@/components/sponsor-slot";
 import { EmailBanner } from "@/components/email-banner";
-import { requireUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { AccountStatus } from "@prisma/client";
+import { currentAccount, isStaff } from "@/lib/session";
 import { flagById, flagStyle, THEME_MODES, type ThemeMode } from "@/lib/themes";
 
 const FOOTER_LINKS = [
@@ -17,7 +19,10 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireUser();
+  const account = await currentAccount();
+  if (account?.accountStatus === AccountStatus.SUSPENDED)
+    redirect("/suspended");
+  const user = account;
   const mode: ThemeMode = THEME_MODES.includes(user?.themeMode as ThemeMode)
     ? (user!.themeMode as ThemeMode)
     : "system";
@@ -32,6 +37,13 @@ export default async function AppLayout({
     >
       <AppNav />
       {user && !user.emailVerified && <EmailBanner email={user.email} />}
+      {user && isStaff(user.role) && (
+        <div className="bg-forest px-4 py-1.5 text-center text-xs text-cream">
+          <Link href="/mod" className="underline">
+            Moderation dashboard
+          </Link>
+        </div>
+      )}
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
       <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
         <SponsorSlot />

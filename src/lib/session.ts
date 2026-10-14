@@ -20,6 +20,30 @@ export async function currentAccount() {
   });
   if (!user || user.accountStatus === AccountStatus.DELETED) return null;
   if ((session.sv ?? 0) !== user.sessionVersion) return null;
+  if (
+    user.accountStatus === AccountStatus.SUSPENDED &&
+    user.suspendedUntil &&
+    user.suspendedUntil <= new Date()
+  ) {
+    const lifted = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        accountStatus: AccountStatus.ACTIVE,
+        statusReason: null,
+        statusChangedAt: new Date(),
+        suspendedUntil: null,
+      },
+      include: { profile: true, verification: true },
+    });
+    await prisma.modAction.create({
+      data: {
+        actorId: null,
+        action: "suspension_expired",
+        targetUserId: user.id,
+      },
+    });
+    return lifted;
+  }
   return user;
 }
 

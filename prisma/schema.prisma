@@ -132,6 +132,8 @@ model User {
   accountStatus   AccountStatus @default(ACTIVE)
   statusReason    String?
   statusChangedAt DateTime?
+  /// Suspensions with an end date lift automatically; null means until reviewed.
+  suspendedUntil  DateTime?
   adPreference    AdPreference  @default(GENERIC)
   /// Lets members appear in a room's online list. Incognito profiles never do.
   showOnline      Boolean       @default(true)
@@ -152,31 +154,33 @@ model User {
   lastActiveAt    DateTime      @default(now())
 
   authTokens              AuthToken[]
+  appeals                 Appeal[]
+  supportTickets          SupportTicket[]
   selfieVerifications     SelfieVerification[]
-  consentRequestsSent     ConsentRequest[] @relation("ConsentRequestsSent")
-  consentRequestsReceived ConsentRequest[] @relation("ConsentRequestsReceived")
+  consentRequestsSent     ConsentRequest[]     @relation("ConsentRequestsSent")
+  consentRequestsReceived ConsentRequest[]     @relation("ConsentRequestsReceived")
   profile                 Profile?
   verification            Verification?
   accounts                Account[]
   sessions                Session[]
-  likesSent               Like[]           @relation("LikesSent")
-  likesReceived           Like[]           @relation("LikesReceived")
-  matchesAsA              Match[]          @relation("MatchUserA")
-  matchesAsB              Match[]          @relation("MatchUserB")
-  messagesSent            Message[]        @relation("MessagesSent")
-  blocksInitiated         Block[]          @relation("BlocksInitiated")
-  blocksReceived          Block[]          @relation("BlocksReceived")
-  reportsFiled            Report[]         @relation("ReportsFiled")
-  reportsAgainst          Report[]         @relation("ReportsAgainst")
-  messageRequestsSent     MessageRequest[] @relation("MessageRequestsSent")
-  messageRequestsReceived MessageRequest[] @relation("MessageRequestsReceived")
-  consentGrantsGiven      ConsentGrant[]   @relation("ConsentGiven")
-  consentGrantsReceived   ConsentGrant[]   @relation("ConsentReceived")
+  likesSent               Like[]               @relation("LikesSent")
+  likesReceived           Like[]               @relation("LikesReceived")
+  matchesAsA              Match[]              @relation("MatchUserA")
+  matchesAsB              Match[]              @relation("MatchUserB")
+  messagesSent            Message[]            @relation("MessagesSent")
+  blocksInitiated         Block[]              @relation("BlocksInitiated")
+  blocksReceived          Block[]              @relation("BlocksReceived")
+  reportsFiled            Report[]             @relation("ReportsFiled")
+  reportsAgainst          Report[]             @relation("ReportsAgainst")
+  messageRequestsSent     MessageRequest[]     @relation("MessageRequestsSent")
+  messageRequestsReceived MessageRequest[]     @relation("MessageRequestsReceived")
+  consentGrantsGiven      ConsentGrant[]       @relation("ConsentGiven")
+  consentGrantsReceived   ConsentGrant[]       @relation("ConsentReceived")
   roomMemberships         RoomMembership[]
   roomInvites             RoomInvite[]
   roomMessages            RoomMessage[]
-  following               Follow[]         @relation("Following")
-  followers               Follow[]         @relation("Followers")
+  following               Follow[]             @relation("Following")
+  followers               Follow[]             @relation("Followers")
   posts                   Post[]
 
   @@index([lastActiveAt])
@@ -257,7 +261,7 @@ model Profile {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  user                   User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                   User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   photos                 Photo[]
   identityTags           ProfileIdentityTag[]
   orientationTags        ProfileOrientationTag[]
@@ -409,8 +413,8 @@ model AccessibilityTag {
 }
 
 model KinkCategory {
-  id          String     @id @default(uuid())
-  slug        String     @unique
+  id          String      @id @default(uuid())
+  slug        String      @unique
   name        String
   description String?
   tier        ContentTier @default(STANDARD)
@@ -568,16 +572,18 @@ model Match {
 
 /// Messages belong to a match so a block or unmatch cuts off the whole conversation.
 model Message {
-  id        String    @id @default(uuid())
-  matchId   String
-  senderId  String
-  body      String?   @db.Text
-  imageUrl  String?
-  voiceUrl  String?
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-  match     Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  sender    User      @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid())
+  matchId    String
+  senderId   String
+  body       String?   @db.Text
+  imageUrl   String?
+  voiceUrl   String?
+  readAt     DateTime?
+  /// Set when the message looks like a common scam; the recipient sees a warning.
+  safetyFlag String?
+  createdAt  DateTime  @default(now())
+  match      Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender     User      @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([matchId, createdAt])
 }
@@ -608,6 +614,7 @@ model Block {
 }
 
 /// AUTOMATED reports have no reporter; they come from content checks and wait for human review.
+/// status: "open" | "resolved" | "dismissed".
 model Report {
   id             String         @id @default(uuid())
   reporterId     String?
@@ -619,11 +626,68 @@ model Report {
   status         String         @default("open")
   createdAt      DateTime       @default(now())
   resolvedAt     DateTime?
+  assigneeId     String?
+  resolvedById   String?
+  resolution     String?        @db.Text
+  /// Storage key of preserved evidence (e.g. a blocked upload).
+  evidenceKey    String?
+  /// Evidence and the reported account are kept even if the account is deleted.
+  legalHold      Boolean        @default(false)
+  /// When this was escalated for a child-safety (NCMEC CyberTipline) report.
+  escalatedAt    DateTime?
+  /// The CyberTipline report number, once filed.
+  externalRef    String?
   reporter       User?          @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: SetNull)
   reportedUser   User           @relation("ReportsAgainst", fields: [reportedUserId], references: [id], onDelete: Cascade)
 
   @@index([status, priority, createdAt])
   @@index([reportedUserId, reason, createdAt])
+}
+
+/// Append-only record of every staff action, for accountability and appeals.
+model ModAction {
+  id           String   @id @default(uuid())
+  actorId      String?
+  targetUserId String?
+  reportId     String?
+  action       String
+  note         String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  @@index([targetUserId, createdAt])
+  @@index([createdAt])
+}
+
+model Appeal {
+  id         String       @id @default(uuid())
+  userId     String
+  message    String       @db.Text
+  status     ReviewStatus @default(PENDING)
+  reviewerId String?
+  reviewNote String?      @db.Text
+  createdAt  DateTime     @default(now())
+  reviewedAt DateTime?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+/// status: "open" | "closed".
+model SupportTicket {
+  id        String    @id @default(uuid())
+  userId    String?
+  email     String
+  category  String
+  subject   String
+  body      String    @db.Text
+  status    String    @default("open")
+  staffNote String?   @db.Text
+  createdAt DateTime  @default(now())
+  closedAt  DateTime?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
 }
 
 enum RoomKind {

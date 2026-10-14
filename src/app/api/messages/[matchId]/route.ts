@@ -9,6 +9,7 @@ import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
 } from "@/lib/moderation/solicitation";
+import { checkForScam } from "@/lib/moderation/scam";
 
 const postSchema = z.object({
   body: z.string().min(1).max(4000).optional(),
@@ -64,6 +65,8 @@ export async function GET(
   return NextResponse.json({
     messages: messages.map((m) => ({
       ...m,
+      // Only the recipient is warned; senders aren't tipped off.
+      safetyFlag: m.senderId === user.id ? null : m.safetyFlag,
       body: m.body === null ? null : filterText(m.body),
       ...(hideMedia
         ? {
@@ -115,6 +118,13 @@ export async function POST(
     });
   }
 
+  const safetyFlag = await checkForScam({
+    senderId: user.id,
+    senderCreatedAt: user.createdAt,
+    matchId,
+    text: parsed.data.body,
+  });
+
   const message = await prisma.message.create({
     data: {
       matchId,
@@ -122,6 +132,7 @@ export async function POST(
       body: parsed.data.body,
       imageUrl: parsed.data.imageUrl,
       voiceUrl: parsed.data.voiceUrl,
+      safetyFlag,
     },
   });
 

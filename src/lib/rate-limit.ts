@@ -66,6 +66,7 @@ export const LIMITS = {
   reportsPerUser: { limit: 20, windowSeconds: 24 * 60 * 60 },
   uploadsPerUser: { limit: 30, windowSeconds: 60 * 60 },
   supportPerIp: { limit: 10, windowSeconds: 60 * 60 },
+  appealsPerUser: { limit: 3, windowSeconds: 24 * 60 * 60 },
 } as const;
 
 export function limitFor(
