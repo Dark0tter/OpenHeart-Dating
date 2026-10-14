@@ -19,6 +19,7 @@ import { applyProviderDecision } from "@/lib/verification";
 import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
+import { busy, canCall, expireCalls, RING_MS } from "@/lib/calls";
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -373,5 +374,87 @@ describe("sponsors", () => {
     });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ views: 2, appViews: 1, clicks: 1 });
+  });
+});
+
+describe("calls", () => {
+  async function matched() {
+    const a = await makeUser("Caller");
+    const b = await makeUser("Callee");
+    await sendLike(a.id, b.id);
+    const { match } = await sendLike(b.id, a.id);
+    return { a, b, matchId: match!.id };
+  }
+
+  it("needs both people to have messaged, and respects 'no calls'", async () => {
+    const { a, b, matchId } = await matched();
+    expect(await canCall(a.id, matchId)).toMatchObject({
+      ok: false,
+      status: 403,
+    });
+
+    await prisma.message.create({
+      data: { matchId, senderId: a.id, body: "hi" },
+    });
+    expect((await canCall(a.id, matchId)).ok).toBe(false);
+    await prisma.message.create({
+      data: { matchId, senderId: b.id, body: "hey" },
+    });
+    expect(await canCall(a.id, matchId)).toEqual({ ok: true, otherId: b.id });
+
+    await prisma.user.update({
+      where: { id: b.id },
+      data: { allowCalls: false },
+    });
+    expect(await canCall(a.id, matchId)).toMatchObject({
+      ok: false,
+      status: 403,
+    });
+  });
+
+  it("isn't possible for strangers", async () => {
+    const { matchId } = await matched();
+    const stranger = await makeUser();
+    expect(await canCall(stranger.id, matchId)).toMatchObject({
+      ok: false,
+      status: 404,
+    });
+  });
+
+  it("marks unanswered calls as missed and tells the person called", async () => {
+    const { a, b, matchId } = await matched();
+    const call = await prisma.call.create({
+      data: { matchId, callerId: a.id, calleeId: b.id },
+    });
+    expect(await busy([b.id])).toBe(true);
+    await expireCalls(new Date(Date.now() + RING_MS + 1000));
+    const after = await prisma.call.findUniqueOrThrow({
+      where: { id: call.id },
+    });
+    expect(after.status).toBe("missed");
+    expect(
+      await prisma.notification.count({
+        where: { userId: b.id, type: "call" },
+      }),
+    ).toBe(1);
+    expect(await busy([a.id, b.id])).toBe(false);
+  });
+
+  it("ends a live call when someone blocks", async () => {
+    const { a, b, matchId } = await matched();
+    const call = await prisma.call.create({
+      data: {
+        matchId,
+        callerId: a.id,
+        calleeId: b.id,
+        status: "active",
+        answeredAt: new Date(),
+      },
+    });
+    await blockUser(b.id, a.id);
+    const after = await prisma.call.findUniqueOrThrow({
+      where: { id: call.id },
+    });
+    expect(after.status).toBe("ended");
   });
 });

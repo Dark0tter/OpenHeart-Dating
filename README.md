@@ -104,7 +104,9 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 - **Photos:** re-encoded with location and camera data stripped, safety-scan hook, moderator review before going live, private and adult albums shared only by consent, selfie verification badge.
 - **Discovery:** location from the browser or city (rounded to about 1 km), approximate distances, ranking by mutual fit, shared goals and interests, profile prompts, a completeness meter.
 - **Messaging:** live updates (Postgres LISTEN/NOTIFY over server-sent events, polling fallback), typing indicators, mutual read receipts, scam warnings, unmatch.
-- **Notifications:** in-app bell, web push and email (when away), each switchable in Settings.
+- **Calls:** voice and video calls between matches once both have messaged (WebRTC, device to device, never recorded). Ringing goes out as a lock-screen alert; block or unmatch ends a call; anyone can turn calls off. Works for most networks with free STUN; add a TURN relay (`TURN_URLS`) for strict networks.
+- **Notifications:** in-app bell, web push, native app push (APNs and Firebase), and email (when away), each switchable in Settings.
+- **Sponsors** (`/mod/sponsors`, admins): direct-sold listings with an approval checklist, website-only vs. app-safe, per-person daily caps, and anonymous daily view/click totals.
 - **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and munches with RSVPs (address only shown to people going).
 - **Safety:** date check-ins that email a trusted contact if you don't check in, `/safety` tips, block, report, Persona age verification by signed webhook.
 - **Trust and safety staff tools** (`/mod`): report queue with assignment, user history, warnings, suspensions with appeals (decided by a different moderator), photo and selfie review, support tickets, room and event moderation, child-safety escalation that preserves evidence under legal hold, and a full audit log. Make the first admin with `npm run staff:set -- you@example.com ADMIN`.

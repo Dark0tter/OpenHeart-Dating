@@ -16,7 +16,8 @@ export type RealtimeEvent =
   | { type: "message"; matchId: string }
   | { type: "typing"; matchId: string }
   | { type: "read"; matchId: string }
-  | { type: "notification" };
+  | { type: "notification" }
+  | { type: "call"; callId: string };
 
 const CHANNEL = "oh_events";
 

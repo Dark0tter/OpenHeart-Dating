@@ -5,6 +5,7 @@ import { SponsorGate } from "@/components/sponsor-gate";
 import { EmailBanner } from "@/components/email-banner";
 import { RealtimeProvider } from "@/components/realtime";
 import { NativePushBridge } from "@/components/native-push-bridge";
+import { CallProvider } from "@/components/call-provider";
 import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { currentAccount, isStaff } from "@/lib/session";
@@ -41,34 +42,36 @@ export default async function AppLayout({
       style={flagStyle(flag)}
     >
       <RealtimeProvider>
-        <AppNav />
-        <NativePushBridge />
-        {user && !user.emailVerified && <EmailBanner email={user.email} />}
-        {user && isStaff(user.role) && (
-          <div className="bg-forest px-4 py-1.5 text-center text-xs text-cream">
-            <Link href="/mod" className="underline">
-              Moderation dashboard
-            </Link>
-          </div>
-        )}
-        <main id="main" className="mx-auto max-w-5xl px-4 py-8">
-          {children}
-        </main>
-        <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
-          <SponsorGate>
-            <SponsorSlot />
-          </SponsorGate>
-          <nav
-            aria-label="Site information"
-            className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-ink/70"
-          >
-            {FOOTER_LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="hover:underline">
-                {l.label}
+        <CallProvider>
+          <AppNav />
+          <NativePushBridge />
+          {user && !user.emailVerified && <EmailBanner email={user.email} />}
+          {user && isStaff(user.role) && (
+            <div className="bg-forest px-4 py-1.5 text-center text-xs text-cream">
+              <Link href="/mod" className="underline">
+                Moderation dashboard
               </Link>
-            ))}
-          </nav>
-        </footer>
+            </div>
+          )}
+          <main id="main" className="mx-auto max-w-5xl px-4 py-8">
+            {children}
+          </main>
+          <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
+            <SponsorGate>
+              <SponsorSlot />
+            </SponsorGate>
+            <nav
+              aria-label="Site information"
+              className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-ink/70"
+            >
+              {FOOTER_LINKS.map((l) => (
+                <Link key={l.href} href={l.href} className="hover:underline">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          </footer>
+        </CallProvider>
       </RealtimeProvider>
     </div>
   );

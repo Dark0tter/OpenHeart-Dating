@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { publish } from "@/lib/realtime";
+import { endCallsBetween } from "@/lib/calls";
 
 /**
  * Unmatch: the conversation disappears for both people and they won't be
@@ -45,6 +46,7 @@ export async function DELETE(
       },
     }),
   ]);
+  await endCallsBetween(user.id, otherId);
   await publish(otherId, { type: "message", matchId });
   return NextResponse.json({ ok: true });
 }

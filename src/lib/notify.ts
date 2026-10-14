@@ -15,7 +15,8 @@ export type NotificationType =
   | "report_update"
   | "verification"
   | "staff_alert"
-  | "event";
+  | "event"
+  | "call";
 
 /** Away this long before a message also goes out by email. */
 const AWAY_MS = 15 * 60 * 1000;
@@ -149,6 +150,17 @@ export async function notify(
       data: { emailedAt: new Date() },
     });
   }
+}
+
+/** Lock-screen alert only, with no entry in the notifications list (e.g. a ringing call). */
+export async function pushOnly(
+  userId: string,
+  n: { title: string; body?: string; link?: string },
+) {
+  await Promise.all([
+    sendPush(userId, n),
+    sendNativePush(userId, n).catch(() => {}),
+  ]);
 }
 
 function pick(n: {

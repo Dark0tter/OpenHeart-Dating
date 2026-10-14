@@ -70,6 +70,7 @@ export const LIMITS = {
   eventsPerUser: { limit: 5, windowSeconds: 24 * 60 * 60 },
   exportsPerUser: { limit: 3, windowSeconds: 24 * 60 * 60 },
   sponsorEventsPerUser: { limit: 200, windowSeconds: 24 * 60 * 60 },
+  callsPerUser: { limit: 20, windowSeconds: 60 * 60 },
 } as const;
 
 export function limitFor(

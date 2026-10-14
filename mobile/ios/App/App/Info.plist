@@ -66,5 +66,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>OpenHeart uses your camera for video calls with your matches and for photo verification.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>OpenHeart uses your microphone for voice and video calls with your matches.</string>
 </dict>
 </plist>

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
+import { expireCalls } from "@/lib/calls";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -26,6 +27,7 @@ export async function runJobs(now = new Date()) {
         dailyDigest: await dailyDigest(now),
         checkIns: await checkIns(now),
         eventReminders: await eventReminders(now),
+        calls: await expireCalls(now),
         cleanup: await cleanup(now),
       };
     },

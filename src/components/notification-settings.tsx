@@ -22,6 +22,7 @@ type PushState = "unsupported" | "off" | "on" | "blocked" | "unconfigured";
 export function NotificationSettings() {
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [readReceipts, setReadReceipts] = useState(true);
+  const [allowCalls, setAllowCalls] = useState(true);
   const [push, setPush] = useState<PushState>("off");
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -31,6 +32,7 @@ export function NotificationSettings() {
       .then((d) => {
         setNotifyEmail(d.notifyEmail ?? true);
         setReadReceipts(d.readReceipts ?? true);
+        setAllowCalls(d.allowCalls ?? true);
       });
 
     if (nativePushAvailable()) {
@@ -53,6 +55,7 @@ export function NotificationSettings() {
   async function save(patch: {
     notifyEmail?: boolean;
     readReceipts?: boolean;
+    allowCalls?: boolean;
   }) {
     const res = await fetch("/api/preferences", {
       method: "PATCH",
@@ -194,6 +197,25 @@ export function NotificationSettings() {
           <span className="block text-ink/70">
             When off, people won&apos;t see when you&apos;ve read their
             messages, and you won&apos;t see when they&apos;ve read yours.
+          </span>
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={allowCalls}
+          onChange={(e) => {
+            setAllowCalls(e.target.checked);
+            save({ allowCalls: e.target.checked });
+          }}
+        />
+        <span>
+          Let my matches call me (voice and video)
+          <span className="block text-ink/70">
+            Only after you&apos;ve both sent a message. Calls go directly
+            between your devices and are never recorded.
           </span>
         </span>
       </label>

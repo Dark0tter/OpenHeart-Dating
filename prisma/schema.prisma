@@ -138,6 +138,8 @@ model User {
   adPreference    AdPreference  @default(GENERIC)
   /// Lets members appear in a room's online list. Incognito profiles never do.
   showOnline      Boolean       @default(true)
+  /// Matches may voice/video call once both have sent a message.
+  allowCalls      Boolean       @default(true)
   /// Lets ADULT_TEXT content show in the mobile apps. Can only be changed on the website.
   appAdultContent Boolean       @default(false)
   termsAcceptedAt DateTime?
@@ -578,10 +580,46 @@ model Match {
   userA       User      @relation("MatchUserA", fields: [userAId], references: [id], onDelete: Cascade)
   userB       User      @relation("MatchUserB", fields: [userBId], references: [id], onDelete: Cascade)
   messages    Message[]
+  calls       Call[]
 
   @@unique([userAId, userBId])
   @@index([userAId])
   @@index([userBId])
+}
+
+/// A voice or video call between two matches. Audio and video go directly
+/// between the two devices (WebRTC) and are never recorded or stored.
+model Call {
+  id         String       @id @default(uuid())
+  matchId    String
+  callerId   String
+  calleeId   String
+  video      Boolean      @default(false)
+  /// ringing | active | ended | declined | missed
+  status     String       @default("ringing")
+  createdAt  DateTime     @default(now())
+  answeredAt DateTime?
+  endedAt    DateTime?
+  match      Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  signals    CallSignal[]
+
+  @@index([calleeId, status])
+  @@index([callerId, status])
+  @@index([status, createdAt])
+}
+
+/// Connection setup passed between the two devices; deleted once delivered.
+model CallSignal {
+  id        String   @id @default(uuid())
+  callId    String
+  toUserId  String
+  /// offer | answer | ice
+  kind      String
+  data      String   @db.Text
+  createdAt DateTime @default(now())
+  call      Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@index([callId, toUserId])
 }
 
 /// Messages belong to a match so a block or unmatch cuts off the whole conversation.

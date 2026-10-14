@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRealtime } from "@/components/realtime";
+import { useCalls } from "@/components/call-provider";
+import { Phone, Video } from "lucide-react";
 
 type Message = {
   id: string;
@@ -35,6 +37,7 @@ export default function ChatPage() {
   const [theyreTyping, setTheyreTyping] = useState(false);
   const [ended, setEnded] = useState(false);
   const router = useRouter();
+  const { startCall, inCall } = useCalls();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSent = useRef(0);
   const bottom = useRef<HTMLDivElement>(null);
@@ -107,6 +110,13 @@ export default function ChatPage() {
     }
   }
 
+  async function call(video: boolean) {
+    if (!other) return;
+    setSendError(null);
+    const error = await startCall(matchId, video, other.displayName);
+    if (error) setSendError(error);
+  }
+
   async function unmatch() {
     if (
       !confirm(
@@ -147,6 +157,26 @@ export default function ChatPage() {
             "Messages"
           )}
         </h1>
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => call(false)}
+            aria-label={`Voice call ${other?.displayName ?? ""}`.trim()}
+            className="rounded-full p-2 text-forest hover:bg-mist disabled:opacity-50"
+            disabled={!other || inCall}
+          >
+            <Phone aria-hidden className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => call(true)}
+            aria-label={`Video call ${other?.displayName ?? ""}`.trim()}
+            className="rounded-full p-2 text-forest hover:bg-mist disabled:opacity-50"
+            disabled={!other || inCall}
+          >
+            <Video aria-hidden className="h-5 w-5" />
+          </button>
+        </div>
         <details className="relative text-sm">
           <summary className="cursor-pointer list-none rounded-md px-2 py-1 text-forest/80 hover:bg-mist">
             Options

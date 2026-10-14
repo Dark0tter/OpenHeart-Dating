@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { orderedPair } from "@/lib/utils";
+import { endCallsBetween } from "@/lib/calls";
 import { ReportPriority, ReportReason } from "@prisma/client";
 
 /** Reports that alert staff immediately (see staffAlerts in jobs.ts). */
@@ -67,6 +68,7 @@ export async function blockUser(blockerId: string, blockedId: string) {
       },
     });
   });
+  await endCallsBetween(blockerId, blockedId);
 }
 
 /** Users hidden from viewer in either direction of a block. */

@@ -146,6 +146,14 @@ services:
       - key: FCM_SERVICE_ACCOUNT_JSON
         scope: RUN_TIME
         type: SECRET
+      # Optional relay for calls on networks that block direct connections.
+      - key: TURN_URLS
+        scope: RUN_TIME
+      - key: TURN_USERNAME
+        scope: RUN_TIME
+      - key: TURN_CREDENTIAL
+        scope: RUN_TIME
+        type: SECRET
       # Only needed if DATABASE_URL goes through a transaction-mode pooler.
       - key: REALTIME_DATABASE_URL
         scope: RUN_TIME

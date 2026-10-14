@@ -13,6 +13,7 @@ const schema = z
     showOnline: z.boolean().optional(),
     notifyEmail: z.boolean().optional(),
     readReceipts: z.boolean().optional(),
+    allowCalls: z.boolean().optional(),
     appAdultContent: z.boolean().optional(),
     themeMode: z.enum(THEME_MODES).optional(),
     themeFlag: z
@@ -33,6 +34,7 @@ export async function GET() {
     showOnline: user.showOnline,
     notifyEmail: user.notifyEmail,
     readReceipts: user.readReceipts,
+    allowCalls: user.allowCalls,
     appAdultContent: user.appAdultContent,
     themeMode: user.themeMode,
     themeFlag: user.themeFlag,
@@ -90,6 +92,7 @@ export async function PATCH(req: Request) {
       showOnline: true,
       notifyEmail: true,
       readReceipts: true,
+      allowCalls: true,
       appAdultContent: true,
       themeMode: true,
       themeFlag: true,
