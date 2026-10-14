@@ -17,6 +17,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { runJobs, CHECKIN_GRACE_MS } from "@/lib/jobs";
 import { applyProviderDecision } from "@/lib/verification";
 import { orderedPair } from "@/lib/utils";
+import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -244,5 +245,62 @@ describe("age verification decisions", () => {
         outcome: "VERIFIED_ADULT",
       }),
     ).toBeNull();
+  });
+});
+
+// Runs last: it appoints a staff member, who then receives every alert.
+describe("staff alerts", () => {
+  it("alerts staff once about an urgent report", async () => {
+    const admin = await makeUser("Admin");
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: { role: "ADMIN" },
+    });
+    const target = await makeUser();
+    const report = await prisma.report.create({
+      data: { reportedUserId: target.id, reason: "THREATS", priority: "HIGH" },
+    });
+
+    await staffAlerts(new Date());
+    const toAdmin = sent.filter((e) => e.to === admin.email);
+    expect(toAdmin).toHaveLength(1);
+    expect(toAdmin[0].subject.toLowerCase()).toContain("urgent");
+    const row = await prisma.report.findUniqueOrThrow({
+      where: { id: report.id },
+    });
+    expect(row.staffAlertedAt).not.toBeNull();
+    expect(
+      await prisma.notification.count({
+        where: { userId: admin.id, type: "staff_alert" },
+      }),
+    ).toBe(1);
+
+    await staffAlerts(new Date());
+    expect(sent.filter((e) => e.to === admin.email)).toHaveLength(1);
+  });
+
+  it("doesn't alert about ordinary reports", async () => {
+    const target = await makeUser();
+    await prisma.report.create({
+      data: { reportedUserId: target.id, reason: "SPAM" },
+    });
+    await staffAlerts(new Date());
+    expect(sent).toHaveLength(0);
+  });
+
+  it("sends the daily summary once a day, after the set hour", async () => {
+    expect((await dailyDigest(new Date("2099-01-01T12:00:00Z"))).sent).toBe(
+      false,
+    );
+    expect((await dailyDigest(new Date("2099-01-01T14:00:00Z"))).sent).toBe(
+      true,
+    );
+    expect(sent.some((e) => e.subject.includes("Daily summary"))).toBe(true);
+    expect((await dailyDigest(new Date("2099-01-01T20:00:00Z"))).sent).toBe(
+      false,
+    );
+    expect((await dailyDigest(new Date("2099-01-02T14:00:00Z"))).sent).toBe(
+      true,
+    );
   });
 });

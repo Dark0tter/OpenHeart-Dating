@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
+import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -21,6 +22,8 @@ export async function runJobs(now = new Date()) {
         SELECT pg_try_advisory_xact_lock(${LOCK_ID}) AS locked`;
       if (!locked) return { skipped: true };
       return {
+        staffAlerts: await staffAlerts(now),
+        dailyDigest: await dailyDigest(now),
         checkIns: await checkIns(now),
         eventReminders: await eventReminders(now),
         cleanup: await cleanup(now),

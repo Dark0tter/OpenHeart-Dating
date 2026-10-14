@@ -13,6 +13,7 @@ export type NotificationType =
   | "selfie_result"
   | "report_update"
   | "verification"
+  | "staff_alert"
   | "event";
 
 /** Away this long before a message also goes out by email. */

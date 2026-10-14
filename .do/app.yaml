@@ -141,6 +141,10 @@ services:
       - key: CRON_SECRET
         scope: RUN_TIME
         type: SECRET
+      # Hour (UTC) of the daily moderation summary email; 13 = 9am US Eastern.
+      - key: STAFF_DIGEST_HOUR_UTC
+        scope: RUN_TIME
+        value: "13"
       - key: GEOCODING
         scope: RUN_TIME
         value: "on"

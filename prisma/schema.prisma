@@ -647,6 +647,8 @@ model Report {
   escalatedAt    DateTime?
   /// The CyberTipline report number, once filed.
   externalRef    String?
+  /// When staff were alerted about this urgent report.
+  staffAlertedAt DateTime?
   reporter       User?          @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: SetNull)
   reportedUser   User           @relation("ReportsAgainst", fields: [reportedUserId], references: [id], onDelete: Cascade)
 
@@ -973,4 +975,10 @@ model Subscription {
   currentPeriodEnd DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+}
+
+/// Last run of a scheduled task that must happen at most once per period (e.g. the daily staff summary).
+model JobState {
+  key       String   @id
+  lastRunAt DateTime
 }

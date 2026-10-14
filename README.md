@@ -106,6 +106,7 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 - **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and munches with RSVPs (address only shown to people going).
 - **Safety:** date check-ins that email a trusted contact if you don't check in, `/safety` tips, block, report, Persona age verification by signed webhook.
 - **Trust and safety staff tools** (`/mod`): report queue with assignment, user history, warnings, suspensions with appeals (decided by a different moderator), photo and selfie review, support tickets, room and event moderation, child-safety escalation that preserves evidence under legal hold, and a full audit log. Make the first admin with `npm run staff:set -- you@example.com ADMIN`.
+- **Staff alerts** (`src/lib/staff-alerts.ts`): urgent reports reach every moderator and admin within a minute by push, in-app and email; a daily summary email lists what's waiting and anything past the 24-hour promise.
 - **Background jobs** (`src/lib/jobs.ts`): run every minute inside the server, one instance at a time.
 
 ## Mobile apps
@@ -194,7 +195,7 @@ Things the code can't do for you:
 
 1. **Legal review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety` by a lawyer familiar with adult platforms (US: Section 230, FOSTA-SESTA, 18 U.S.C. 2257 if explicit images are allowed; EU/UK: GDPR, Online Safety Act).
 2. **NCMEC CyberTipline** registration as an electronic service provider. US law requires reporting child sexual abuse material you become aware of; the `/mod` escalation preserves evidence, but the report itself is filed on NCMEC's site.
-3. **Moderators.** The Terms promise a 24-hour review of reports. Appoint at least two staff (`npm run staff:set`) so appeals can go to someone other than the original moderator.
+3. **Moderation.** One person can run it: make yourself admin (`npm run staff:set -- you@example.com ADMIN`), turn on push notifications in Settings on your phone, and you'll be alerted within a minute of any urgent report, plus a daily summary email of everything waiting. The Terms promise a review within 24 hours, and the summary flags anything older. Admins may decide appeals of their own decisions; add moderators later if volume grows.
 4. **Accounts and keys:** hosting (DigitalOcean), domain and Cloudflare, email (Resend; verify the sending domain), photo storage (Spaces), Persona (template that collects date of birth, plus a webhook to `/api/verification/persona-webhook`), Turnstile, Sentry, VAPID keys (`npm run vapid:generate`), `CRON_SECRET`, `SUPPORT_EMAIL`.
 5. **App stores:** Apple Developer Program ($99/year) and Google Play Console ($25 once). Both review dating apps closely: have a demo account ready, and answer the content questions honestly (the apps never show adult photos).
 6. **Before real users:** `ALLOW_VERIFICATION_STUB=false`, `PHOTO_REVIEW_MODE=pre`, a test signup through Persona's sandbox, a test date check-in, and a restore test of the database backup.

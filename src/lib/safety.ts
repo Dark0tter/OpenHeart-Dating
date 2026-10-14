@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { orderedPair } from "@/lib/utils";
 import { ReportPriority, ReportReason } from "@prisma/client";
 
-const EMERGENCY_REASONS: ReportReason[] = [
+/** Reports that alert staff immediately (see staffAlerts in jobs.ts). */
+export const EMERGENCY_REASONS: ReportReason[] = [
   ReportReason.THREATS,
   ReportReason.UNDERAGE,
   ReportReason.EMERGENCY,
