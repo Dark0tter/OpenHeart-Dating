@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
-import { personaSignatureValid } from "@/lib/persona";
+import { personaSignatureValid, redactPersonaInquiry } from "@/lib/persona";
 import { ageFromBirthdate, applyProviderDecision } from "@/lib/verification";
+import { identityBanHash } from "@/lib/bans";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
     data?: {
       attributes?: {
         name?: string;
-        payload?: { data?: { attributes?: InquiryAttributes } };
+        payload?: { data?: { id?: string; attributes?: InquiryAttributes } };
       };
     };
   };
@@ -75,11 +76,22 @@ export async function POST(req: Request) {
     providerReference: reference,
     outcome,
     underage,
+    identityHash:
+      outcome === "VERIFIED_ADULT"
+        ? identityBanHash(
+            attr(inquiry, "name-first", "nameFirst"),
+            attr(inquiry, "name-last", "nameLast"),
+            attr(inquiry, "birthdate", "birthdate"),
+          )
+        : null,
   });
   if (!result)
     return NextResponse.json({ ok: true, ignored: "unknown reference" });
 
-  if (!underage) {
+  const inquiryId = event.data?.attributes?.payload?.data?.id;
+  if (inquiryId) await redactPersonaInquiry(inquiryId);
+
+  if (!underage && !result.banEvasion) {
     const user = await prisma.user.findUnique({
       where: { id: result.userId },
       select: { id: true },

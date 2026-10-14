@@ -404,7 +404,9 @@ export default function SettingsPage() {
         <h2 className="font-medium text-coral-deep">Delete account</h2>
         <p className="text-sm text-ink/70">
           Permanently deletes your profile, photos, interests, messages, posts,
-          likes, and matches. This can&apos;t be undone.
+          likes, and matches. This can&apos;t be undone. The only exception: if
+          your account is part of an open legal case, we must keep the records
+          involved until the case ends, then delete them.
         </p>
         <div>
           <Label htmlFor="deletePassword">Password</Label>

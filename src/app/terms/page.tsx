@@ -111,7 +111,10 @@ export default function TermsPage() {
           </h2>
           <p className="mt-2">
             You can permanently delete your account at any time from the
-            Settings page, on the website or in the app. See our{" "}
+            Settings page, on the website or in the app. If your account is part
+            of a child-safety or law-enforcement case, the law requires us to
+            keep the records involved until the case ends; everything else is
+            deleted right away. See our{" "}
             <Link href="/privacy" className="underline">
               privacy promise
             </Link>{" "}

@@ -168,6 +168,7 @@ model User {
   notifications           Notification[]
   pushSubscriptions       PushSubscription[]
   deviceTokens            DeviceToken[]
+  subscription            Subscription?
   appeals                 Appeal[]
   supportTickets          SupportTicket[]
   selfieVerifications     SelfieVerification[]
@@ -554,6 +555,9 @@ model Verification {
   providerReference String?
   verificationToken String?            @unique
   verifiedAt        DateTime?
+  /// Keyed hash of the verified name and birthdate, so a banned person can't
+  /// verify a new account. Never reversible; no ID data is stored.
+  identityHash      String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -813,21 +817,23 @@ model EventRsvp {
 /// details below. Deleted a week after it ends.
 /// status: "active" | "safe" | "alerted" | "cancelled".
 model SafetyCheckIn {
-  id           String    @id @default(uuid())
-  userId       String
-  meetingWith  String
-  place        String
-  startsAt     DateTime
-  checkInBy    DateTime
-  contactName  String
-  contactEmail String
-  note         String?   @db.Text
-  status       String    @default("active")
-  remindedAt   DateTime?
-  alertedAt    DateTime?
-  endedAt      DateTime?
-  createdAt    DateTime  @default(now())
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String    @id @default(uuid())
+  userId        String
+  meetingWith   String
+  place         String
+  startsAt      DateTime
+  checkInBy     DateTime
+  contactName   String
+  contactEmail  String
+  note          String?   @db.Text
+  status        String    @default("active")
+  remindedAt    DateTime?
+  alertedAt     DateTime?
+  /// Set when the alert email couldn't be sent; the job keeps retrying.
+  alertFailedAt DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status, checkInBy])
   @@index([userId])
@@ -1057,10 +1063,25 @@ model Subscription {
   note             String?   @db.Text
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// Last run of a scheduled task that must happen at most once per period (e.g. the daily staff summary).
 model JobState {
   key       String   @id
   lastRunAt DateTime
+}
+
+/// Permanent bans. Only keyed hashes of the email and the verified identity are
+/// kept, so the ban outlives the account without storing who the person was.
+model BannedIdentity {
+  hash      String   @id
+  /// "email" or "identity"
+  kind      String
+  /// The banned account, while it still exists (cleared when it's deleted).
+  userId    String?
+  reason    String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

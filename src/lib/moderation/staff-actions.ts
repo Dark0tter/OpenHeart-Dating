@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { appUrl } from "@/lib/request";
 import { notify } from "@/lib/notify";
 import { deleteObject, getObject, putObject } from "@/lib/storage";
+import { banUser, unbanUser } from "@/lib/bans";
 
 /**
  * Every staff action goes through here so it lands in the audit log. Actions
@@ -38,7 +39,10 @@ export async function suspendUser(opts: {
   reason: string;
   days: number | null;
   reportId?: string;
+  /** Also blocks the email and verified identity from ever rejoining. */
+  permanent?: boolean;
 }) {
+  const permanent = Boolean(opts.permanent) && !opts.days;
   const until = opts.days
     ? new Date(Date.now() + opts.days * 24 * 60 * 60 * 1000)
     : null;
@@ -51,18 +55,31 @@ export async function suspendUser(opts: {
       suspendedUntil: until,
     },
   });
+  if (permanent) await banUser(opts.userId, opts.reason);
   await logAction({
     actorId: opts.actorId,
-    action: opts.days ? `suspend_${opts.days}d` : "suspend_indefinite",
+    action: permanent
+      ? "ban_permanent"
+      : opts.days
+        ? `suspend_${opts.days}d`
+        : "suspend_indefinite",
     targetUserId: opts.userId,
     reportId: opts.reportId,
     note: opts.reason,
   });
-  await emailMember(opts.userId, "Your OpenHeart account has been suspended", [
-    `Your account was suspended ${until ? `until ${until.toUTCString()}` : "until our team reviews it"}.`,
-    `Reason: ${opts.reason}`,
-    `If you think this is a mistake, sign in at ${appUrl()}/login to send an appeal. A different moderator will review it.`,
-  ]);
+  await emailMember(
+    opts.userId,
+    permanent
+      ? "Your OpenHeart account has been banned"
+      : "Your OpenHeart account has been suspended",
+    [
+      permanent
+        ? "Your account was permanently banned, and you can't open a new one."
+        : `Your account was suspended ${until ? `until ${until.toUTCString()}` : "until our team reviews it"}.`,
+      `Reason: ${opts.reason}`,
+      `If you think this is a mistake, sign in at ${appUrl()}/login to send an appeal. A different moderator will review it.`,
+    ],
+  );
 }
 
 export async function reinstateUser(opts: {
@@ -79,6 +96,7 @@ export async function reinstateUser(opts: {
       suspendedUntil: null,
     },
   });
+  await unbanUser(opts.userId);
   await logAction({
     actorId: opts.actorId,
     action: "reinstate",
@@ -238,6 +256,7 @@ export async function escalateChildSafety(opts: {
       sessionVersion: { increment: 1 },
     },
   });
+  await banUser(userId, "Child safety escalation");
   await logAction({
     actorId: opts.actorId,
     action: "escalate_child_safety",

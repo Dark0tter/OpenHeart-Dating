@@ -3,6 +3,7 @@ import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { expireCalls } from "@/lib/calls";
+import { finishHeldDeletions } from "@/lib/account-deletion";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -13,6 +14,7 @@ import { expireCalls } from "@/lib/calls";
 
 const LOCK_ID = 727_001;
 export const CHECKIN_GRACE_MS = 15 * 60 * 1000;
+const CHECKIN_RETRY_MS = 5 * 60 * 1000;
 const DAY = 24 * 60 * 60 * 1000;
 
 /** The lock lives as long as this transaction, so it's always released. */
@@ -57,15 +59,21 @@ async function checkIns(now: Date) {
     where: {
       status: "active",
       checkInBy: { lte: new Date(now.getTime() - CHECKIN_GRACE_MS) },
+      OR: [
+        { alertFailedAt: null },
+        { alertFailedAt: { lte: new Date(now.getTime() - CHECKIN_RETRY_MS) } },
+      ],
     },
     include: {
       user: { select: { profile: { select: { displayName: true } } } },
     },
     take: 200,
   });
+  let alerted = 0;
+  let failed = 0;
   for (const c of overdue) {
     const name = c.user.profile?.displayName ?? "Your friend";
-    await sendEmail({
+    const sent = await sendEmail({
       to: c.contactEmail,
       subject: `${name} hasn't checked in after their date`,
       paragraphs: [
@@ -77,12 +85,30 @@ async function checkIns(now: Date) {
         "Please try to reach them. If you believe they're in danger, contact local emergency services.",
       ],
     });
+    if (sent) {
+      alerted++;
+      await prisma.safetyCheckIn.update({
+        where: { id: c.id },
+        data: { status: "alerted", alertedAt: now, alertFailedAt: null },
+      });
+      continue;
+    }
+    // Keep retrying, and make sure the member knows nobody was told yet.
+    failed++;
+    if (!c.alertFailedAt) {
+      await notify(c.userId, {
+        type: "event",
+        title: `We couldn't reach ${c.contactName}`,
+        body: "Our email to your safety contact failed; we'll keep trying. If you need help, call them or local emergency services.",
+        link: "/safety/check-in",
+      });
+    }
     await prisma.safetyCheckIn.update({
       where: { id: c.id },
-      data: { status: "alerted", alertedAt: now },
+      data: { alertFailedAt: now },
     });
   }
-  return { reminded: due.length, alerted: overdue.length };
+  return { reminded: due.length, alerted, failed };
 }
 
 async function eventReminders(now: Date) {
@@ -134,6 +160,15 @@ async function cleanup(now: Date) {
     prisma.authToken.deleteMany({ where: { expiresAt: { lt: weekAgo } } }),
   ]);
 
+  // A check-in whose alert never got through stops retrying after two days.
+  await prisma.safetyCheckIn.updateMany({
+    where: {
+      status: "active",
+      checkInBy: { lt: new Date(now.getTime() - 2 * DAY) },
+    },
+    data: { status: "cancelled", endedAt: now },
+  });
+
   // Conversations are deleted 30 days after an unmatch, unless they're part of
   // an open report or a legal hold.
   const stale = await prisma.match.findMany({
@@ -158,7 +193,10 @@ async function cleanup(now: Date) {
     purged += r.count;
   }
 
+  const deletedAccounts = await finishHeldDeletions(prisma);
+
   return {
+    deletedAccounts,
     checkIns: checkIns.count,
     notifications: notifications.count,
     rateLimitBuckets: buckets.count,

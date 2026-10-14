@@ -62,7 +62,11 @@ export default function PrivacyPage() {
           To run the service and keep members safe we keep your account details,
           your profile, your messages, your login session, and when you were
           last active. Age verification is handled by a verification provider;
-          we keep the result, never your ID images.
+          we keep the result, never your ID images, and we ask the provider to
+          delete them once the check is done. If an account is permanently
+          banned, we keep a one-way scrambled code of its email and verified
+          name and birthdate, so the same person can&apos;t rejoin; the code
+          can&apos;t be turned back into those details.
         </p>
         <p className="mt-3 text-ink/75">
           Profiles and messages are automatically checked for payment links,

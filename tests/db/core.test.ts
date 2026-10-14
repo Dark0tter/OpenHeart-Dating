@@ -2,9 +2,11 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sent = vi.hoisted(() => [] as { to: string; subject: string }[]);
+const emailWorks = vi.hoisted(() => ({ value: true }));
 vi.mock("@/lib/email", () => ({
   emailConfigured: () => true,
   sendEmail: async (e: { to: string; subject: string }) => {
+    if (!emailWorks.value) return false;
     sent.push({ to: e.to, subject: e.subject });
     return true;
   },
@@ -16,6 +18,8 @@ import { blockUser } from "@/lib/safety";
 import { rateLimit } from "@/lib/rate-limit";
 import { runJobs, CHECKIN_GRACE_MS } from "@/lib/jobs";
 import { applyProviderDecision } from "@/lib/verification";
+import { banUser, emailBanHash, identityBanHash, isBanned } from "@/lib/bans";
+import { deleteAccount } from "@/lib/account-deletion";
 import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
@@ -48,6 +52,7 @@ afterAll(async () => {
 
 beforeEach(() => {
   sent.length = 0;
+  emailWorks.value = true;
 });
 
 describe("likes and matches", () => {
@@ -68,7 +73,7 @@ describe("likes and matches", () => {
     await expect(sendLike(a.id, b.id)).rejects.toThrow();
   });
 
-  it("blocking removes the match, likes and messages", async () => {
+  it("blocking ends the match and likes but keeps messages for reports", async () => {
     const a = await makeUser();
     const b = await makeUser();
     await sendLike(a.id, b.id);
@@ -83,7 +88,7 @@ describe("likes and matches", () => {
     });
     expect(after?.unmatchedAt).not.toBeNull();
     expect(await prisma.message.count({ where: { matchId: match!.id } })).toBe(
-      0,
+      1,
     );
     expect(
       await prisma.like.count({
@@ -143,6 +148,41 @@ describe("date check-ins", () => {
     // Running again doesn't email twice.
     await runJobs(new Date(now.getTime() + CHECKIN_GRACE_MS + MIN));
     expect(sent.filter((e) => e.to === "alex@test.local")).toHaveLength(1);
+  });
+
+  it("keeps retrying and tells the member when the alert email fails", async () => {
+    const user = await makeUser("Kai");
+    const now = new Date();
+    const c = await prisma.safetyCheckIn.create({
+      data: {
+        userId: user.id,
+        meetingWith: "Sam",
+        place: "Bar",
+        startsAt: new Date(now.getTime() - 3 * 60 * MIN),
+        checkInBy: new Date(now.getTime() - CHECKIN_GRACE_MS - MIN),
+        contactName: "Lee",
+        contactEmail: "lee@test.local",
+        remindedAt: now,
+      },
+    });
+    emailWorks.value = false;
+    await runJobs(now);
+    let row = await prisma.safetyCheckIn.findUniqueOrThrow({
+      where: { id: c.id },
+    });
+    expect(row.status).toBe("active");
+    expect(row.alertFailedAt).not.toBeNull();
+    expect(
+      await prisma.notification.count({
+        where: { userId: user.id, title: { contains: "couldn't reach Lee" } },
+      }),
+    ).toBe(1);
+
+    emailWorks.value = true;
+    await runJobs(new Date(now.getTime() + 6 * MIN));
+    row = await prisma.safetyCheckIn.findUniqueOrThrow({ where: { id: c.id } });
+    expect(row.status).toBe("alerted");
+    expect(sent.filter((e) => e.to === "lee@test.local")).toHaveLength(1);
   });
 
   it("does nothing once the member says they're safe", async () => {
@@ -244,6 +284,38 @@ describe("age verification decisions", () => {
         where: { reportedUserId: user.id, reason: "UNDERAGE" },
       }),
     ).toBe(1);
+  });
+
+  it("blocks a banned person from verifying a new account", async () => {
+    const first = await makeUser();
+    const hash = identityBanHash("Jo", "Doe", "1990-01-01");
+    await prisma.verification.create({
+      data: { userId: first.id, status: "VERIFIED_ADULT", identityHash: hash },
+    });
+    await banUser(first.id, "test");
+    expect(await isBanned(emailBanHash(first.email))).toBe(true);
+
+    const second = await makeUser();
+    await prisma.verification.create({
+      data: {
+        userId: second.id,
+        status: "PENDING",
+        provider: "persona",
+        providerReference: `ref_${second.id}`,
+      },
+    });
+    const v = await applyProviderDecision({
+      providerReference: `ref_${second.id}`,
+      outcome: "VERIFIED_ADULT",
+      identityHash: identityBanHash("JO", "Doe", "1990-01-01"),
+    });
+    expect(v?.status).toBe("REJECTED");
+    expect(v?.banEvasion).toBe(true);
+    const after = await prisma.user.findUniqueOrThrow({
+      where: { id: second.id },
+    });
+    expect(after.accountStatus).toBe("SUSPENDED");
+    expect(await isBanned(emailBanHash(second.email))).toBe(true);
   });
 
   it("ignores unknown references", async () => {
@@ -504,5 +576,34 @@ describe("supporters", () => {
     expect(await isSupporter(u.id)).toBe(false);
     const after = await prisma.user.findUniqueOrThrow({ where: { id: u.id } });
     expect(after.adPreference).toBe("GENERIC");
+  });
+});
+
+describe("account deletion", () => {
+  it("keeps a held account until the hold is lifted, then finishes", async () => {
+    const reporter = await makeUser();
+    const user = await makeUser();
+    const report = await prisma.report.create({
+      data: {
+        reporterId: reporter.id,
+        reportedUserId: user.id,
+        reason: "UNDERAGE",
+        legalHold: true,
+      },
+    });
+    await deleteAccount(prisma, user.id);
+    const held = await prisma.user.findUnique({ where: { id: user.id } });
+    expect(held?.accountStatus).toBe("DELETED");
+    expect(await prisma.profile.count({ where: { userId: user.id } })).toBe(0);
+
+    await runJobs(new Date());
+    expect(await prisma.user.count({ where: { id: user.id } })).toBe(1);
+
+    await prisma.report.update({
+      where: { id: report.id },
+      data: { legalHold: false },
+    });
+    await runJobs(new Date());
+    expect(await prisma.user.count({ where: { id: user.id } })).toBe(0);
   });
 });

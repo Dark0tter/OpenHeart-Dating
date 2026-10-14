@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { personaSignatureValid } from "@/lib/persona";
+import { afterEach, describe, expect, it } from "vitest";
+import { personaSignatureValid, redactPersonaInquiry } from "@/lib/persona";
 import { ageFromBirthdate } from "@/lib/verification";
 import { ageFromDob, isAdult } from "@/lib/utils";
 
@@ -80,5 +80,40 @@ describe("Persona webhook signature", () => {
         now,
       ),
     ).toBe(false);
+  });
+});
+
+describe("redactPersonaInquiry", () => {
+  afterEach(() => {
+    delete process.env.PERSONA_API_KEY;
+  });
+
+  it("does nothing without an API key", async () => {
+    let called = false;
+    const fake = (async () => {
+      called = true;
+      return new Response(null);
+    }) as typeof fetch;
+    expect(await redactPersonaInquiry("inq_abc123", fake)).toBe(false);
+    expect(called).toBe(false);
+  });
+
+  it("sends an authenticated DELETE for the inquiry", async () => {
+    process.env.PERSONA_API_KEY = "persona_test_key";
+    let seen: { url: string; init?: RequestInit } | null = null;
+    const fake = (async (url: string, init?: RequestInit) => {
+      seen = { url, init };
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+    expect(await redactPersonaInquiry("inq_abc123", fake)).toBe(true);
+    expect(seen!.url).toBe(
+      "https://api.withpersona.com/api/v1/inquiries/inq_abc123",
+    );
+    expect(seen!.init?.method).toBe("DELETE");
+  });
+
+  it("refuses ids that aren't inquiry ids", async () => {
+    process.env.PERSONA_API_KEY = "persona_test_key";
+    expect(await redactPersonaInquiry("../accounts/x")).toBe(false);
   });
 });

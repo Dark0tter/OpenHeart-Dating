@@ -190,7 +190,7 @@ The App Platform spec lives in `.do/app.yaml` and deploys from `main` of
 
 1. Create a managed PostgreSQL 16 cluster named `openheart-db` (same region as the app, `nyc`).
 2. Create the app: **Apps → Create App → import `.do/app.yaml`**, or `doctl apps create --spec .do/app.yaml`.
-3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus Persona/Veriff and S3 (Spaces) keys when ready.
+3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus `BAN_HASH_SECRET` (set once, never change), Persona and S3 (Spaces) keys when ready.
 4. Each deploy runs the `migrate` pre-deploy job (`prisma migrate deploy` + idempotent tag seed) before the web service goes live. `/api/health` checks the database.
 
 Age verification: the stub callback is disabled in production. For a staging test you can set

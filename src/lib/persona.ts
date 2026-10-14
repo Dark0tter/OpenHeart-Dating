@@ -1,6 +1,37 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
 const TOLERANCE_SECONDS = 5 * 60;
+const PERSONA_API = "https://api.withpersona.com/api/v1";
+
+/**
+ * Permanently deletes an inquiry's ID images and personal data on Persona's
+ * side once we have the decision (the privacy page promises we never keep
+ * ID images). Needs PERSONA_API_KEY; returns false when it couldn't redact.
+ */
+export async function redactPersonaInquiry(
+  inquiryId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<boolean> {
+  const key = process.env.PERSONA_API_KEY;
+  if (!key || !/^inq_[A-Za-z0-9]+$/.test(inquiryId)) return false;
+  try {
+    const res = await fetchImpl(`${PERSONA_API}/inquiries/${inquiryId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Persona-Version": "2023-01-05",
+        Accept: "application/json",
+      },
+    });
+    if (!res.ok) {
+      console.error(`Persona redaction failed for ${inquiryId}: ${res.status}`);
+    }
+    return res.ok;
+  } catch (err) {
+    console.error(`Persona redaction failed for ${inquiryId}`, err);
+    return false;
+  }
+}
 
 /**
  * Persona-Signature: "t=<unix>,v1=<hex>" — several v1 values may be present

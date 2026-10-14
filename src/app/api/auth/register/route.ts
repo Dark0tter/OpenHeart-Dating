@@ -11,6 +11,7 @@ import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request";
 import { BOT_CHECK_FAILED, passesBotCheck } from "@/lib/bot-check";
 import { sendVerificationEmail } from "@/lib/account-email";
+import { emailBanHash, isBanned } from "@/lib/bans";
 
 const schema = z.object({
   email: z.string().email(),
@@ -67,6 +68,12 @@ export async function POST(req: Request) {
     }
 
     const email = parsed.data.email.toLowerCase();
+    if (await isBanned(emailBanHash(email))) {
+      return NextResponse.json(
+        { error: "We can't create an account with this email." },
+        { status: 403 },
+      );
+    }
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(

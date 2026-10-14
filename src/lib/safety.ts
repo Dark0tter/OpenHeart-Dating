@@ -35,20 +35,13 @@ export async function blockUser(blockerId: string, blockedId: string) {
       },
     });
 
-    // Soft-unmatch
+    // Soft-unmatch. The conversation disappears for both people but is kept
+    // 30 days so a report can still be reviewed (see cleanup in jobs.ts).
     const [a, b] = orderedPair(blockerId, blockedId);
     await tx.match.updateMany({
       where: { userAId: a, userBId: b, unmatchedAt: null },
       data: { unmatchedAt: new Date() },
     });
-
-    // Delete messages in that match
-    const match = await tx.match.findUnique({
-      where: { userAId_userBId: { userAId: a, userBId: b } },
-    });
-    if (match) {
-      await tx.message.deleteMany({ where: { matchId: match.id } });
-    }
 
     await tx.messageRequest.deleteMany({
       where: {

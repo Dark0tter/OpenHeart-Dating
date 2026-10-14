@@ -208,7 +208,8 @@ export default async function ReportDetail({
               <option value="1">1 day</option>
               <option value="7">7 days</option>
               <option value="30">30 days</option>
-              <option value="">Until reviewed (ban)</option>
+              <option value="">Until reviewed</option>
+              <option value="ban">Permanent ban (can&apos;t rejoin)</option>
             </select>
           </label>
           <div className="flex flex-wrap gap-2">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { completeAgeVerification } from "@/lib/verification";
+import { completeAgeVerification, stubAllowed } from "@/lib/verification";
 
 const schema = z.object({
   token: z.string().min(1),
@@ -10,16 +10,10 @@ const schema = z.object({
 });
 
 /**
- * Stub: whoever holds the token can mark themselves verified.
- * Off in production unless ALLOW_VERIFICATION_STUB=true (staging only);
- * real launches must replace this with a signed Persona/Veriff webhook.
+ * Development stub: whoever holds the token can mark themselves verified.
+ * Off in production unless ALLOW_VERIFICATION_STUB=true (staging only).
  */
-function stubDisabled() {
-  return (
-    process.env.NODE_ENV === "production" &&
-    process.env.ALLOW_VERIFICATION_STUB !== "true"
-  );
-}
+const stubDisabled = () => !stubAllowed();
 
 export async function POST(req: Request) {
   if (stubDisabled()) {

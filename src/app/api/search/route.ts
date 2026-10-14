@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/session";
+import { requireMember } from "@/lib/session";
 import { searchProfiles, type SearchSort } from "@/lib/discovery";
 import { activityLabel, ageFromDob, approxDistanceLabel } from "@/lib/utils";
 import { photoSrc } from "@/lib/photos";
@@ -10,7 +10,7 @@ import { supporterBadges } from "@/lib/supporter";
 const SORTS: SearchSort[] = ["best", "recent", "nearest"];
 
 export async function GET(req: Request) {
-  const user = await requireUser();
+  const user = await requireMember();
   if (!user?.profile) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

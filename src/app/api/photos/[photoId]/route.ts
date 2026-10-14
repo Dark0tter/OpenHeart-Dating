@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { PhotoVisibility, ReviewStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { isStaff, requireUser } from "@/lib/session";
 import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { viewablePhoto } from "@/lib/photos";
 import { deleteObject, getObject } from "@/lib/storage";
@@ -18,6 +18,12 @@ export async function GET(req: Request, ctx: Ctx) {
   const adultAllowedHere = !isRestricted(await allowedTiers(user));
   const photo = await viewablePhoto(photoId, user, adultAllowedHere);
   if (!photo) return new NextResponse(null, { status: 404 });
+  const ownPhoto = photo.profileId === user.profile?.id;
+  const member =
+    user.profile?.isActive && user.verification?.status === "VERIFIED_ADULT";
+  if (!ownPhoto && !member && !isStaff(user.role)) {
+    return new NextResponse(null, { status: 404 });
+  }
 
   const size = new URL(req.url).searchParams.get("size");
   const key =

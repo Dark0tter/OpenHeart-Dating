@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { isStaff, requireUser } from "@/lib/session";
+import { isStaff, requireMember, requireUser } from "@/lib/session";
 import { allowedTiers } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
@@ -36,7 +36,7 @@ async function load(eventId: string, viewerId: string) {
 }
 
 export async function GET(_req: Request, ctx: Ctx) {
-  const user = await requireUser();
+  const user = await requireMember();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { eventId } = await ctx.params;

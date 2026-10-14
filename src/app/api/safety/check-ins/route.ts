@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { sendEmail } from "@/lib/email";
+import { emailConfigured, sendEmail } from "@/lib/email";
 
 const MAX_ACTIVE = 3;
 
@@ -37,6 +37,15 @@ export async function POST(req: Request) {
   const user = await requireUser();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (process.env.NODE_ENV === "production" && !emailConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "Date check-ins aren't available right now because we can't send email. Please tell a friend your plans directly.",
+      },
+      { status: 503 },
+    );
+  }
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {

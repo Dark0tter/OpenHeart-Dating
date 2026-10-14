@@ -77,6 +77,7 @@ export async function reportAction(fd: FormData) {
       });
       break;
     case "suspend": {
+      const permanent = text(fd, "days") === "ban";
       const days = Number(text(fd, "days")) || null;
       await suspendUser({
         actorId: staff.id,
@@ -84,12 +85,13 @@ export async function reportAction(fd: FormData) {
         reason: note || "Breaking our community guidelines",
         days,
         reportId,
+        permanent,
       });
       await closeReport({
         actorId: staff.id,
         reportId,
         status: "resolved",
-        resolution: `Suspended ${days ? `${days} days` : "indefinitely"}: ${note}`,
+        resolution: `${permanent ? "Banned permanently" : `Suspended ${days ? `${days} days` : "indefinitely"}`}: ${note}`,
       });
       break;
     }
@@ -134,6 +136,7 @@ export async function memberAction(fd: FormData) {
       userId,
       reason: note || "Breaking our community guidelines",
       days,
+      permanent: text(fd, "days") === "ban",
     });
   } else if (action === "reinstate") {
     await reinstateUser({ actorId: staff.id, userId, note });

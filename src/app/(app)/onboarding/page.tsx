@@ -235,8 +235,9 @@ function OnboardingInner() {
 
   async function startVerify() {
     const res = await fetch("/api/verification/start", { method: "POST" });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (data.redirectUrl) window.location.href = data.redirectUrl;
+    else setMessage(data.error ?? "Couldn't start verification. Try again.");
   }
 
   async function resendEmail() {

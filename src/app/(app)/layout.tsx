@@ -6,6 +6,7 @@ import { EmailBanner } from "@/components/email-banner";
 import { RealtimeProvider } from "@/components/realtime";
 import { NativePushBridge } from "@/components/native-push-bridge";
 import { CallProvider } from "@/components/call-provider";
+import { MemberGate } from "@/components/member-gate";
 import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { currentAccount, isStaff } from "@/lib/session";
@@ -54,7 +55,14 @@ export default async function AppLayout({
             </div>
           )}
           <main id="main" className="mx-auto max-w-5xl px-4 py-8">
-            {children}
+            <MemberGate
+              isMember={Boolean(
+                user?.profile?.isActive &&
+                user.verification?.status === "VERIFIED_ADULT",
+              )}
+            >
+              {children}
+            </MemberGate>
           </main>
           <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
             <SponsorGate>

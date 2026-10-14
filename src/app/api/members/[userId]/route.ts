@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ConsentScope, KinkInterestLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireMember } from "@/lib/session";
 import { assertProfileViewable } from "@/lib/discovery";
 import { allowedTiers, isAppRequest, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
@@ -28,7 +28,7 @@ const SHOWN_LEVELS: KinkInterestLevel[] = [
 ];
 
 export async function GET(_req: Request, ctx: Ctx) {
-  const viewer = await requireUser();
+  const viewer = await requireMember();
   if (!viewer) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -14,6 +14,7 @@ type CheckIn = {
   checkInBy: string;
   contactName: string;
   status: "active" | "safe" | "alerted" | "cancelled";
+  alertFailedAt?: string | null;
 };
 
 function localInput(d: Date) {
@@ -127,7 +128,9 @@ export default function CheckInPage() {
           <p className="text-sm text-ink/70">
             {c.status === "alerted"
               ? `We emailed ${c.contactName} because you didn't check in.`
-              : `Check in by ${new Date(c.checkInBy).toLocaleString()} or we'll email ${c.contactName}.`}
+              : c.alertFailedAt
+                ? `We couldn't email ${c.contactName} yet and are still trying. If you need help, call them or local emergency services.`
+                : `Check in by ${new Date(c.checkInBy).toLocaleString()} or we'll email ${c.contactName}.`}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button type="button" onClick={() => act(c.id, "safe")}>

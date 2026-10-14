@@ -2,9 +2,21 @@ import { VerificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { appUrl } from "@/lib/request";
+import { banUser, isBanned } from "@/lib/bans";
 
-export type VerificationProvider =
-  "persona" | "veriff" | "stripe_identity" | "yoti";
+export type VerificationProvider = "persona";
+
+/** The dev stub is never used in production unless explicitly allowed (staging). */
+export function stubAllowed(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" ||
+    process.env.ALLOW_VERIFICATION_STUB === "true"
+  );
+}
+
+export function verificationAvailable(): boolean {
+  return personaConfigured() || stubAllowed();
+}
 
 export function personaConfigured(): boolean {
   return Boolean(
@@ -23,11 +35,9 @@ export function personaConfigured(): boolean {
  */
 export async function startAgeVerification(
   userId: string,
-  provider?: VerificationProvider,
+  provider: VerificationProvider = "persona",
 ) {
-  const selected =
-    provider ??
-    ((process.env.VERIFICATION_PROVIDER as VerificationProvider) || "persona");
+  const selected = provider;
 
   const verificationToken = randomBytes(24).toString("hex");
   const providerReference = `${selected}_ref_${randomBytes(12).toString("hex")}`;
@@ -102,20 +112,50 @@ export async function applyProviderDecision(opts: {
   providerReference: string;
   outcome: "VERIFIED_ADULT" | "NOT_VERIFIED" | "REJECTED";
   underage?: boolean;
+  identityHash?: string | null;
 }) {
   const existing = await prisma.verification.findFirst({
     where: { providerReference: opts.providerReference },
   });
   if (!existing) return null;
 
+  const banEvasion =
+    opts.outcome === "VERIFIED_ADULT" &&
+    (await isBanned(opts.identityHash ?? null));
+  const outcome = banEvasion ? "REJECTED" : opts.outcome;
+
   const updated = await prisma.verification.update({
     where: { id: existing.id },
     data: {
-      status: opts.outcome as VerificationStatus,
-      verifiedAt: opts.outcome === "VERIFIED_ADULT" ? new Date() : null,
+      status: outcome as VerificationStatus,
+      verifiedAt: outcome === "VERIFIED_ADULT" ? new Date() : null,
       verificationToken: null,
+      ...(opts.identityHash ? { identityHash: opts.identityHash } : {}),
     },
   });
+
+  if (banEvasion) {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: existing.userId },
+        data: {
+          accountStatus: "SUSPENDED",
+          statusReason: "This person was previously banned from OpenHeart.",
+          statusChangedAt: new Date(),
+          suspendedUntil: null,
+        },
+      }),
+      prisma.modAction.create({
+        data: {
+          action: "ban_evasion_blocked",
+          targetUserId: existing.userId,
+          note: "Automatic: verified identity matches a permanent ban",
+        },
+      }),
+    ]);
+    await banUser(existing.userId, "Ban evasion");
+    return { ...updated, banEvasion: true };
+  }
 
   if (opts.underage) {
     await prisma.$transaction([
@@ -142,7 +182,7 @@ export async function applyProviderDecision(opts: {
       }),
     ]);
   }
-  return updated;
+  return { ...updated, banEvasion: false };
 }
 
 /** Webhook/callback handler stub — marks adult verified without storing ID media. */

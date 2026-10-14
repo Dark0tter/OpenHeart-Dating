@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { AccountStatus, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireMember } from "@/lib/session";
 import { blockedUserIds } from "@/lib/safety";
 import { incognitoUserIdsVisibleTo } from "@/lib/discovery";
 import { allowedTiers } from "@/lib/content-policy";
@@ -11,7 +11,7 @@ const PAGE_SIZE = 20;
 
 /** Posts from people you follow or liked, plus your own, newest first. */
 export async function GET(req: Request) {
-  const user = await requireUser();
+  const user = await requireMember();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

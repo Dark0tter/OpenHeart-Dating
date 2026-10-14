@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ContentTier, EventKind } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireMember, requireUser } from "@/lib/session";
+import { requireMember } from "@/lib/session";
 import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import {
@@ -17,7 +17,7 @@ import { coarse, geocodeCity } from "@/lib/geocode";
 const MAX_DAYS_AHEAD = 365;
 
 export async function GET(req: Request) {
-  const user = await requireUser();
+  const user = await requireMember();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

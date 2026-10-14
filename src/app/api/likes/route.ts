@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireUser } from "@/lib/session";
+import { requireMember } from "@/lib/session";
 import { sendLike } from "@/lib/matching";
 import { limitFor, tooManyRequests } from "@/lib/rate-limit";
 import { notify } from "@/lib/notify";
@@ -10,7 +10,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const user = await requireUser();
+  const user = await requireMember();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
