@@ -275,6 +275,11 @@ export default function SettingsPage() {
             {o.label}
           </label>
         ))}
+        <Link href="/supporter" className="text-sm text-forest underline">
+          {supporter
+            ? "Your Supporter membership"
+            : "About Supporter membership"}
+        </Link>
       </fieldset>
 
       <form onSubmit={onBlock} className="space-y-3">

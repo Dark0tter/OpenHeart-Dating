@@ -18,6 +18,7 @@ type Card = {
   activity: string;
   verified: boolean;
   photoVerified: boolean;
+  supporter?: boolean;
   hardClashes: number;
   identity: string[];
   orientation: string[];
@@ -283,6 +284,11 @@ export default function SearchPage() {
                   {p.verified && (
                     <span className="font-medium text-forest">
                       Age verified
+                    </span>
+                  )}
+                  {p.supporter && (
+                    <span className="font-medium text-coral-deep">
+                      ♥ Supporter
                     </span>
                   )}
                   {p.hardClashes > 0 && (

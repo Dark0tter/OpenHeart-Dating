@@ -8,6 +8,7 @@ import { textFilterFor } from "@/lib/moderation/app-text";
 import { galleryFor } from "@/lib/photos";
 import { promptQuestion } from "@/lib/constants/prompts";
 import { findClashes } from "@/lib/limits";
+import { supporterBadges } from "@/lib/supporter";
 import {
   activityLabel,
   ageFromDob,
@@ -168,6 +169,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       activity: activityLabel(profile.user.lastActiveAt),
       ageVerified: profile.user.verification?.status === "VERIFIED_ADULT",
       photoVerified: Boolean(profile.user.photoVerifiedAt),
+      supporter: (await supporterBadges([userId])).has(userId),
       identity: profile.identityTags.map((t) => t.tag.label),
       orientation: profile.orientationTags.map((t) => t.tag.label),
       goals: profile.goalTags.map((t) => t.tag.label),

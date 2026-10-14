@@ -4,6 +4,8 @@ import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { memberAction } from "@/app/mod/actions";
+import { supporterAction } from "@/app/mod/supporter-actions";
+import { supporterStatus } from "@/lib/supporter";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +40,7 @@ export default async function MemberDetail({
   });
   if (!user) notFound();
 
-  const [reports, actions] = await Promise.all([
+  const [reports, actions, supporter] = await Promise.all([
     prisma.report.findMany({
       where: { reportedUserId: id },
       orderBy: { createdAt: "desc" },
@@ -49,6 +51,7 @@ export default async function MemberDetail({
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
+    supporterStatus(id),
   ]);
   const isAdmin = staff.role === UserRole.ADMIN;
 
@@ -161,6 +164,47 @@ export default async function MemberDetail({
           )}
         </form>
       </section>
+
+      {isAdmin && (
+        <section className="rounded-lg border border-forest/10 p-4">
+          <h2 className="font-medium text-forest">Supporter</h2>
+          <p className="mt-1 text-sm text-ink/70">
+            {supporter.active
+              ? `Active${supporter.until ? ` until ${supporter.until.toISOString().slice(0, 10)}` : ""} (${supporter.provider ?? "manual"}).`
+              : "Not a supporter."}
+            {supporter.note && ` Note: ${supporter.note}`}
+          </p>
+          <form
+            action={supporterAction}
+            className="mt-3 flex flex-wrap items-center gap-2"
+          >
+            <input type="hidden" name="userId" value={user.id} />
+            <select
+              name="months"
+              aria-label="How long"
+              className="h-9 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
+            >
+              <option value="1">1 month</option>
+              <option value="3">3 months</option>
+              <option value="12">12 months</option>
+            </select>
+            <input
+              name="note"
+              placeholder="Why / receipt reference"
+              aria-label="Note"
+              className="h-9 min-w-48 flex-1 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
+            />
+            <button name="action" value="grant" className={btn}>
+              {supporter.active ? "Add time" : "Make supporter"}
+            </button>
+            {supporter.active && (
+              <button name="action" value="end" className={btn}>
+                End now
+              </button>
+            )}
+          </form>
+        </section>
+      )}
 
       <section>
         <h2 className="font-medium text-forest">Reports about this member</h2>

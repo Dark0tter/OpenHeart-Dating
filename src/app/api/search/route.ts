@@ -5,6 +5,7 @@ import { activityLabel, ageFromDob, approxDistanceLabel } from "@/lib/utils";
 import { photoSrc } from "@/lib/photos";
 import { allowedTiers } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
+import { supporterBadges } from "@/lib/supporter";
 
 const SORTS: SearchSort[] = ["best", "recent", "nearest"];
 
@@ -45,6 +46,9 @@ export async function GET(req: Request) {
     page: num(searchParams.get("page")) ?? 0,
     limit: num(searchParams.get("limit")) ?? 24,
   });
+  const supporters = await supporterBadges(
+    results.map((r) => r.profile.userId),
+  );
 
   return NextResponse.json({
     hasLocation: user.profile.latitude != null,
@@ -63,6 +67,7 @@ export async function GET(req: Request) {
       visibility: p.visibility,
       verified: p.user.verification?.status === "VERIFIED_ADULT",
       photoVerified: Boolean(p.user.photoVerifiedAt),
+      supporter: supporters.has(p.userId),
       identity: p.identityTags.map((t) => t.tag.label),
       orientation: p.orientationTags.map((t) => t.tag.label),
       goals: p.goalTags.map((t) => t.tag.label),

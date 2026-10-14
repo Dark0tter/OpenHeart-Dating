@@ -166,8 +166,8 @@ Database migrations live in `prisma/migrations`; `npm run db:setup` applies them
 Members are the customers, not the product.
 
 - **Always free:** likes, messages, matching, search, filters, safety tools.
-- **Sponsor block:** one small labelled block at the bottom of app pages (`SponsorSlot`). It's `GENERIC` by default; members can opt in to `PROFILE_INTERESTS`, which matches only the kinks (Favorite/Interested/Curious) and relationship goals on their profile and skips anything they marked No/Hard Limit. No impressions, clicks, or viewers are stored; links open with `rel="sponsored noopener noreferrer"` and no referrer.
-- **Supporter membership** (`Subscription.plan = "supporter"`): option to hide the sponsor block, supporter badge, extra storage, and forum video playback (Phase 4). Never core dating features.
+- **Sponsor block:** one small labelled block at the bottom of app pages (`SponsorSlot`). It's `GENERIC` by default; members can opt in to `PROFILE_INTERESTS`, which matches only the kinks (Favorite/Interested/Curious) and relationship goals on their profile and skips anything they marked No/Hard Limit. Every sponsor is approved by an admin at `/mod/sponsors`, which shows only anonymous daily view and click totals; who saw or clicked is never stored. Links open with no referrer. The apps only ever show general-audience sponsors, and the block never appears in messages or signup.
+- **Supporter membership** (`/supporter`): cosmetic perks only (badge, option to hide the sponsor block). Never core dating features. Stripe's rules exclude adult dating, so admins grant it by hand at `/mod/users/<id>` until an adult-friendly processor is connected.
 - **No data sales, no third-party trackers, no cross-site tracking.**
 
 ## Financial solicitation policy
@@ -190,7 +190,7 @@ The App Platform spec lives in `.do/app.yaml` and deploys from `main` of
 
 1. Create a managed PostgreSQL 16 cluster named `openheart-db` (same region as the app, `nyc`).
 2. Create the app: **Apps → Create App → import `.do/app.yaml`**, or `doctl apps create --spec .do/app.yaml`.
-3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus Persona/Veriff, Stripe and S3 (Spaces) keys when ready.
+3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus Persona/Veriff and S3 (Spaces) keys when ready.
 4. Each deploy runs the `migrate` pre-deploy job (`prisma migrate deploy` + idempotent tag seed) before the web service goes live. `/api/health` checks the database.
 
 Age verification: the stub callback is disabled in production. For a staging test you can set
@@ -200,7 +200,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs migrations, tests, typecheck, l
 
 ## Launch checklist
 
-Things the code can't do for you:
+Step-by-step with costs, cheapest first: [docs/LAUNCH.md](docs/LAUNCH.md). In short, things the code can't do for you:
 
 1. **Legal review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety` by a lawyer familiar with adult platforms (US: Section 230, FOSTA-SESTA, 18 U.S.C. 2257 if explicit images are allowed; EU/UK: GDPR, Online Safety Act).
 2. **NCMEC CyberTipline** registration as an electronic service provider. US law requires reporting child sexual abuse material you become aware of; the `/mod` escalation preserves evidence, but the report itself is filed on NCMEC's site.

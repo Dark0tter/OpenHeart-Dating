@@ -20,6 +20,7 @@ type Member = {
   activity: string;
   ageVerified: boolean;
   photoVerified: boolean;
+  supporter?: boolean;
   identity: string[];
   orientation: string[];
   goals: string[];
@@ -159,6 +160,11 @@ export default function MemberPage() {
           {m.photoVerified && (
             <li className="rounded-full bg-forest px-2.5 py-1 text-cream">
               Photo verified
+            </li>
+          )}
+          {m.supporter && (
+            <li className="rounded-full bg-coral/15 px-2.5 py-1 text-coral-deep">
+              ♥ Supporter
             </li>
           )}
           {r.likedYou && !r.matchId && (

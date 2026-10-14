@@ -1047,8 +1047,14 @@ model Subscription {
   /// "free" | "supporter". Supporter perks are extras, never core dating features.
   plan             String    @default("free")
   stripeCustomerId String?
+  /// "manual" (granted by an admin) or the payment processor's name.
+  provider         String?
   status           String    @default("active")
   currentPeriodEnd DateTime?
+  /// Members choose whether others see their Supporter badge.
+  showBadge        Boolean   @default(true)
+  /// Staff-only: why it was granted, receipt reference, etc.
+  note             String?   @db.Text
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }

@@ -20,6 +20,12 @@ import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
 import { busy, canCall, expireCalls, RING_MS } from "@/lib/calls";
+import {
+  endSupporter,
+  grantSupporter,
+  isSupporter,
+  supporterBadges,
+} from "@/lib/supporter";
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -456,5 +462,30 @@ describe("calls", () => {
       where: { id: call.id },
     });
     expect(after.status).toBe("ended");
+  });
+});
+
+describe("supporters", () => {
+  it("can be granted, shown or hidden, and ended", async () => {
+    const u = await makeUser();
+    expect(await isSupporter(u.id)).toBe(false);
+    await grantSupporter({ userId: u.id, months: 1, note: "test" });
+    expect(await isSupporter(u.id)).toBe(true);
+    expect((await supporterBadges([u.id])).has(u.id)).toBe(true);
+
+    await prisma.subscription.update({
+      where: { userId: u.id },
+      data: { showBadge: false },
+    });
+    expect((await supporterBadges([u.id])).has(u.id)).toBe(false);
+
+    await prisma.user.update({
+      where: { id: u.id },
+      data: { adPreference: "NONE" },
+    });
+    await endSupporter(u.id);
+    expect(await isSupporter(u.id)).toBe(false);
+    const after = await prisma.user.findUniqueOrThrow({ where: { id: u.id } });
+    expect(after.adPreference).toBe("GENERIC");
   });
 });
