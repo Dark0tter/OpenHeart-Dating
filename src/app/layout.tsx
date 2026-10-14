@@ -44,6 +44,9 @@ export default function RootLayout({
       <body
         className={`${figtree.variable} ${fraunces.variable} min-h-screen antialiased`}
       >
+        <a href="#main" className="oh-skip-link">
+          Skip to content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

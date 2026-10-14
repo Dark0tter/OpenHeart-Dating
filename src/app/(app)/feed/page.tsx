@@ -60,7 +60,7 @@ export default function FeedPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Feed
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Posts from people you&apos;ve liked or followed. Meet people in{" "}
         <Link href="/rooms" className="underline">
           rooms
@@ -112,7 +112,7 @@ export default function FeedPage() {
       </ul>
 
       {loaded && posts.length === 0 && (
-        <p className="mt-8 text-ink/55">
+        <p className="mt-8 text-ink/70">
           Nothing here yet. Like or follow people and their posts will show up
           here.
         </p>

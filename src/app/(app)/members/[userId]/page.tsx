@@ -50,7 +50,7 @@ function Chips({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <h3 className="text-xs font-medium uppercase tracking-wide text-ink/50">
+      <h3 className="text-xs font-medium uppercase tracking-wide text-ink/70">
         {title}
       </h3>
       <ul className="mt-1 flex flex-wrap gap-1.5">
@@ -127,8 +127,8 @@ export default function MemberPage() {
     if (ok) router.push("/search");
   }
 
-  if (error) return <p className="text-ink/60">{error}</p>;
-  if (!data) return <p className="text-ink/60">Loading…</p>;
+  if (error) return <p className="text-ink/70">{error}</p>;
+  if (!data) return <p className="text-ink/70">Loading…</p>;
 
   const m = data.member;
   const r = data.relationship;
@@ -139,7 +139,7 @@ export default function MemberPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           {m.displayName}, {m.age}
         </h1>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           {[m.pronouns, m.location, m.distance, m.activity]
             .filter(Boolean)
             .join(" · ")}
@@ -230,7 +230,7 @@ export default function MemberPage() {
               key={p.question}
               className="rounded-lg border border-forest/10 bg-cream/60 p-4"
             >
-              <h2 className="text-sm text-ink/60">{p.question}</h2>
+              <h2 className="text-sm text-ink/70">{p.question}</h2>
               <p className="mt-1 whitespace-pre-wrap text-ink">{p.answer}</p>
             </div>
           ))}

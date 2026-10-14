@@ -28,7 +28,7 @@ export default function GuidelinesPage() {
   return (
     <div className="oh-atmosphere min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-6 pb-20 pt-6">
+      <main id="main" className="mx-auto max-w-2xl px-6 pb-20 pt-6">
         <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
           Community guidelines
         </h1>
@@ -81,7 +81,7 @@ export default function GuidelinesPage() {
           appealed.
         </p>
 
-        <p className="mt-12 text-sm text-ink/55">
+        <p className="mt-12 text-sm text-ink/70">
           See also our{" "}
           <Link href="/privacy" className="underline">
             privacy promise

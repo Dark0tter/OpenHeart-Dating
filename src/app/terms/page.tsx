@@ -21,7 +21,10 @@ export default function TermsPage() {
   return (
     <div className="oh-atmosphere min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-2xl space-y-8 px-6 pb-20 pt-6 text-ink/85">
+      <main
+        id="main"
+        className="mx-auto max-w-2xl space-y-8 px-6 pb-20 pt-6 text-ink/85"
+      >
         <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
           Terms of use
         </h1>

@@ -168,7 +168,7 @@ export default function SettingsPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           Settings &amp; safety
         </h1>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="mt-1 text-sm text-ink/70">
           Block immediately removes messages, likes, matching, and search
           visibility between you. Emergency reports enter the high-priority
           queue.
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           />
           Show me in room online lists
         </label>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           Incognito profiles never appear in online lists, whatever this is set
           to.
         </p>
@@ -207,14 +207,14 @@ export default function SettingsPage() {
           Adult content in the mobile app
         </legend>
         {inApp ? (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             The app shows a limited version of OpenHeart. You can change this
             setting on the OpenHeart website.
           </p>
         ) : (
           <>
             <label
-              className={`flex items-center gap-2 text-sm ${verifiedAdult ? "text-ink" : "text-ink/40"}`}
+              className={`flex items-center gap-2 text-sm ${verifiedAdult ? "text-ink" : "text-ink/70"}`}
             >
               <input
                 type="checkbox"
@@ -224,7 +224,7 @@ export default function SettingsPage() {
               />
               Show the full interest list in the iPhone and Android apps
             </label>
-            <p className="text-sm text-ink/60">
+            <p className="text-sm text-ink/70">
               {verifiedAdult
                 ? "Off by default. Some interests, rooms, and adult photos are only ever shown on the website."
                 : "Available after age verification."}
@@ -235,7 +235,7 @@ export default function SettingsPage() {
 
       <fieldset className="space-y-2">
         <legend className="font-medium text-forest">Sponsor block</legend>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           One small block at the bottom of the page. We never use your activity,
           browsing, or device data.{" "}
           <Link href="/privacy" className="underline">
@@ -261,7 +261,7 @@ export default function SettingsPage() {
         ].map((o) => (
           <label
             key={o.value}
-            className={`flex items-center gap-2 text-sm ${o.disabled ? "text-ink/40" : "text-ink"}`}
+            className={`flex items-center gap-2 text-sm ${o.disabled ? "text-ink/70" : "text-ink"}`}
           >
             <input
               type="radio"

@@ -71,7 +71,7 @@ export default function NotificationsPage() {
           </Button>
         )}
       </div>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Choose how you&apos;re notified in{" "}
         <Link href="/settings#notifications" className="underline">
           Settings
@@ -80,9 +80,9 @@ export default function NotificationsPage() {
       </p>
 
       {items === null ? (
-        <p className="mt-6 text-ink/60">Loading…</p>
+        <p className="mt-6 text-ink/70">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="mt-6 text-ink/60">
+        <p className="mt-6 text-ink/70">
           Nothing yet. Matches and messages will show up here.
         </p>
       ) : (
@@ -101,7 +101,7 @@ export default function NotificationsPage() {
                     {i.title}
                     {!i.readAt && <span className="sr-only"> (unread)</span>}
                   </p>
-                  {i.body && <p className="text-sm text-ink/60">{i.body}</p>}
+                  {i.body && <p className="text-sm text-ink/70">{i.body}</p>}
                   <p className="text-xs text-ink/45">{when(i.createdAt)}</p>
                 </div>
               </div>

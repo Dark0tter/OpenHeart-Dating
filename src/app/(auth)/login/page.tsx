@@ -94,7 +94,7 @@ export default function LoginPage() {
       <Suspense>
         <LoginForm />
       </Suspense>
-      <p className="mt-6 text-sm text-ink/60">
+      <p className="mt-6 text-sm text-ink/70">
         New here?{" "}
         <Link href="/register" className="text-forest underline">
           Join free

@@ -59,38 +59,38 @@ export default async function MemberDetail({
           {user.profile?.displayName ?? "(no profile)"}
         </h1>
         <dl className="mt-3 grid max-w-xl grid-cols-[10rem_1fr] gap-y-1 text-sm">
-          <dt className="text-ink/60">Email</dt>
+          <dt className="text-ink/70">Email</dt>
           <dd>
             {user.email}{" "}
             {user.emailVerified ? "(confirmed)" : "(not confirmed)"}
           </dd>
-          <dt className="text-ink/60">Account</dt>
+          <dt className="text-ink/70">Account</dt>
           <dd>
             {user.accountStatus.toLowerCase()}
             {user.statusReason && ` — ${user.statusReason}`}
             {user.suspendedUntil &&
               ` (until ${user.suspendedUntil.toISOString().slice(0, 10)})`}
           </dd>
-          <dt className="text-ink/60">Role</dt>
+          <dt className="text-ink/70">Role</dt>
           <dd>{user.role.toLowerCase()}</dd>
-          <dt className="text-ink/60">Age check</dt>
+          <dt className="text-ink/70">Age check</dt>
           <dd>
             {user.verification?.status.toLowerCase().replaceAll("_", " ") ??
               "not started"}
           </dd>
-          <dt className="text-ink/60">Photo badge</dt>
+          <dt className="text-ink/70">Photo badge</dt>
           <dd>
             {user.photoVerifiedAt
               ? user.photoVerifiedAt.toISOString().slice(0, 10)
               : "no"}
           </dd>
-          <dt className="text-ink/60">Profile</dt>
+          <dt className="text-ink/70">Profile</dt>
           <dd>
             {user.profile
               ? `${user.profile.isActive ? "on" : "off"}, ${user.profile.visibility.toLowerCase()}`
               : "none"}
           </dd>
-          <dt className="text-ink/60">Joined / active</dt>
+          <dt className="text-ink/70">Joined / active</dt>
           <dd>
             {user.createdAt.toISOString().slice(0, 10)} /{" "}
             {user.lastActiveAt.toISOString().slice(0, 10)}
@@ -176,7 +176,7 @@ export default async function MemberDetail({
               · {r.status} · {r.createdAt.toISOString().slice(0, 10)}
             </li>
           ))}
-          {reports.length === 0 && <li className="text-ink/60">None.</li>}
+          {reports.length === 0 && <li className="text-ink/70">None.</li>}
         </ul>
       </section>
 
@@ -185,14 +185,14 @@ export default async function MemberDetail({
         <ul className="mt-2 space-y-1 text-sm">
           {actions.map((a) => (
             <li key={a.id}>
-              <span className="text-ink/50">
+              <span className="text-ink/70">
                 {a.createdAt.toISOString().slice(0, 16).replace("T", " ")}
               </span>{" "}
               {a.action.replaceAll("_", " ")}
               {a.note && <span className="text-ink/70"> — {a.note}</span>}
             </li>
           ))}
-          {actions.length === 0 && <li className="text-ink/60">None.</li>}
+          {actions.length === 0 && <li className="text-ink/70">None.</li>}
         </ul>
       </section>
     </div>

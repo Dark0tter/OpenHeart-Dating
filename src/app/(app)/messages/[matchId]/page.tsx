@@ -189,7 +189,7 @@ export default function ChatPage() {
         className="mt-4 flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4"
       >
         {messages.length === 0 && (
-          <p className="text-sm text-ink/55">
+          <p className="text-sm text-ink/70">
             Say hi! A question about something on their profile is a great
             start.
           </p>
@@ -228,7 +228,7 @@ export default function ChatPage() {
                 )}
               </div>
               {mine && m.id === lastMine?.id && m.readAt && (
-                <p className="mt-0.5 text-right text-[11px] text-ink/50">
+                <p className="mt-0.5 text-right text-[11px] text-ink/70">
                   Seen
                 </p>
               )}
@@ -236,7 +236,7 @@ export default function ChatPage() {
           );
         })}
         {theyreTyping && (
-          <p className="text-xs italic text-ink/55">
+          <p className="text-xs italic text-ink/70">
             {other?.displayName ?? "They"} {other ? "is" : "are"} typing…
           </p>
         )}

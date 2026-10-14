@@ -20,7 +20,7 @@ export default async function PhotoQueue() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Photos to review
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Approve photos that follow the photo rules. Remove anything else; tick
         &ldquo;block forever&rdquo; for serious violations so the same file can
         never be uploaded again. If a photo may show a minor, don&apos;t approve
@@ -43,6 +43,7 @@ export default async function PhotoQueue() {
               <input
                 name="reason"
                 placeholder="Reason if removing"
+                aria-label="Reason if removing"
                 className="h-9 w-full rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
               />
               <label className="flex items-center gap-2 text-xs">
@@ -65,7 +66,7 @@ export default async function PhotoQueue() {
         ))}
       </ul>
       {photos.length === 0 && (
-        <p className="mt-6 text-ink/60">All caught up.</p>
+        <p className="mt-6 text-ink/70">All caught up.</p>
       )}
     </div>
   );

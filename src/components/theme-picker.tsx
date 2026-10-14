@@ -45,7 +45,7 @@ export function ThemePicker({
   return (
     <fieldset className="space-y-4" disabled={saving}>
       <legend className="font-medium text-forest">Theme</legend>
-      <p className="text-sm text-ink/60">
+      <p className="text-sm text-ink/70">
         Saved to your account, so it&apos;s the same on the website and in the
         apps.
       </p>

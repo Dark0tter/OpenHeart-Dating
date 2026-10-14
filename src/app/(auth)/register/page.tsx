@@ -57,7 +57,7 @@ export default function RegisterPage() {
         >
           OpenHeart
         </Link>
-        <p className="mt-2 text-sm text-ink/60">
+        <p className="mt-2 text-sm text-ink/70">
           18+ only. Email, password, and date of birth required.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -126,7 +126,7 @@ export default function RegisterPage() {
             {loading ? "Creating…" : "Continue"}
           </Button>
         </form>
-        <p className="mt-6 text-sm text-ink/60">
+        <p className="mt-6 text-sm text-ink/70">
           Already have an account?{" "}
           <Link href="/login" className="text-forest underline">
             Log in

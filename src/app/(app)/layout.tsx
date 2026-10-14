@@ -48,10 +48,15 @@ export default async function AppLayout({
             </Link>
           </div>
         )}
-        <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+        <main id="main" className="mx-auto max-w-5xl px-4 py-8">
+          {children}
+        </main>
         <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
           <SponsorSlot />
-          <nav className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-ink/50">
+          <nav
+            aria-label="Site information"
+            className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-ink/70"
+          >
             {FOOTER_LINKS.map((l) => (
               <Link key={l.href} href={l.href} className="hover:underline">
                 {l.label}

@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
           </Button>
         </form>
       )}
-      <p className="mt-6 text-sm text-ink/60">
+      <p className="mt-6 text-sm text-ink/70">
         <Link href="/login" className="text-forest underline">
           Back to log in
         </Link>

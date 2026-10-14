@@ -86,10 +86,15 @@ services:
       - key: ALLOW_VERIFICATION_STUB
         scope: RUN_TIME
         value: "false"
-      - key: PERSONA_API_KEY
+      # Persona hosted age verification; webhook URL: ${APP_URL}/api/verification/persona-webhook
+      - key: PERSONA_TEMPLATE_ID
+        scope: RUN_TIME
+      - key: PERSONA_ENVIRONMENT_ID
+        scope: RUN_TIME
+      - key: PERSONA_WEBHOOK_SECRET
         scope: RUN_TIME
         type: SECRET
-      - key: VERIFF_API_KEY
+      - key: PERSONA_API_KEY
         scope: RUN_TIME
         type: SECRET
       - key: STRIPE_SECRET_KEY
@@ -98,9 +103,12 @@ services:
       # Public safety / child-safety contact shown on /terms and /child-safety.
       - key: SUPPORT_EMAIL
         scope: RUN_AND_BUILD_TIME
+      # Photo storage (DigitalOcean Spaces): S3_ENDPOINT e.g. https://nyc3.digitaloceanspaces.com
       - key: S3_BUCKET
         scope: RUN_TIME
       - key: S3_REGION
+        scope: RUN_TIME
+      - key: S3_ENDPOINT
         scope: RUN_TIME
       - key: S3_KEY
         scope: RUN_TIME
@@ -108,3 +116,31 @@ services:
       - key: S3_SECRET
         scope: RUN_TIME
         type: SECRET
+      # "pre" = photos hidden until a moderator approves them.
+      - key: PHOTO_REVIEW_MODE
+        scope: RUN_TIME
+        value: pre
+      - key: IMAGE_SCAN_URL
+        scope: RUN_TIME
+      - key: IMAGE_SCAN_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      # Web push. Generate once with `npm run vapid:generate`.
+      - key: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        scope: RUN_AND_BUILD_TIME
+      - key: VAPID_PRIVATE_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VAPID_SUBJECT
+        scope: RUN_TIME
+      # Only needed if DATABASE_URL goes through a transaction-mode pooler.
+      - key: REALTIME_DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      # Background jobs run inside the web service; protects the optional /api/cron trigger.
+      - key: CRON_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: GEOCODING
+        scope: RUN_TIME
+        value: "on"

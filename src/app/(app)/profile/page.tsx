@@ -50,7 +50,7 @@ function Completeness({
         <h2 id="completeness-title" className="font-medium text-forest">
           Profile strength
         </h2>
-        <span className="text-sm text-ink/60">{percent}%</span>
+        <span className="text-sm text-ink/70">{percent}%</span>
       </div>
       <div
         role="progressbar"
@@ -62,7 +62,7 @@ function Completeness({
       >
         <div className="h-full bg-forest" style={{ width: `${percent}%` }} />
       </div>
-      <p className="mt-3 text-sm text-ink/60">
+      <p className="mt-3 text-sm text-ink/70">
         Fuller profiles show up higher in &ldquo;Best match&rdquo;. Next steps:
       </p>
       <ul className="mt-2 space-y-1 text-sm">
@@ -97,7 +97,7 @@ export default function ProfilePage() {
   }, []);
 
   if (!data?.profile) {
-    return <p className="text-ink/60">Loading profile…</p>;
+    return <p className="text-ink/70">Loading profile…</p>;
   }
 
   const p = data.profile;
@@ -109,7 +109,7 @@ export default function ProfilePage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           {p.displayName}
         </h1>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="mt-1 text-sm text-ink/70">
           {p.pronouns || "Pronouns not set"} ·{" "}
           {VISIBILITY_TEXT[p.visibility] ?? p.visibility} ·{" "}
           {p.isActive ? "Profile is on" : "Profile is off (draft)"}

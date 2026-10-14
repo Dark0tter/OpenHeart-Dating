@@ -58,7 +58,7 @@ export default async function MemberLookup({
         ))}
       </ul>
       {q && users.length === 0 && (
-        <p className="mt-6 text-ink/60">No one found.</p>
+        <p className="mt-6 text-ink/70">No one found.</p>
       )}
     </div>
   );

@@ -36,7 +36,7 @@ export default async function SelfieQueue() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Selfies to review
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Approve when the selfie shows the requested pose and is clearly the same
         person as the profile photos. The selfie is deleted as soon as you
         decide.
@@ -89,7 +89,7 @@ export default async function SelfieQueue() {
         ))}
       </ul>
       {selfies.length === 0 && (
-        <p className="mt-6 text-ink/60">All caught up.</p>
+        <p className="mt-6 text-ink/70">All caught up.</p>
       )}
     </div>
   );

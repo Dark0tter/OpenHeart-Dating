@@ -72,7 +72,7 @@ export function AccountSecurity() {
         <Button type="submit" variant="secondary" disabled={busy}>
           Change password
         </Button>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           Changing your password signs you out on every device.
         </p>
       </form>
@@ -80,7 +80,7 @@ export function AccountSecurity() {
         <Button type="button" variant="ghost" onClick={onSignOutEverywhere}>
           Sign out on all devices
         </Button>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           Use this if you lost a phone or signed in on a shared computer.
         </p>
       </div>

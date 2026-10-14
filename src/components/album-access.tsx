@@ -60,7 +60,7 @@ export function AlbumAccess() {
         <h2 id="album-heading" className="font-medium text-forest">
           Private photo access
         </h2>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           Nobody sees your private or adult photos unless you say yes. You can
           take access back at any time.
         </p>
@@ -134,7 +134,7 @@ export function AlbumAccess() {
         </ul>
       ) : (
         data.incoming.length === 0 && (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             You haven&apos;t shared private photos with anyone.
           </p>
         )

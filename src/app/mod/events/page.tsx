@@ -26,12 +26,12 @@ export default async function EventsAdmin() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Upcoming events
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Open an event to cancel it; you&apos;ll be asked for a reason, which is
         logged, and everyone who RSVP&apos;d is told.
       </p>
       <table className="mt-6 w-full text-left text-sm">
-        <thead className="text-ink/60">
+        <thead className="text-ink/70">
           <tr>
             <th className="py-2">When (UTC)</th>
             <th>Event</th>
@@ -53,7 +53,7 @@ export default async function EventsAdmin() {
                 >
                   {e.title}
                 </Link>{" "}
-                <span className="text-xs text-ink/50">
+                <span className="text-xs text-ink/70">
                   {e.kind.toLowerCase()} ·{" "}
                   {e.tier.toLowerCase().replace("_", " ")}
                 </span>
@@ -77,7 +77,7 @@ export default async function EventsAdmin() {
         </tbody>
       </table>
       {events.length === 0 && (
-        <p className="mt-6 text-ink/60">No upcoming events.</p>
+        <p className="mt-6 text-ink/70">No upcoming events.</p>
       )}
     </div>
   );

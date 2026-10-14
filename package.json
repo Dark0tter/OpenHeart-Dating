@@ -7,6 +7,9 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.db.config.mts",
     "db:up": "docker compose up -d",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
@@ -50,7 +53,8 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.27",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.4"
   },
   "allowScripts": {
     "@prisma/client@6.19.0": true,

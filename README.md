@@ -87,21 +87,53 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Production build verified with `npm run build`.
 
-## Phase roadmap
+## Tests
 
-| Phase | Scope |
-| --- | --- |
-| **1 (this repo)** | Auth, profiles, tag taxonomies, discovery, likes, matches, messaging, age-verification stubs, block/report, noindex headers |
-| **2** | Full kink interest levels UI, advanced filters, photo albums, richer incognito flows |
-| **3** | Moderation dashboard (report queue, warnings, suspensions, verification-based bans, appeals, sponsor management), supporter payments, push |
-| **4** | Community groups, events, forums, local meetups |
+```bash
+npm test          # unit tests: moderation filters, scam signals, ranking, age checks, webhook signatures
+npm run test:db   # database tests: needs DATABASE_URL pointing at a disposable, migrated database
+```
+
+CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, checks the migrations match `schema.prisma`, seeds, then runs typecheck, lint, both test suites and a production build on every push and pull request.
+
+## What's built
+
+- **Accounts:** email confirmation, password reset and change (signs out other devices), Turnstile bot check, rate limits stored in Postgres, error alerts (Sentry), download-my-data (`GET /api/account/export`) and account deletion.
+- **Photos:** re-encoded with location and camera data stripped, safety-scan hook, moderator review before going live, private and adult albums shared only by consent, selfie verification badge.
+- **Discovery:** location from the browser or city (rounded to about 1 km), approximate distances, ranking by mutual fit, shared goals and interests, profile prompts, a completeness meter.
+- **Messaging:** live updates (Postgres LISTEN/NOTIFY over server-sent events, polling fallback), typing indicators, mutual read receipts, scam warnings, unmatch.
+- **Notifications:** in-app bell, web push and email (when away), each switchable in Settings.
+- **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and munches with RSVPs (address only shown to people going).
+- **Safety:** date check-ins that email a trusted contact if you don't check in, `/safety` tips, block, report, Persona age verification by signed webhook.
+- **Trust and safety staff tools** (`/mod`): report queue with assignment, user history, warnings, suspensions with appeals (decided by a different moderator), photo and selfie review, support tickets, room and event moderation, child-safety escalation that preserves evidence under legal hold, and a full audit log. Make the first admin with `npm run staff:set -- you@example.com ADMIN`.
+- **Background jobs** (`src/lib/jobs.ts`): run every minute inside the server, one instance at a time.
+
+## Mobile apps
+
+`mobile/` holds the Capacitor shells for iOS and Android. They load the live website with `OpenHeartApp` added to the user agent, so the server applies the app store content policy below.
+
+```bash
+cd mobile && npm install
+OPENHEART_URL=https://your-domain npm run sync
+npm run ios       # opens Xcode (needs a Mac and an Apple Developer account to publish)
+npm run android   # opens Android Studio
+```
+
+Before publishing, set the bundle ID (`OPENHEART_APP_ID`, default `com.openheartdating.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires. Web push doesn't work inside the iOS app; native push (APNs and Firebase) is a later addition.
 
 ## Important API surfaces
 
 | Route | Purpose |
 | --- | --- |
 | `POST /api/auth/register` | Email + password + DOB (18+) |
-| `POST /api/verification/start` | Start age-verification stub (Persona/Veriff/Stripe/Yoti ready) |
+| `POST /api/verification/start` | Start age verification (Persona hosted flow; dev stub without keys) |
+| `POST /api/verification/persona-webhook` | Signed Persona result: verified, declined, or under 18 (suspends and reports) |
+| `GET/POST/PATCH /api/safety/check-ins` | Date check-ins |
+| `DELETE /api/matches/[matchId]` | Unmatch |
+| `GET /api/account/export` | Download all your data as JSON |
+| `GET/POST /api/events`, `POST /api/events/[id]/rsvp` | Events and munches |
+| `GET /api/live` | Live updates (server-sent events) |
+| `POST /api/cron` | Run background jobs now (needs `CRON_SECRET`) |
 | `GET /api/search` | Tag-filtered search. Incognito profiles only appear after a match, after they liked or messaged you, or via a `PROFILE_ACCESS` grant |
 | `POST /api/likes` | Free like → auto-match on reciprocal |
 | `GET/POST /api/messages/[matchId]` | Free messaging + read receipts |
@@ -136,7 +168,7 @@ Members are the customers, not the product.
 
 - 18+ enforcement + age verification before adult content
 - Consent-based sharing of explicit material
-- GDPR / CCPA readiness (data access/deletion workflows — Phase 3)
+- GDPR / CCPA: data download and account deletion are built in
 - DMCA + ToS + Community Guidelines
 - Never permanently store government ID images (tokens + status only)
 - Profile pages send `noindex,nofollow` + `X-Robots-Tag`
@@ -154,7 +186,18 @@ The App Platform spec lives in `.do/app.yaml` and deploys from `main` of
 Age verification: the stub callback is disabled in production. For a staging test you can set
 `ALLOW_VERIFICATION_STUB=true`; set it back to `false` before real users sign up.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs Prisma validation, typecheck and a production build on every push and PR.
+GitHub Actions (`.github/workflows/ci.yml`) runs migrations, tests, typecheck, lint and a production build on every push and PR.
+
+## Launch checklist
+
+Things the code can't do for you:
+
+1. **Legal review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety` by a lawyer familiar with adult platforms (US: Section 230, FOSTA-SESTA, 18 U.S.C. 2257 if explicit images are allowed; EU/UK: GDPR, Online Safety Act).
+2. **NCMEC CyberTipline** registration as an electronic service provider. US law requires reporting child sexual abuse material you become aware of; the `/mod` escalation preserves evidence, but the report itself is filed on NCMEC's site.
+3. **Moderators.** The Terms promise a 24-hour review of reports. Appoint at least two staff (`npm run staff:set`) so appeals can go to someone other than the original moderator.
+4. **Accounts and keys:** hosting (DigitalOcean), domain and Cloudflare, email (Resend; verify the sending domain), photo storage (Spaces), Persona (template that collects date of birth, plus a webhook to `/api/verification/persona-webhook`), Turnstile, Sentry, VAPID keys (`npm run vapid:generate`), `CRON_SECRET`, `SUPPORT_EMAIL`.
+5. **App stores:** Apple Developer Program ($99/year) and Google Play Console ($25 once). Both review dating apps closely: have a demo account ready, and answer the content questions honestly (the apps never show adult photos).
+6. **Before real users:** `ALLOW_VERIFICATION_STUB=false`, `PHOTO_REVIEW_MODE=pre`, a test signup through Persona's sandbox, a test date check-in, and a restore test of the database backup.
 
 ## Hosting target
 

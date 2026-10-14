@@ -188,7 +188,7 @@ export default function RoomPage() {
   const onlineList = (
     <div className="mt-2">
       {youAreHidden && (
-        <p className="mb-2 text-xs text-ink/50">
+        <p className="mb-2 text-xs text-ink/70">
           You&apos;re hidden from this list.{" "}
           <Link href="/settings" className="underline">
             Change
@@ -228,7 +228,7 @@ export default function RoomPage() {
         })}
       </ul>
       {online.length === 0 && (
-        <p className="text-xs text-ink/50">No one else is here right now.</p>
+        <p className="text-xs text-ink/70">No one else is here right now.</p>
       )}
     </div>
   );
@@ -239,7 +239,7 @@ export default function RoomPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
           {roomName || "Room"}
         </h1>
-        <Link href="/rooms" className="text-sm text-forest/70 hover:underline">
+        <Link href="/rooms" className="text-sm text-forest/80 hover:underline">
           All rooms
         </Link>
       </div>
@@ -266,7 +266,7 @@ export default function RoomPage() {
             <p className="mt-2 whitespace-pre-wrap text-ink/75">{room.rules}</p>
           )}
           {room?.slowModeSeconds && room.slowModeSeconds > 2 ? (
-            <p className="mt-1 text-xs text-ink/55">
+            <p className="mt-1 text-xs text-ink/70">
               Slow mode: one message every {room.slowModeSeconds} seconds.
             </p>
           ) : null}
@@ -300,10 +300,14 @@ export default function RoomPage() {
 
       <div className="mt-4 flex min-h-0 flex-1 gap-4">
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4">
+          <div
+            role="log"
+            aria-label="Room messages"
+            className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-forest/10 bg-cream/50 p-4"
+          >
             {messages.map((m) => (
               <div key={m.id} className={m.mine ? "text-right" : ""}>
-                <div className="text-xs text-ink/50">
+                <div className="text-xs text-ink/70">
                   {m.mine ? (
                     "You"
                   ) : (
@@ -365,7 +369,7 @@ export default function RoomPage() {
                 {m.mine && youAreHost && (
                   <button
                     type="button"
-                    className="mt-1 text-xs text-ink/50 hover:underline"
+                    className="mt-1 text-xs text-ink/70 hover:underline"
                     onClick={() =>
                       hostAction(
                         { action: "delete_message", messageId: m.id },
@@ -379,7 +383,7 @@ export default function RoomPage() {
               </div>
             ))}
             {messages.length === 0 && !error && (
-              <p className="text-sm text-ink/50">
+              <p className="text-sm text-ink/70">
                 It&apos;s quiet in here. Start the conversation.
               </p>
             )}

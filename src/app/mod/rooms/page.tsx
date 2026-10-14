@@ -30,7 +30,7 @@ export default async function RoomsAdmin() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Rooms &amp; hosts
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Hosts can pin notices, set rules and slow mode, delete messages, and
         mute or remove members in their room. They can&apos;t act on other hosts
         or staff. Everything they do is in the audit log.
@@ -40,7 +40,7 @@ export default async function RoomsAdmin() {
           <li key={r.id} className="rounded-lg border border-forest/10 p-4">
             <p className="font-medium text-forest">
               {r.name}{" "}
-              <span className="text-sm font-normal text-ink/60">
+              <span className="text-sm font-normal text-ink/70">
                 · {r._count.members} members · {r._count.bans} removed
               </span>
             </p>
@@ -63,7 +63,7 @@ export default async function RoomsAdmin() {
                 </li>
               ))}
               {r.members.length === 0 && (
-                <li className="text-ink/50">No hosts yet.</li>
+                <li className="text-ink/70">No hosts yet.</li>
               )}
             </ul>
             <form action={roomHostAction} className="mt-2 flex gap-2">

@@ -89,8 +89,8 @@ export default function EventPage() {
     if (res.ok) router.push("/events");
   }
 
-  if (error) return <p className="text-ink/60">{error}</p>;
-  if (!event) return <p className="text-ink/60">Loading…</p>;
+  if (error) return <p className="text-ink/70">{error}</p>;
+  if (!event) return <p className="text-ink/70">Loading…</p>;
 
   const place =
     event.kind === "ONLINE"
@@ -119,7 +119,7 @@ export default function EventPage() {
           {place}
           {event.km != null && ` · about ${event.km} km away`}
         </p>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="mt-1 text-sm text-ink/70">
           Hosted by{" "}
           {event.isHost ? (
             "you"
@@ -221,7 +221,7 @@ export default function EventPage() {
                 >
                   {a.displayName}
                 </Link>{" "}
-                <span className="text-ink/55">· {a.status}</span>
+                <span className="text-ink/70">· {a.status}</span>
               </li>
             ))}
           </ul>
@@ -234,7 +234,7 @@ export default function EventPage() {
         </Button>
       )}
 
-      <p className="text-xs text-ink/50">
+      <p className="text-xs text-ink/70">
         Meeting someone new? Read our{" "}
         <Link href="/safety" className="underline">
           safety tips

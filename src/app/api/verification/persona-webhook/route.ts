@@ -1,35 +1,10 @@
 import { NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { personaSignatureValid } from "@/lib/persona";
 import { ageFromBirthdate, applyProviderDecision } from "@/lib/verification";
 
 export const dynamic = "force-dynamic";
-
-const TOLERANCE_SECONDS = 5 * 60;
-
-/**
- * Persona-Signature: "t=<unix>,v1=<hex>" — several v1 values may be present
- * (space separated) while a webhook secret is being rotated.
- */
-function signatureValid(
-  header: string | null,
-  rawBody: string,
-  secret: string,
-) {
-  if (!header) return false;
-  const t = /(?:^|,)\s*t=(\d+)/.exec(header)?.[1];
-  const sigs = [...header.matchAll(/v1=([0-9a-f]+)/g)].map((m) => m[1]);
-  if (!t || sigs.length === 0) return false;
-  if (Math.abs(Date.now() / 1000 - Number(t)) > TOLERANCE_SECONDS) return false;
-  const expected = createHmac("sha256", secret)
-    .update(`${t}.${rawBody}`)
-    .digest();
-  return sigs.some((s) => {
-    const got = Buffer.from(s, "hex");
-    return got.length === expected.length && timingSafeEqual(got, expected);
-  });
-}
 
 type InquiryAttributes = Record<string, unknown>;
 
@@ -48,7 +23,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const rawBody = await req.text();
-  if (!signatureValid(req.headers.get("persona-signature"), rawBody, secret)) {
+  if (
+    !personaSignatureValid(
+      req.headers.get("persona-signature"),
+      rawBody,
+      secret,
+    )
+  ) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

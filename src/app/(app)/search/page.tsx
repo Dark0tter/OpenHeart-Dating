@@ -121,7 +121,7 @@ export default function SearchPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Search
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         &ldquo;Best match&rdquo; weighs who you&apos;re each looking for, shared
         goals and interests, limits, distance, and recent activity. Incognito
         members only appear once they&apos;ve liked you, matched with you, or
@@ -268,7 +268,7 @@ export default function SearchPage() {
               </Link>
               <div className="space-y-3 p-4">
                 <p className="flex flex-wrap gap-2 text-xs">
-                  <span className="text-ink/60">{p.activity}</span>
+                  <span className="text-ink/70">{p.activity}</span>
                   {p.photoVerified && (
                     <span className="font-medium text-forest">
                       Photo verified
@@ -330,7 +330,7 @@ export default function SearchPage() {
       )}
 
       {!error && !loading && profiles.length === 0 && (
-        <p className="mt-10 text-ink/55">
+        <p className="mt-10 text-ink/70">
           Nobody matches these filters yet. Try a wider distance or fewer
           filters.
         </p>

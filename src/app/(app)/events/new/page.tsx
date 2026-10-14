@@ -78,7 +78,7 @@ export default function NewEventPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Host an event
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         First munches should be in a public place like a café or bar. The exact
         address or link is only shown to people who RSVP &ldquo;going&rdquo;,
         and you can see who&apos;s coming.
@@ -214,7 +214,7 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        <p className="text-xs text-ink/55">
+        <p className="text-xs text-ink/70">
           No ticket sales, paid entry links or money requests — events are free
           to list and attend through OpenHeart. Follow the community guidelines.
         </p>

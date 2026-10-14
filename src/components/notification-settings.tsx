@@ -94,7 +94,7 @@ export function NotificationSettings() {
   return (
     <section className="space-y-4 rounded-lg border border-forest/10 bg-cream/60 p-4">
       <h2 className="font-medium text-forest">Notifications</h2>
-      <p className="text-sm text-ink/60">
+      <p className="text-sm text-ink/70">
         Notifications never include message text or anything from your profile,
         so nothing private shows on a lock screen.
       </p>
@@ -112,18 +112,18 @@ export function NotificationSettings() {
           </Button>
         )}
         {push === "blocked" && (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             Notifications are blocked in your browser settings for this site.
           </p>
         )}
         {push === "unsupported" && (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             This browser doesn&apos;t support notifications. On iPhone, add
             OpenHeart to your Home Screen first.
           </p>
         )}
         {push === "unconfigured" && (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             Device notifications aren&apos;t available yet.
           </p>
         )}
@@ -141,7 +141,7 @@ export function NotificationSettings() {
         />
         <span>
           Email me about matches, requests and messages while I&apos;m away
-          <span className="block text-ink/55">
+          <span className="block text-ink/70">
             Account and safety emails are always sent.
           </span>
         </span>
@@ -159,7 +159,7 @@ export function NotificationSettings() {
         />
         <span>
           Read receipts
-          <span className="block text-ink/55">
+          <span className="block text-ink/70">
             When off, people won&apos;t see when you&apos;ve read their
             messages, and you won&apos;t see when they&apos;ve read yours.
           </span>

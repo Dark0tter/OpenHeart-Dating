@@ -3,10 +3,10 @@
 :root {
   --oh-ink: #1a2420;
   --oh-forest: #2d4a3e;
-  --oh-sage: #6b8f7a;
+  --oh-sage: #4f725e;
   --oh-mist: #e8efe9;
   --oh-bloom: #f3ebe3;
-  --oh-coral: #c45c4a;
+  --oh-coral: #ad4b3b;
   --oh-coral-deep: #9e3f30;
   --oh-cream: #faf6f1;
   --background: var(--oh-bloom);
@@ -224,4 +224,37 @@ body {
 
 .animate-oh-pulse {
   animation: oh-pulse-soft 4s ease-in-out infinite;
+}
+
+/* A visible keyboard focus ring everywhere, without showing it on mouse clicks. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--oh-forest);
+  outline-offset: 2px;
+}
+
+.oh-skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 100;
+  border-radius: 0.375rem;
+  background: var(--oh-forest);
+  color: var(--oh-cream);
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+.oh-skip-link:focus {
+  top: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

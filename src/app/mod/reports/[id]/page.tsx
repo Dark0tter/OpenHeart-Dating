@@ -85,11 +85,11 @@ export default async function ReportDetail({
         </Link>
         <h1 className="mt-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           {report.reason.replaceAll("_", " ").toLowerCase()}{" "}
-          <span className="text-base text-ink/60">
+          <span className="text-base text-ink/70">
             ({report.priority.toLowerCase()} priority, {report.status})
           </span>
         </h1>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="mt-1 text-sm text-ink/70">
           Filed {report.createdAt.toUTCString()} by{" "}
           {report.reporter
             ? (report.reporter.profile?.displayName ?? report.reporter.email)
@@ -123,7 +123,7 @@ export default async function ReportDetail({
             </Link>{" "}
             · {report.reportedUser.email}
           </p>
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             Status {report.reportedUser.accountStatus.toLowerCase()} · joined{" "}
             {report.reportedUser.createdAt.toISOString().slice(0, 10)} ·{" "}
             {priorReports} other report{priorReports === 1 ? "" : "s"}
@@ -175,7 +175,7 @@ export default async function ReportDetail({
                     [{m.safetyFlag}]
                   </span>
                 )}
-                <span className="ml-2 text-xs text-ink/50">
+                <span className="ml-2 text-xs text-ink/70">
                   {m.createdAt.toISOString().slice(0, 16).replace("T", " ")}
                 </span>
               </li>
@@ -267,7 +267,7 @@ export default async function ReportDetail({
         <ul className="mt-2 space-y-1 text-sm">
           {history.map((h) => (
             <li key={h.id}>
-              <span className="text-ink/50">
+              <span className="text-ink/70">
                 {h.createdAt.toISOString().slice(0, 16).replace("T", " ")}
               </span>{" "}
               {h.action.replaceAll("_", " ")}
@@ -275,7 +275,7 @@ export default async function ReportDetail({
             </li>
           ))}
           {history.length === 0 && (
-            <li className="text-ink/60">No actions yet.</li>
+            <li className="text-ink/70">No actions yet.</li>
           )}
         </ul>
       </section>

@@ -64,7 +64,7 @@ export default function MessagesPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Messages
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Private chats open when someone accepts your request or you match.
         Messaging is never paywalled.
       </p>
@@ -122,7 +122,7 @@ export default function MessagesPage() {
                   <p className="font-medium text-ink">
                     {c.otherUser.displayName}, {c.otherUser.age}
                   </p>
-                  <p className="line-clamp-1 text-sm text-ink/55">
+                  <p className="line-clamp-1 text-sm text-ink/70">
                     {c.lastMessage?.body ?? "Say hello"}
                   </p>
                 </div>
@@ -132,7 +132,7 @@ export default function MessagesPage() {
           ))}
         </ul>
         {conversations.length === 0 && (
-          <p className="mt-3 text-sm text-ink/55">
+          <p className="mt-3 text-sm text-ink/70">
             No private chats yet. Meet people in{" "}
             <Link href="/rooms" className="underline">
               rooms

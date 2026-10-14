@@ -55,7 +55,7 @@ export default function EventsPage() {
           <Button type="button">Host an event</Button>
         </Link>
       </div>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Munches, socials, classes and online meetups run by members. Exact
         addresses are only shared with people who RSVP &ldquo;going&rdquo;.
       </p>
@@ -93,9 +93,9 @@ export default function EventsPage() {
       )}
 
       {events === null ? (
-        <p className="mt-8 text-ink/60">Loading…</p>
+        <p className="mt-8 text-ink/70">Loading…</p>
       ) : events.length === 0 ? (
-        <p className="mt-8 text-ink/60">
+        <p className="mt-8 text-ink/70">
           No events here yet. Why not{" "}
           <Link href="/events/new" className="text-forest underline">
             host one
@@ -116,7 +116,7 @@ export default function EventsPage() {
                 <h2 className="mt-1 font-[family-name:var(--font-fraunces)] text-xl text-forest">
                   {e.title}
                 </h2>
-                <p className="mt-1 text-sm text-ink/65">
+                <p className="mt-1 text-sm text-ink/70">
                   {e.kind === "ONLINE"
                     ? "Online"
                     : [e.venueName, e.city, e.state].filter(Boolean).join(", ")}
@@ -125,7 +125,7 @@ export default function EventsPage() {
                 <p className="mt-2 line-clamp-2 text-sm text-ink/75">
                   {e.description}
                 </p>
-                <p className="mt-3 text-xs text-ink/55">
+                <p className="mt-3 text-xs text-ink/70">
                   Hosted by {e.isHost ? "you" : e.host.displayName} · {e.going}{" "}
                   going
                   {e.full && " · full"}

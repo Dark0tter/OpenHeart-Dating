@@ -65,13 +65,13 @@ export default function RoomsPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Rooms
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Group chats for shared interests. When you add interests to your
         profile, you&apos;re invited to matching rooms. If you click with
         someone, ask to talk privately.
       </p>
       {restricted && (
-        <p className="mt-2 text-sm text-ink/60">
+        <p className="mt-2 text-sm text-ink/70">
           More rooms are available on the OpenHeart website.
         </p>
       )}
@@ -187,7 +187,7 @@ function RoomRow({
             Matches your profile
           </span>
         )}
-        <p className="text-sm text-ink/55">
+        <p className="text-sm text-ink/70">
           {room.description} · {room.memberCount}{" "}
           {room.memberCount === 1 ? "member" : "members"}
         </p>

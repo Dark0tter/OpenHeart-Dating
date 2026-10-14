@@ -45,7 +45,7 @@ export default async function ReportsPage({
             className={
               s === status && !sp.escalated
                 ? "font-semibold text-forest"
-                : "text-forest/70"
+                : "text-forest/80"
             }
           >
             {s[0].toUpperCase() + s.slice(1)}
@@ -54,14 +54,14 @@ export default async function ReportsPage({
         <Link
           href="/mod/reports?escalated=1"
           className={
-            sp.escalated ? "font-semibold text-forest" : "text-forest/70"
+            sp.escalated ? "font-semibold text-forest" : "text-forest/80"
           }
         >
           Child-safety cases
         </Link>
       </nav>
       <table className="mt-6 w-full text-left text-sm">
-        <thead className="text-ink/60">
+        <thead className="text-ink/70">
           <tr>
             <th className="py-2">Priority</th>
             <th>Reason</th>
@@ -105,7 +105,7 @@ export default async function ReportsPage({
         </tbody>
       </table>
       {reports.length === 0 && (
-        <p className="mt-6 text-ink/60">Nothing here.</p>
+        <p className="mt-6 text-ink/70">Nothing here.</p>
       )}
     </div>
   );

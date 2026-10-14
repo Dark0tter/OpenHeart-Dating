@@ -96,7 +96,7 @@ export default function CheckInPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           Date check-in
         </h1>
-        <p className="mt-1 text-sm text-ink/65">
+        <p className="mt-1 text-sm text-ink/70">
           Tell us when you expect to be home. If you don&apos;t tap
           &ldquo;I&apos;m safe&rdquo; within 15 minutes of that time, we email
           someone you trust with the details you enter here. See more{" "}
@@ -239,7 +239,7 @@ export default function CheckInPage() {
           <input type="checkbox" name="tellContactNow" defaultChecked /> Let
           them know now that they&apos;re my safety contact
         </label>
-        <p className="text-xs text-ink/55">
+        <p className="text-xs text-ink/70">
           We only use these details for this check-in and delete them a week
           after it ends.
         </p>

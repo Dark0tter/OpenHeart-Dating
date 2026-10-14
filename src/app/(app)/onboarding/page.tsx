@@ -265,7 +265,7 @@ function OnboardingInner() {
   }
 
   if (!tags || !loaded) {
-    return <p className="text-ink/60">Loading onboarding…</p>;
+    return <p className="text-ink/70">Loading onboarding…</p>;
   }
 
   return (
@@ -273,7 +273,7 @@ function OnboardingInner() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         {isActive ? "Edit your profile" : "Build your profile"}
       </h1>
-      <p className="mt-2 text-sm text-ink/65">
+      <p className="mt-2 text-sm text-ink/70">
         Identity and attraction use tags — never locked male/female search
         buckets. Completing age verification is required before activation.
       </p>
@@ -316,7 +316,7 @@ function OnboardingInner() {
           <legend className="px-1 text-sm font-medium text-forest">
             Location
           </legend>
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             Used only to show approximate distance (like &ldquo;about 10 km
             away&rdquo;). We round it to about 1 km and never show your exact
             spot.
@@ -367,7 +367,7 @@ function OnboardingInner() {
                 Remove location
               </Button>
             )}
-            <span className="text-xs text-ink/55">
+            <span className="text-xs text-ink/70">
               {hasCoords
                 ? "Distance is on."
                 : "Type a city or share your location to see distances."}
@@ -394,7 +394,7 @@ function OnboardingInner() {
           <legend className="px-1 text-sm font-medium text-forest">
             Profile questions
           </legend>
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             Pick up to {MAX_PROMPTS}. Good answers give people something easy to
             message you about.
           </p>
@@ -506,13 +506,13 @@ function OnboardingInner() {
           <p className="text-sm font-medium text-forest">
             Interests &amp; kinks
           </p>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-ink/70">
             Optional. Anything you mark Favorite, Interested or Curious gets you
             invited to that group&apos;s room. No and Hard limit are shown on
             your profile so others know your boundaries.
           </p>
           {tags.contentRestricted && (
-            <p className="mt-2 text-sm text-ink/60">
+            <p className="mt-2 text-sm text-ink/70">
               The app shows a shorter list. You can see and edit the full list
               on the OpenHeart website, and anything you set there is kept.
             </p>
@@ -528,7 +528,7 @@ function OnboardingInner() {
                   <summary className="cursor-pointer text-sm text-forest">
                     {cat.name}
                     {chosen > 0 && (
-                      <span className="ml-2 text-xs text-ink/50">
+                      <span className="ml-2 text-xs text-ink/70">
                         {chosen} selected
                       </span>
                     )}
@@ -590,7 +590,7 @@ function OnboardingInner() {
         {!isActive && (
           <div className="rounded-md border border-forest/15 bg-cream/60 p-4">
             <p className="font-medium text-forest">Age verification</p>
-            <p className="mt-1 text-sm text-ink/60">
+            <p className="mt-1 text-sm text-ink/70">
               Required before profile activation. We store a verification token
               and status only — never ID images.
             </p>

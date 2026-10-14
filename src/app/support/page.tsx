@@ -10,7 +10,10 @@ export default async function SupportPage() {
   return (
     <div className="oh-atmosphere min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-xl space-y-6 px-6 pb-20 pt-6 text-ink/85">
+      <main
+        id="main"
+        className="mx-auto max-w-xl space-y-6 px-6 pb-20 pt-6 text-ink/85"
+      >
         <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
           Contact support
         </h1>

@@ -33,7 +33,7 @@ export default async function AuditLog({
         Audit log
       </h1>
       <table className="mt-6 w-full text-left text-sm">
-        <thead className="text-ink/60">
+        <thead className="text-ink/70">
           <tr>
             <th className="py-2">When (UTC)</th>
             <th>Who</th>

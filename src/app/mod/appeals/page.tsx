@@ -30,7 +30,7 @@ export default async function AppealsPage() {
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Appeals
       </h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         You can&apos;t decide an appeal on a suspension you made. Your note is
         emailed to the member.
       </p>
@@ -56,6 +56,7 @@ export default async function AppealsPage() {
               <input
                 name="note"
                 placeholder="Note to the member"
+                aria-label="Note to the member"
                 className="h-9 min-w-56 flex-1 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
               />
               <button name="decision" value="approve" className={btn}>
@@ -73,7 +74,7 @@ export default async function AppealsPage() {
         ))}
       </ul>
       {appeals.length === 0 && (
-        <p className="mt-6 text-ink/60">No appeals waiting.</p>
+        <p className="mt-6 text-ink/70">No appeals waiting.</p>
       )}
     </div>
   );

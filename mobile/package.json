@@ -1,0 +1,23 @@
+{
+  "name": "openheart-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "iOS and Android shells for the OpenHeart website (Capacitor).",
+  "scripts": {
+    "sync": "cap sync",
+    "ios": "cap open ios",
+    "android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

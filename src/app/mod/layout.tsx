@@ -53,13 +53,15 @@ export default async function ModLayout({
           </nav>
           <Link
             href="/feed"
-            className="ml-auto text-sm text-ink/60 hover:underline"
+            className="ml-auto text-sm text-ink/70 hover:underline"
           >
             Back to site
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main" className="mx-auto max-w-6xl px-4 py-8">
+        {children}
+      </main>
     </div>
   );
 }

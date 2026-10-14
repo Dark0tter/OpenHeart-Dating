@@ -80,7 +80,7 @@ export function SelfieVerify() {
           <p className="rounded-md bg-mist px-3 py-2 font-medium text-forest">
             {state.gesture}
           </p>
-          <p className="text-xs text-ink/60">
+          <p className="text-xs text-ink/70">
             Only moderators see it, and it&apos;s deleted right after review.
           </p>
           <input

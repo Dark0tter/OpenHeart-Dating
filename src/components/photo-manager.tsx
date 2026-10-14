@@ -98,7 +98,7 @@ export function PhotoManager({
         <h2 id="photos-heading" className="font-medium text-forest">
           Your photos
         </h2>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink/70">
           Up to 12. Location and camera details are removed from every photo.
           Your main photo must be visible to everyone and show your face.
         </p>
@@ -141,7 +141,7 @@ export function PhotoManager({
                     p.status === "REJECTED"
                       ? "text-coral-deep"
                       : p.status === "PENDING"
-                        ? "text-ink/60"
+                        ? "text-ink/70"
                         : "text-forest"
                   }
                 >

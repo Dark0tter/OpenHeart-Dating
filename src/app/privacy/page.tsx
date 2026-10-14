@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <div className="oh-atmosphere min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-6 pb-20 pt-6">
+      <main id="main" className="mx-auto max-w-2xl px-6 pb-20 pt-6">
         <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
           Our privacy promise
         </h1>
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
           and a note goes to our moderation team for review.
         </p>
 
-        <p className="mt-12 text-sm text-ink/55">
+        <p className="mt-12 text-sm text-ink/70">
           See also our{" "}
           <Link href="/guidelines" className="underline">
             community guidelines

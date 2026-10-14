@@ -49,7 +49,7 @@ export function AppNav() {
                     "rounded-md px-3 py-2 whitespace-nowrap transition-colors",
                     isActive(l.href)
                       ? "bg-forest text-cream"
-                      : "text-forest/70 hover:bg-mist hover:text-ink",
+                      : "text-forest/80 hover:bg-mist hover:text-ink",
                   )}
                 >
                   {l.label}
@@ -87,7 +87,7 @@ export function AppNav() {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
-                    active ? "text-coral" : "text-forest/60 hover:text-ink",
+                    active ? "text-coral" : "text-forest/80 hover:text-ink",
                   )}
                 >
                   <Icon

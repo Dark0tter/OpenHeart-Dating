@@ -36,7 +36,7 @@ export default async function SupportQueue() {
             key={t.id}
             className={`rounded-lg border p-4 ${URGENT.has(t.category) ? "border-coral" : "border-forest/10"}`}
           >
-            <p className="text-sm text-ink/60">
+            <p className="text-sm text-ink/70">
               {label(t.category)} · {t.email} · {t.createdAt.toUTCString()} · #
               {t.id.slice(0, 8)}
             </p>
@@ -57,7 +57,7 @@ export default async function SupportQueue() {
           </li>
         ))}
       </ul>
-      {tickets.length === 0 && <p className="mt-6 text-ink/60">Inbox zero.</p>}
+      {tickets.length === 0 && <p className="mt-6 text-ink/70">Inbox zero.</p>}
     </div>
   );
 }

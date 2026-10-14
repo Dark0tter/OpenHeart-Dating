@@ -97,7 +97,7 @@ export function PhotoGallery({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-ink/60">No photos to show yet.</p>
+        <p className="text-sm text-ink/70">No photos to show yet.</p>
       )}
 
       {locked.map((l) => (
@@ -110,9 +110,9 @@ export function PhotoGallery({
             {ownerName} says yes.
           </span>
           {sent[l.scope] === "PENDING" ? (
-            <span className="text-ink/60">Request sent</span>
+            <span className="text-ink/70">Request sent</span>
           ) : sent[l.scope] === "DENIED" ? (
-            <span className="text-ink/60">They declined</span>
+            <span className="text-ink/70">They declined</span>
           ) : (
             <Button
               size="sm"

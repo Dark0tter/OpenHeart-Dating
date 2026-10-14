@@ -6,7 +6,10 @@ export default function Home() {
     <div className="oh-atmosphere oh-grain relative min-h-screen overflow-hidden">
       <SiteHeader />
 
-      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-end px-6 pb-16 pt-8 md:justify-center md:px-10 md:pb-24">
+      <main
+        id="main"
+        className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-end px-6 pb-16 pt-8 md:justify-center md:px-10 md:pb-24"
+      >
         <div className="max-w-xl">
           <h1 className="animate-oh-rise font-[family-name:var(--font-fraunces)] text-5xl leading-[1.05] tracking-tight text-forest md:text-7xl">
             OpenHeart
