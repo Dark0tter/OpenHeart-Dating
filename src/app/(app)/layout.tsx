@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppNav } from "@/components/app-nav";
 import { SponsorSlot } from "@/components/sponsor-slot";
+import { SponsorGate } from "@/components/sponsor-gate";
 import { EmailBanner } from "@/components/email-banner";
 import { RealtimeProvider } from "@/components/realtime";
 import { redirect } from "next/navigation";
@@ -52,7 +53,9 @@ export default async function AppLayout({
           {children}
         </main>
         <footer className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10">
-          <SponsorSlot />
+          <SponsorGate>
+            <SponsorSlot />
+          </SponsorGate>
           <nav
             aria-label="Site information"
             className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-ink/70"

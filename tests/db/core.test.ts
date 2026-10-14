@@ -18,6 +18,7 @@ import { runJobs, CHECKIN_GRACE_MS } from "@/lib/jobs";
 import { applyProviderDecision } from "@/lib/verification";
 import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
+import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -302,5 +303,75 @@ describe("staff alerts", () => {
     expect((await dailyDigest(new Date("2099-01-02T14:00:00Z"))).sent).toBe(
       true,
     );
+  });
+});
+
+describe("sponsors", () => {
+  const ALL = ["STANDARD", "ADULT_TEXT", "WEB_ONLY"] as const;
+
+  async function placement(data: {
+    approved: boolean;
+    tier: "STANDARD" | "WEB_ONLY";
+  }) {
+    return prisma.sponsorPlacement.create({
+      data: {
+        sponsorName: "Test sponsor",
+        title: "Hello",
+        linkUrl: "https://example.org",
+        targetKinkSlugs: [],
+        targetGoalSlugs: [],
+        contentTier: data.tier,
+        approvedAt: data.approved ? new Date() : null,
+        dailyCap: 3,
+      },
+    });
+  }
+
+  it("never shows unapproved listings, and the apps only get ones approved for everyone", async () => {
+    await prisma.sponsorPlacement.deleteMany();
+    await placement({ approved: false, tier: "STANDARD" });
+    expect(await pickSponsorPlacement(null, [...ALL])).toBeNull();
+
+    const web = await placement({ approved: true, tier: "WEB_ONLY" });
+    expect((await pickSponsorPlacement(null, [...ALL]))?.id).toBe(web.id);
+    expect(
+      await pickSponsorPlacement(null, [...ALL], { app: true }),
+    ).toBeNull();
+
+    const everyone = await placement({ approved: true, tier: "STANDARD" });
+    expect(
+      (await pickSponsorPlacement(null, [...ALL], { app: true }))?.id,
+    ).toBe(everyone.id);
+  });
+
+  it("respects the per-person daily limit", async () => {
+    await prisma.sponsorPlacement.deleteMany();
+    const p = await placement({ approved: true, tier: "STANDARD" });
+    expect(
+      await pickSponsorPlacement(null, [...ALL], { seen: { [p.id]: 3 } }),
+    ).toBeNull();
+    expect(
+      await pickSponsorPlacement(null, [...ALL], {
+        app: true,
+        seen: { [p.id]: 2 },
+      }),
+    ).toBeNull();
+    expect(
+      (await pickSponsorPlacement(null, [...ALL], { seen: { [p.id]: 2 } }))?.id,
+    ).toBe(p.id);
+  });
+
+  it("keeps anonymous daily totals", async () => {
+    await prisma.sponsorPlacement.deleteMany();
+    const p = await placement({ approved: true, tier: "STANDARD" });
+    const now = new Date("2026-10-14T12:00:00Z");
+    await recordSponsorEvent(p.id, "view", false, now);
+    await recordSponsorEvent(p.id, "view", true, now);
+    await recordSponsorEvent(p.id, "click", true, now);
+    const rows = await prisma.sponsorDailyStat.findMany({
+      where: { placementId: p.id },
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ views: 2, appViews: 1, clicks: 1 });
   });
 });

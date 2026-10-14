@@ -1,7 +1,15 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { randomUUID } from "node:crypto";
 import { requireUser } from "@/lib/session";
-import { allowedTiers } from "@/lib/content-policy";
-import { pickSponsorPlacement } from "@/lib/sponsors";
+import { allowedTiers, isAppRequest } from "@/lib/content-policy";
+import {
+  isSafeSponsorUrl,
+  parseSeen,
+  pickSponsorPlacement,
+  SEEN_COOKIE,
+} from "@/lib/sponsors";
+import { SponsorBeacon } from "@/components/sponsor-beacon";
 
 const LABELS = {
   SPONSOR_SPOTLIGHT: "Sponsor Spotlight",
@@ -14,21 +22,27 @@ const LABELS = {
 export async function SponsorSlot() {
   let placement;
   try {
-    const user = await requireUser();
+    const [user, app, jar] = await Promise.all([
+      requireUser(),
+      isAppRequest(),
+      cookies(),
+    ]);
     placement = await pickSponsorPlacement(
       user?.id ?? null,
       await allowedTiers(user),
+      { app, seen: parseSeen(jar.get(SEEN_COOKIE)?.value, new Date()) },
     );
   } catch {
     return null;
   }
-  if (!placement || !isSafeUrl(placement.linkUrl)) return null;
+  if (!placement || !isSafeSponsorUrl(placement.linkUrl)) return null;
 
   return (
     <aside
       aria-label={LABELS[placement.label]}
       className="mx-auto mt-12 max-w-[300px] rounded-md border border-forest/15 bg-cream/70 p-3 text-sm"
     >
+      <SponsorBeacon placementId={placement.id} renderId={randomUUID()} />
       <p className="text-[11px] font-medium uppercase tracking-wide text-sage">
         {LABELS[placement.label]} · {placement.sponsorName}
       </p>
@@ -37,7 +51,7 @@ export async function SponsorSlot() {
         <p className="mt-1 line-clamp-3 text-ink/70">{placement.body}</p>
       )}
       <a
-        href={placement.linkUrl}
+        href={`/api/sponsors/${placement.id}/click`}
         target="_blank"
         rel="sponsored noopener noreferrer"
         referrerPolicy="no-referrer"
@@ -53,12 +67,4 @@ export async function SponsorSlot() {
       </p>
     </aside>
   );
-}
-
-function isSafeUrl(url: string): boolean {
-  try {
-    return new URL(url).protocol === "https:";
-  } catch {
-    return false;
-  }
 }

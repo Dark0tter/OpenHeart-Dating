@@ -43,6 +43,17 @@ export default function PrivacyPage() {
           Limit. It never uses your browsing, searches, messages, or device.
           Supporters can turn it off.
         </p>
+        <p className="mt-3 text-ink/75">
+          Sponsors are approved by a person before they appear. It only appears
+          on a few pages (home, search, the rooms list, events, and your own
+          profile) — never in messages, room chats, signup, safety pages, or
+          next to another member&apos;s profile. In the iPhone and Android apps
+          it only shows listings approved as suitable for everyone. Sponsors get
+          anonymous daily totals of how many times their listing was shown and
+          clicked. To avoid repeats, your browser keeps a small cookie counting
+          how often you&apos;ve seen each listing today; that count stays on
+          your device.
+        </p>
 
         <h2 className="mt-12 font-[family-name:var(--font-fraunces)] text-2xl text-forest">
           What we do keep

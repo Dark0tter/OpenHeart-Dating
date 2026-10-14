@@ -932,10 +932,10 @@ model Post {
 }
 
 /// Targeting uses only kink and relationship-goal slugs the member chose to list.
-/// There are deliberately no impression, click, or viewer columns.
+/// There are deliberately no viewer columns; reach is counted in SponsorDailyStat totals.
 model SponsorPlacement {
-  id              String       @id @default(uuid())
-  label           SponsorLabel @default(SPONSOR_SPOTLIGHT)
+  id              String             @id @default(uuid())
+  label           SponsorLabel       @default(SPONSOR_SPOTLIGHT)
   sponsorName     String
   title           String
   body            String?
@@ -943,14 +943,34 @@ model SponsorPlacement {
   targetKinkSlugs String[]
   targetGoalSlugs String[]
   /// Set from the creative itself; explicit creatives must not reach the apps.
-  contentTier     ContentTier  @default(WEB_ONLY)
-  isActive        Boolean      @default(true)
-  startsAt        DateTime     @default(now())
+  contentTier     ContentTier        @default(WEB_ONLY)
+  isActive        Boolean            @default(true)
+  startsAt        DateTime           @default(now())
   endsAt          DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  /// Never shown until an admin approves it.
+  approvedAt      DateTime?
+  approvedById    String?
+  /// Most times one person sees it per day (kept in their own cookie, not on the server).
+  dailyCap        Int                @default(3)
+  /// Contact and billing notes for staff; never shown to members.
+  staffNotes      String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  stats           SponsorDailyStat[]
 
   @@index([isActive, startsAt])
+}
+
+/// Anonymous daily totals for advertisers. No member ids are ever stored here.
+model SponsorDailyStat {
+  placementId String
+  day         DateTime         @db.Date
+  views       Int              @default(0)
+  appViews    Int              @default(0)
+  clicks      Int              @default(0)
+  placement   SponsorPlacement @relation(fields: [placementId], references: [id], onDelete: Cascade)
+
+  @@id([placementId, day])
 }
 
 /// Granter lets viewer see gated content: an adult album, or an incognito profile.

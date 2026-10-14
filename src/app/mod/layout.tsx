@@ -46,9 +46,17 @@ export default async function ModLayout({
               </Link>
             ))}
             {staff.role === UserRole.ADMIN && (
-              <Link href="/mod/audit" className="text-forest hover:underline">
-                Audit log
-              </Link>
+              <>
+                <Link
+                  href="/mod/sponsors"
+                  className="text-forest hover:underline"
+                >
+                  Sponsors
+                </Link>
+                <Link href="/mod/audit" className="text-forest hover:underline">
+                  Audit log
+                </Link>
+              </>
             )}
           </nav>
           <Link

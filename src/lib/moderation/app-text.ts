@@ -49,6 +49,10 @@ export function maskExplicit(text: string): string {
   return text.replace(EXPLICIT_RE, (w) => w[0] + "•".repeat(w.length - 1));
 }
 
+export function hasExplicit(text: string): boolean {
+  return new RegExp(EXPLICIT_RE.source, "i").test(text);
+}
+
 /** Returns a masker bound to the viewer's tiers, for mapping over rows. */
 export function textFilterFor(tiers: ContentTier[]): (text: string) => string {
   return shouldMaskText(tiers) ? maskExplicit : (text) => text;
