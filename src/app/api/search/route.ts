@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/session";
-import { searchProfiles } from "@/lib/discovery";
-import { ageFromDob } from "@/lib/utils";
+import { searchProfiles, type SearchSort } from "@/lib/discovery";
+import { activityLabel, ageFromDob, approxDistanceLabel } from "@/lib/utils";
 import { photoSrc } from "@/lib/photos";
+
+const SORTS: SearchSort[] = ["best", "recent", "nearest"];
 
 export async function GET(req: Request) {
   const user = await requireUser();
@@ -15,8 +17,10 @@ export async function GET(req: Request) {
     const v = searchParams.get(key);
     return v ? v.split(",").filter(Boolean) : undefined;
   };
+  const sortParam = searchParams.get("sort") as SearchSort | null;
+  const distanceParam = searchParams.get("distance");
 
-  const profiles = await searchProfiles({
+  const { results, hasMore } = await searchProfiles({
     viewerUserId: user.id,
     viewerLat: user.profile.latitude,
     viewerLng: user.profile.longitude,
@@ -26,28 +30,38 @@ export async function GET(req: Request) {
     kinkIds: parseList("kinks"),
     minAge: num(searchParams.get("minAge")),
     maxAge: num(searchParams.get("maxAge")),
-    maxDistanceKm: num(searchParams.get("distance")) ?? user.profile.radiusKm,
+    maxDistanceKm:
+      distanceParam === "any"
+        ? undefined
+        : (num(distanceParam) ?? user.profile.radiusKm),
     verifiedOnly: searchParams.get("verified") === "1",
-    cursor: searchParams.get("cursor") ?? undefined,
+    photoVerifiedOnly: searchParams.get("photoVerified") === "1",
+    hasPhoto: searchParams.get("hasPhoto") === "1",
+    sort: sortParam && SORTS.includes(sortParam) ? sortParam : "best",
+    page: num(searchParams.get("page")) ?? 0,
     limit: num(searchParams.get("limit")) ?? 24,
   });
 
   return NextResponse.json({
-    profiles: profiles.map((p) => ({
+    hasLocation: user.profile.latitude != null,
+    hasMore,
+    profiles: results.map(({ profile: p, km }) => ({
       id: p.id,
       userId: p.userId,
       displayName: p.displayName,
       pronouns: p.pronouns,
       bio: p.bio,
       age: ageFromDob(p.user.dateOfBirth),
-      location: [p.city, p.state, p.country].filter(Boolean).join(", ") || null,
+      location: [p.city, p.state].filter(Boolean).join(", ") || null,
+      distance: km != null ? approxDistanceLabel(km) : null,
+      activity: activityLabel(p.user.lastActiveAt),
       visibility: p.visibility,
       verified: p.user.verification?.status === "VERIFIED_ADULT",
+      photoVerified: Boolean(p.user.photoVerifiedAt),
       identity: p.identityTags.map((t) => t.tag.label),
       orientation: p.orientationTags.map((t) => t.tag.label),
       goals: p.goalTags.map((t) => t.tag.label),
       relationshipStyles: p.relationshipStyleTags.map((t) => t.tag.label),
-      photoVerified: Boolean(p.user.photoVerifiedAt),
       photos: p.photos.map((ph) => ({
         id: ph.id,
         url: photoSrc(ph.id, "thumb"),

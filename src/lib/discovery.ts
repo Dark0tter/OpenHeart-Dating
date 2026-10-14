@@ -7,6 +7,9 @@ import {
 import { prisma } from "@/lib/prisma";
 import { blockedUserIds, isBlockedEitherWay } from "@/lib/safety";
 import { distanceKm } from "@/lib/utils";
+import { scoreMatch, type RankProfile } from "@/lib/ranking";
+
+export type SearchSort = "best" | "recent" | "nearest";
 
 export type SearchFilters = {
   identityTagIds?: string[];
@@ -17,12 +20,18 @@ export type SearchFilters = {
   maxAge?: number;
   maxDistanceKm?: number;
   verifiedOnly?: boolean;
+  photoVerifiedOnly?: boolean;
+  hasPhoto?: boolean;
   viewerLat?: number | null;
   viewerLng?: number | null;
   viewerUserId: string;
+  sort?: SearchSort;
   limit?: number;
-  cursor?: string;
+  page?: number;
 };
+
+/** Candidates considered per search; ranking happens on this pool. */
+const POOL_SIZE = 300;
 
 /**
  * Incognito owners the viewer may see: an active match, the incognito owner
@@ -69,8 +78,54 @@ export async function incognitoUserIdsVisibleTo(
   return ids;
 }
 
+const rankInclude = {
+  identityTags: { include: { tag: true } },
+  orientationTags: { include: { tag: true } },
+  goalTags: { include: { tag: true } },
+  relationshipStyleTags: { include: { tag: true } },
+  seekingIdentityTags: true,
+  kinks: { select: { kinkId: true, level: true } },
+  _count: { select: { prompts: true } },
+  photos: {
+    where: { visibility: "PUBLIC", status: "APPROVED" },
+    orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+    take: 3,
+  },
+  user: {
+    select: {
+      id: true,
+      dateOfBirth: true,
+      lastActiveAt: true,
+      photoVerifiedAt: true,
+      verification: { select: { status: true } },
+    },
+  },
+} satisfies Prisma.ProfileInclude;
+
+type RankedRow = Prisma.ProfileGetPayload<{ include: typeof rankInclude }>;
+
+function toRankProfile(p: RankedRow): RankProfile {
+  return {
+    identityIds: p.identityTags.map((t) => t.tagId),
+    seekingIdentityIds: p.seekingIdentityTags.map((t) => t.tagId),
+    goalIds: p.goalTags.map((t) => t.tagId),
+    styleIds: p.relationshipStyleTags.map((t) => t.tagId),
+    kinks: p.kinks,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    lastActiveAt: p.user.lastActiveAt,
+    publicPhotos: p.photos.length,
+    bioLength: p.bio?.trim().length ?? 0,
+    promptCount: p._count.prompts,
+    photoVerified: Boolean(p.user.photoVerifiedAt),
+    ageVerified: p.user.verification?.status === "VERIFIED_ADULT",
+  };
+}
+
 export async function searchProfiles(filters: SearchFilters) {
   const limit = Math.min(filters.limit ?? 24, 50);
+  const page = Math.max(filters.page ?? 0, 0);
+  const sort = filters.sort ?? "best";
 
   const [blocked, incognitoAllowed] = await Promise.all([
     blockedUserIds(filters.viewerUserId),
@@ -92,6 +147,7 @@ export async function searchProfiles(filters: SearchFilters) {
       ...(filters.verifiedOnly
         ? { verification: { status: "VERIFIED_ADULT" } }
         : {}),
+      ...(filters.photoVerifiedOnly ? { photoVerifiedAt: { not: null } } : {}),
       ...(filters.minAge || filters.maxAge
         ? {
             dateOfBirth: {
@@ -101,6 +157,9 @@ export async function searchProfiles(filters: SearchFilters) {
           }
         : {}),
     },
+    ...(filters.hasPhoto
+      ? { photos: { some: { visibility: "PUBLIC", status: "APPROVED" } } }
+      : {}),
     ...(filters.identityTagIds?.length
       ? { identityTags: { some: { tagId: { in: filters.identityTagIds } } } }
       : {}),
@@ -126,52 +185,33 @@ export async function searchProfiles(filters: SearchFilters) {
       : {}),
   };
 
-  const profiles = await prisma.profile.findMany({
-    where,
-    take: limit * 2,
-    ...(filters.cursor ? { skip: 1, cursor: { id: filters.cursor } } : {}),
-    orderBy: [{ user: { lastActiveAt: "desc" } }, { id: "asc" }],
-    include: {
-      identityTags: { include: { tag: true } },
-      orientationTags: { include: { tag: true } },
-      goalTags: { include: { tag: true } },
-      relationshipStyleTags: { include: { tag: true } },
-      seekingIdentityTags: true,
-      photos: {
-        where: { visibility: "PUBLIC", status: "APPROVED" },
-        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-        take: 3,
-      },
-      user: {
-        select: {
-          id: true,
-          dateOfBirth: true,
-          lastActiveAt: true,
-          photoVerifiedAt: true,
-          verification: { select: { status: true } },
-        },
-      },
-    },
-  });
+  const [pool, viewer] = await Promise.all([
+    prisma.profile.findMany({
+      where,
+      take: POOL_SIZE,
+      orderBy: [{ user: { lastActiveAt: "desc" } }, { id: "asc" }],
+      include: rankInclude,
+    }),
+    prisma.profile.findUnique({
+      where: { userId: filters.viewerUserId },
+      include: rankInclude,
+    }),
+  ]);
 
-  const viewer = await prisma.profile.findUnique({
-    where: { userId: filters.viewerUserId },
-    include: {
-      identityTags: true,
-      seekingIdentityTags: true,
-    },
-  });
+  const viewerRank = viewer ? toRankProfile(viewer) : null;
+  const viewerIdentityIds = new Set(viewerRank?.identityIds ?? []);
+  const viewerSeekingIds = new Set(viewerRank?.seekingIdentityIds ?? []);
 
-  const viewerIdentityIds = new Set(
-    viewer?.identityTags.map((t) => t.tagId) ?? [],
-  );
-  const viewerSeekingIds = new Set(
-    viewer?.seekingIdentityTags.map((t) => t.tagId) ?? [],
-  );
-
-  const result = [];
-  for (const p of profiles) {
-    if (!withinDistance(p, filters)) continue;
+  const candidates = [];
+  for (const p of pool) {
+    const km = kmBetween(filters, p);
+    if (
+      filters.maxDistanceKm != null &&
+      km != null &&
+      km > filters.maxDistanceKm
+    ) {
+      continue;
+    }
 
     if (p.visibility === Visibility.LIMITED) {
       if (!viewer) continue;
@@ -184,33 +224,43 @@ export async function searchProfiles(filters: SearchFilters) {
       if (!seeksThem || !theySeekViewer) continue;
     }
 
-    result.push(p);
-    if (result.length >= limit) break;
+    const score = viewerRank
+      ? scoreMatch(viewerRank, toRankProfile(p)).total
+      : 0;
+    candidates.push({ profile: p, km, score });
   }
 
-  return result;
+  if (sort === "best") {
+    candidates.sort((a, b) => b.score - a.score);
+  } else if (sort === "nearest") {
+    candidates.sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity));
+  }
+
+  const start = page * limit;
+  return {
+    results: candidates.slice(start, start + limit),
+    hasMore: candidates.length > start + limit,
+  };
 }
 
-function withinDistance(
-  p: { latitude: number | null; longitude: number | null },
+function kmBetween(
   filters: SearchFilters,
-): boolean {
+  p: { latitude: number | null; longitude: number | null },
+): number | null {
   if (
-    filters.maxDistanceKm == null ||
     filters.viewerLat == null ||
     filters.viewerLng == null ||
     p.latitude == null ||
     p.longitude == null
   ) {
-    return true;
+    return null;
   }
-  const d = distanceKm(
+  return distanceKm(
     filters.viewerLat,
     filters.viewerLng,
     p.latitude,
     p.longitude,
   );
-  return d <= filters.maxDistanceKm;
 }
 
 function yearsAgo(years: number): Date {
@@ -231,15 +281,12 @@ export async function assertProfileViewable(opts: {
       user: { select: { accountStatus: true } },
     },
   });
-  if (
-    !profile ||
-    profile.user.accountStatus !== AccountStatus.ACTIVE ||
-    !profile.isActive
-  ) {
+  if (!profile || profile.user.accountStatus !== AccountStatus.ACTIVE) {
     return null;
   }
-
   if (opts.viewerUserId === profile.userId) return profile;
+  if (!profile.isActive) return null;
+
   if (
     opts.viewerUserId &&
     (await isBlockedEitherWay(opts.viewerUserId, profile.userId))

@@ -6,6 +6,11 @@ import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  MAX_PROMPT_ANSWER,
+  MAX_PROMPTS,
+  PROFILE_PROMPTS,
+} from "@/lib/constants/prompts";
 
 type Tag = { id: string; label: string; category?: string };
 type KinkCategory = {
@@ -58,6 +63,18 @@ function OnboardingInner() {
   const [bio, setBio] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [visibility, setVisibility] = useState("PUBLIC");
+  const [city, setCity] = useState("");
+  const [region, setRegion] = useState("");
+  const [country, setCountry] = useState("");
+  const [radiusKm, setRadiusKm] = useState(50);
+  const [hasCoords, setHasCoords] = useState(false);
+  const [browserCoords, setBrowserCoords] = useState<
+    { latitude: number; longitude: number } | null | undefined
+  >(undefined);
+  const [locating, setLocating] = useState(false);
+  const [prompts, setPrompts] = useState<
+    { promptId: string; answer: string }[]
+  >([]);
   const [isActive, setIsActive] = useState(false);
   const [verified, setVerified] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -71,6 +88,18 @@ function OnboardingInner() {
       setBio(p.bio ?? "");
       setPronouns(p.pronouns ?? "");
       setVisibility(p.visibility ?? "PUBLIC");
+      setCity(p.city ?? "");
+      setRegion(p.state ?? "");
+      setCountry(p.country ?? "");
+      setRadiusKm(p.radiusKm ?? 50);
+      setHasCoords(p.latitude != null);
+      setBrowserCoords(undefined);
+      setPrompts(
+        (p.prompts ?? []).map((q: { promptId: string; answer: string }) => ({
+          promptId: q.promptId,
+          answer: q.answer,
+        })),
+      );
       setIsActive(Boolean(p.isActive));
       setIdentity(ids(p.identityTags));
       setOrientation(ids(p.orientationTags));
@@ -116,6 +145,51 @@ function OnboardingInner() {
     });
   }
 
+  function shareLocation() {
+    if (!navigator.geolocation) {
+      setMessage("Your browser can't share location. Type your city instead.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        setBrowserCoords({
+          latitude: Math.round(pos.coords.latitude * 100) / 100,
+          longitude: Math.round(pos.coords.longitude * 100) / 100,
+        });
+        setHasCoords(true);
+        setMessage(
+          "Location captured (rounded to about 1 km). Save to keep it.",
+        );
+      },
+      () => {
+        setLocating(false);
+        setMessage(
+          "Location permission was denied. You can type your city instead.",
+        );
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+    );
+  }
+
+  function clearLocation() {
+    setBrowserCoords(null);
+    setHasCoords(false);
+    setCity("");
+    setRegion("");
+    setCountry("");
+  }
+
+  function setPrompt(
+    index: number,
+    patch: Partial<{ promptId: string; answer: string }>,
+  ) {
+    setPrompts((list) =>
+      list.map((p, i) => (i === index ? { ...p, ...patch } : p)),
+    );
+  }
+
   async function startVerify() {
     const res = await fetch("/api/verification/start", { method: "POST" });
     const data = await res.json();
@@ -132,6 +206,19 @@ function OnboardingInner() {
         bio,
         pronouns,
         visibility,
+        city: city.trim() || null,
+        state: region.trim() || null,
+        country: country.trim() || null,
+        radiusKm,
+        ...(browserCoords !== undefined
+          ? {
+              latitude: browserCoords?.latitude ?? null,
+              longitude: browserCoords?.longitude ?? null,
+            }
+          : {}),
+        prompts: prompts
+          .filter((p) => p.promptId && p.answer.trim())
+          .map((p) => ({ promptId: p.promptId, answer: p.answer.trim() })),
         identityTagIds: identity,
         orientationTagIds: orientation,
         goalTagIds: goals,
@@ -188,29 +275,179 @@ function OnboardingInner() {
       </p>
 
       {message && (
-        <p className="mt-4 rounded-md bg-mist px-3 py-2 text-sm text-forest">
+        <p
+          role="status"
+          className="mt-4 rounded-md bg-mist px-3 py-2 text-sm text-forest"
+        >
           {message}
         </p>
       )}
 
       <div className="mt-8 space-y-6">
         <div>
-          <Label>Pronouns</Label>
+          <Label htmlFor="pronouns">Pronouns</Label>
           <Input
+            id="pronouns"
             value={pronouns}
             onChange={(e) => setPronouns(e.target.value)}
             placeholder="they/them"
           />
         </div>
         <div>
-          <Label>Bio</Label>
+          <Label htmlFor="bio">Bio</Label>
           <textarea
+            id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={4}
+            maxLength={2000}
             className="w-full rounded-md border border-forest/15 bg-cream/80 px-3 py-2 text-sm"
           />
         </div>
+
+        <fieldset
+          id="location"
+          className="scroll-mt-24 rounded-md border border-forest/15 bg-cream/50 p-4"
+        >
+          <legend className="px-1 text-sm font-medium text-forest">
+            Location
+          </legend>
+          <p className="text-sm text-ink/60">
+            Used only to show approximate distance (like &ldquo;about 10 km
+            away&rdquo;). We round it to about 1 km and never show your exact
+            spot.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                maxLength={80}
+                autoComplete="address-level2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="region">State / region</Label>
+              <Input
+                id="region"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                maxLength={80}
+                autoComplete="address-level1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                maxLength={80}
+                autoComplete="country-name"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={shareLocation}
+              disabled={locating}
+            >
+              {locating ? "Finding you…" : "Use my current location"}
+            </Button>
+            {(hasCoords || city) && (
+              <Button type="button" variant="ghost" onClick={clearLocation}>
+                Remove location
+              </Button>
+            )}
+            <span className="text-xs text-ink/55">
+              {hasCoords
+                ? "Distance is on."
+                : "Type a city or share your location to see distances."}
+            </span>
+          </div>
+          <div className="mt-3">
+            <Label htmlFor="radius">Usual search distance</Label>
+            <select
+              id="radius"
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value))}
+              className="h-11 w-full rounded-md border border-forest/15 bg-cream/80 px-3 text-sm"
+            >
+              {[10, 25, 50, 100, 250, 500].map((km) => (
+                <option key={km} value={km}>
+                  Within {km} km
+                </option>
+              ))}
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset className="rounded-md border border-forest/15 bg-cream/50 p-4">
+          <legend className="px-1 text-sm font-medium text-forest">
+            Profile questions
+          </legend>
+          <p className="text-sm text-ink/60">
+            Pick up to {MAX_PROMPTS}. Good answers give people something easy to
+            message you about.
+          </p>
+          <div className="mt-3 space-y-4">
+            {prompts.map((p, i) => (
+              <div key={i} className="space-y-2">
+                <div className="flex gap-2">
+                  <select
+                    aria-label={`Question ${i + 1}`}
+                    value={p.promptId}
+                    onChange={(e) => setPrompt(i, { promptId: e.target.value })}
+                    className="h-11 min-w-0 flex-1 rounded-md border border-forest/15 bg-cream/80 px-3 text-sm"
+                  >
+                    <option value="">Choose a question…</option>
+                    {PROFILE_PROMPTS.filter(
+                      (q) =>
+                        q.id === p.promptId ||
+                        !prompts.some((other) => other.promptId === q.id),
+                    ).map((q) => (
+                      <option key={q.id} value={q.id}>
+                        {q.question}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() =>
+                      setPrompts((list) => list.filter((_, j) => j !== i))
+                    }
+                  >
+                    Remove
+                  </Button>
+                </div>
+                <textarea
+                  aria-label={`Answer ${i + 1}`}
+                  value={p.answer}
+                  onChange={(e) => setPrompt(i, { answer: e.target.value })}
+                  rows={2}
+                  maxLength={MAX_PROMPT_ANSWER}
+                  className="w-full rounded-md border border-forest/15 bg-cream/80 px-3 py-2 text-sm"
+                />
+              </div>
+            ))}
+            {prompts.length < MAX_PROMPTS && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() =>
+                  setPrompts((list) => [...list, { promptId: "", answer: "" }])
+                }
+              >
+                Add a question
+              </Button>
+            )}
+          </div>
+        </fieldset>
 
         <div>
           <TagPicker
@@ -305,6 +542,7 @@ function OnboardingInner() {
                       >
                         <span className="text-ink">{k.name}</span>
                         <select
+                          aria-label={k.name}
                           value={kinks[k.id] ?? ""}
                           onChange={(e) =>
                             setKinkLevel(k.id, e.target.value as KinkLevel | "")
@@ -328,8 +566,9 @@ function OnboardingInner() {
         </div>
 
         <div>
-          <Label>Visibility</Label>
+          <Label htmlFor="visibility">Visibility</Label>
           <select
+            id="visibility"
             value={visibility}
             onChange={(e) => setVisibility(e.target.value)}
             className="h-11 w-full rounded-md border border-forest/15 bg-cream/80 px-3 text-sm"
@@ -406,7 +645,7 @@ function TagPicker({
   onToggle: (id: string) => void;
 }) {
   return (
-    <div>
+    <div role="group" aria-label={title}>
       <p className="mb-2 text-sm font-medium text-forest">{title}</p>
       <div className="flex flex-wrap gap-2">
         {tags.map((t) => {
@@ -415,6 +654,7 @@ function TagPicker({
             <button
               key={t.id}
               type="button"
+              aria-pressed={on}
               onClick={() => onToggle(t.id)}
               className={
                 on

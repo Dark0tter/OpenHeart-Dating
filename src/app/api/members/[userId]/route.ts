@@ -6,6 +6,7 @@ import { assertProfileViewable } from "@/lib/discovery";
 import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import { galleryFor } from "@/lib/photos";
+import { promptQuestion } from "@/lib/constants/prompts";
 import {
   activityLabel,
   ageFromDob,
@@ -66,6 +67,7 @@ export async function GET(_req: Request, ctx: Ctx) {
         where: { level: { in: SHOWN_LEVELS }, kink: { tier: { in: tiers } } },
         include: { kink: { select: { name: true } } },
       },
+      prompts: { orderBy: { sortOrder: "asc" } },
     },
   });
 
@@ -151,6 +153,10 @@ export async function GET(_req: Request, ctx: Ctx) {
         curious: kinksAt(KinkInterestLevel.CURIOUS),
         hardLimits: kinksAt(KinkInterestLevel.HARD_LIMIT),
       },
+      prompts: profile.prompts.flatMap((p) => {
+        const question = promptQuestion(p.promptId);
+        return question ? [{ question, answer: filterText(p.answer) }] : [];
+      }),
     },
     gallery,
     relationship: {

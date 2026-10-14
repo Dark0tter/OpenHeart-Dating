@@ -21,7 +21,65 @@ type ProfileData = {
   } | null;
   verification: { status: string } | null;
   contentRestricted: boolean;
+  completeness: {
+    percent: number;
+    steps: { key: string; label: string; done: boolean }[];
+  } | null;
 };
+
+const STEP_LINKS: Record<string, string> = {
+  photo: "#photos",
+  photos3: "#photos",
+  selfie: "#selfie",
+  email: "/settings",
+  location: "/onboarding#location",
+};
+
+function Completeness({
+  percent,
+  steps,
+}: NonNullable<ProfileData["completeness"]>) {
+  const todo = steps.filter((s) => !s.done);
+  if (todo.length === 0) return null;
+  return (
+    <section
+      aria-labelledby="completeness-title"
+      className="rounded-lg border border-forest/10 bg-cream/60 p-4"
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="completeness-title" className="font-medium text-forest">
+          Profile strength
+        </h2>
+        <span className="text-sm text-ink/60">{percent}%</span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+        aria-labelledby="completeness-title"
+        className="mt-2 h-2 overflow-hidden rounded-full bg-mist"
+      >
+        <div className="h-full bg-forest" style={{ width: `${percent}%` }} />
+      </div>
+      <p className="mt-3 text-sm text-ink/60">
+        Fuller profiles show up higher in &ldquo;Best match&rdquo;. Next steps:
+      </p>
+      <ul className="mt-2 space-y-1 text-sm">
+        {todo.slice(0, 4).map((s) => (
+          <li key={s.key}>
+            <Link
+              href={STEP_LINKS[s.key] ?? "/onboarding"}
+              className="text-forest underline underline-offset-2"
+            >
+              {s.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 const VISIBILITY_TEXT: Record<string, string> = {
   PUBLIC: "Visible to members",
@@ -96,11 +154,17 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <PhotoManager
-        canAddAdult={verifiedAdult}
-        adultAllowedHere={!data.contentRestricted}
-      />
-      <SelfieVerify />
+      {data.completeness && <Completeness {...data.completeness} />}
+
+      <div id="photos" className="scroll-mt-24">
+        <PhotoManager
+          canAddAdult={verifiedAdult}
+          adultAllowedHere={!data.contentRestricted}
+        />
+      </div>
+      <div id="selfie" className="scroll-mt-24">
+        <SelfieVerify />
+      </div>
     </div>
   );
 }

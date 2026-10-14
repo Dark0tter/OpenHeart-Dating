@@ -10,6 +10,13 @@ import {
   enforceSolicitationPolicy,
   solicitationErrorBody,
 } from "@/lib/moderation/solicitation";
+import {
+  MAX_PROMPT_ANSWER,
+  MAX_PROMPTS,
+  promptQuestion,
+} from "@/lib/constants/prompts";
+import { coarse, geocodeCity } from "@/lib/geocode";
+import { profileCompleteness } from "@/lib/profile-completeness";
 
 const updateSchema = z.object({
   displayName: z.string().min(2).max(40).optional(),
@@ -42,6 +49,15 @@ const updateSchema = z.object({
       }),
     )
     .optional(),
+  prompts: z
+    .array(
+      z.object({
+        promptId: z.string().refine((id) => promptQuestion(id) !== null),
+        answer: z.string().trim().min(1).max(MAX_PROMPT_ANSWER),
+      }),
+    )
+    .max(MAX_PROMPTS)
+    .optional(),
 });
 
 export async function GET() {
@@ -73,14 +89,36 @@ export async function GET() {
         where: restricted ? { visibility: { not: "ADULT" } } : {},
         orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
       },
+      prompts: { orderBy: { sortOrder: "asc" } },
     },
   });
+
+  const completeness = profile
+    ? profileCompleteness({
+        publicPhotos: profile.photos.filter(
+          (p) => p.visibility === "PUBLIC" && p.status === "APPROVED",
+        ).length,
+        bio: profile.bio,
+        pronouns: profile.pronouns,
+        identityCount: profile.identityTags.length,
+        orientationCount: profile.orientationTags.length,
+        goalCount: profile.goalTags.length,
+        promptCount: profile.prompts.length,
+        hasLocation: profile.latitude != null,
+        emailVerified: Boolean(user.emailVerified),
+        ageVerified: user.verification?.status === "VERIFIED_ADULT",
+        photoVerified: Boolean(user.photoVerifiedAt),
+      })
+    : null;
 
   return NextResponse.json({
     profile,
     verification: user.verification,
     dateOfBirth: user.dateOfBirth,
+    emailVerified: Boolean(user.emailVerified),
+    photoVerified: Boolean(user.photoVerifiedAt),
     contentRestricted: restricted,
+    completeness,
   });
 }
 
@@ -112,6 +150,7 @@ export async function PATCH(req: Request) {
       city: data.city,
       customIdentity: data.customIdentity,
       customOrientation: data.customOrientation,
+      prompts: data.prompts?.map((p) => p.answer).join("\n"),
     },
   });
   if (solicitation.blocked) {
@@ -138,7 +177,34 @@ export async function PATCH(req: Request) {
     }
   }
 
+  // Browser coordinates are rounded to ~1 km; a typed city is looked up once.
+  if (data.latitude != null) data.latitude = coarse(data.latitude);
+  if (data.longitude != null) data.longitude = coarse(data.longitude);
+  const cityChanged =
+    data.city !== undefined &&
+    (data.city !== user.profile.city ||
+      data.state !== user.profile.state ||
+      data.country !== user.profile.country);
+  if (cityChanged && data.latitude === undefined) {
+    const found = data.city ? await geocodeCity(data) : null;
+    data.latitude = found?.latitude ?? null;
+    data.longitude = found?.longitude ?? null;
+  }
+
   await prisma.$transaction(async (tx) => {
+    if (data.prompts) {
+      await tx.profilePrompt.deleteMany({ where: { profileId } });
+      await tx.profilePrompt.createMany({
+        data: data.prompts.map((p, i) => ({
+          profileId,
+          promptId: p.promptId,
+          answer: p.answer,
+          sortOrder: i,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
     await tx.profile.update({
       where: { id: profileId },
       data: {

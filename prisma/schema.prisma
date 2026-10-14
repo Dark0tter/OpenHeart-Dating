@@ -269,9 +269,22 @@ model Profile {
   kinks                  ProfileKink[]
   seekingIdentityTags    SeekingIdentityTag[]
   seekingOrientationTags SeekingOrientationTag[]
+  prompts                ProfilePrompt[]
 
   @@index([visibility, isActive])
   @@index([latitude, longitude])
+}
+
+/// Answers to guided questions; promptId refers to src/lib/constants/prompts.ts.
+model ProfilePrompt {
+  id        String  @id @default(uuid())
+  profileId String
+  promptId  String
+  answer    String  @db.Text
+  sortOrder Int     @default(0)
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, promptId])
 }
 
 /// Images are re-encoded on upload (metadata and location stripped) and only
