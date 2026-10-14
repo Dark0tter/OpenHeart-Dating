@@ -21,6 +21,7 @@ import { profileCompleteness } from "@/lib/profile-completeness";
 const updateSchema = z.object({
   displayName: z.string().min(2).max(40).optional(),
   bio: z.string().max(2000).optional().nullable(),
+  limitsNote: z.string().max(1000).optional().nullable(),
   pronouns: z.string().max(40).optional().nullable(),
   visibility: z.nativeEnum(Visibility).optional(),
   city: z.string().max(80).optional().nullable(),
@@ -146,6 +147,7 @@ export async function PATCH(req: Request) {
     fields: {
       displayName: data.displayName,
       bio: data.bio,
+      limitsNote: data.limitsNote,
       pronouns: data.pronouns,
       city: data.city,
       customIdentity: data.customIdentity,
@@ -210,6 +212,9 @@ export async function PATCH(req: Request) {
       data: {
         displayName: data.displayName,
         bio: data.bio,
+        limitsNote:
+          data.limitsNote?.trim() ||
+          (data.limitsNote === undefined ? undefined : null),
         pronouns: data.pronouns,
         visibility: data.visibility,
         city: data.city,

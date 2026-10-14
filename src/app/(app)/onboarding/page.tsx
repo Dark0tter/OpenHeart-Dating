@@ -25,7 +25,7 @@ const KINK_LEVELS: { value: KinkLevel; label: string }[] = [
   { value: "FAVORITE", label: "Favorite" },
   { value: "INTERESTED", label: "Interested" },
   { value: "CURIOUS", label: "Curious" },
-  { value: "NO", label: "No" },
+  { value: "NO", label: "Soft limit" },
   { value: "HARD_LIMIT", label: "Hard limit" },
 ];
 
@@ -61,6 +61,7 @@ function OnboardingInner() {
   const [seeking, setSeeking] = useState<string[]>([]);
   const [kinks, setKinks] = useState<Record<string, KinkLevel>>({});
   const [bio, setBio] = useState("");
+  const [limitsNote, setLimitsNote] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [visibility, setVisibility] = useState("PUBLIC");
   const [city, setCity] = useState("");
@@ -86,6 +87,7 @@ function OnboardingInner() {
     const p = d.profile;
     if (p) {
       setBio(p.bio ?? "");
+      setLimitsNote(p.limitsNote ?? "");
       setPronouns(p.pronouns ?? "");
       setVisibility(p.visibility ?? "PUBLIC");
       setCity(p.city ?? "");
@@ -238,6 +240,7 @@ function OnboardingInner() {
           kinkId,
           level,
         })),
+        limitsNote: limitsNote.trim() || null,
         ...(activate ? { isActive: true } : {}),
       }),
     });
@@ -508,9 +511,24 @@ function OnboardingInner() {
           </p>
           <p className="mt-1 text-sm text-ink/70">
             Optional. Anything you mark Favorite, Interested or Curious gets you
-            invited to that group&apos;s room. No and Hard limit are shown on
-            your profile so others know your boundaries.
+            invited to that group&apos;s room. Limits are shown in their own
+            section on your profile, and people whose interests clash with your
+            limits are shown lower in search and warned before they like you.
           </p>
+          <dl className="mt-2 grid gap-1 text-xs text-ink/70 sm:grid-cols-2">
+            <div>
+              <dt className="inline font-medium text-forest">Soft limit: </dt>
+              <dd className="inline">
+                not for me, or only with a lot of trust and talking first.
+              </dd>
+            </div>
+            <div>
+              <dt className="inline font-medium text-coral-deep">
+                Hard limit:{" "}
+              </dt>
+              <dd className="inline">never, not negotiable.</dd>
+            </div>
+          </dl>
           {tags.contentRestricted && (
             <p className="mt-2 text-sm text-ink/70">
               The app shows a shorter list. You can see and edit the full list
@@ -568,6 +586,51 @@ function OnboardingInner() {
             })}
           </div>
         </div>
+
+        <fieldset
+          id="limits"
+          className="space-y-3 rounded-md border border-forest/15 bg-cream/60 p-4"
+        >
+          <legend className="px-1 text-sm font-medium text-forest">
+            Your limits
+          </legend>
+          {(["HARD_LIMIT", "NO"] as const).map((level) => {
+            const names = tags.kinks
+              .flatMap((c) => c.kinks)
+              .filter((k) => kinks[k.id] === level)
+              .map((k) => k.name);
+            return (
+              <div key={level}>
+                <p
+                  className={
+                    level === "HARD_LIMIT"
+                      ? "text-sm font-medium text-coral-deep"
+                      : "text-sm font-medium text-forest"
+                  }
+                >
+                  {level === "HARD_LIMIT" ? "Hard limits" : "Soft limits"}
+                </p>
+                <p className="text-sm text-ink/70">
+                  {names.length > 0
+                    ? names.join(", ")
+                    : `None yet. Set any item above to "${level === "HARD_LIMIT" ? "Hard limit" : "Soft limit"}".`}
+                </p>
+              </div>
+            );
+          })}
+          <div>
+            <Label htmlFor="limitsNote">Anything else? (optional)</Label>
+            <textarea
+              id="limitsNote"
+              value={limitsNote}
+              onChange={(e) => setLimitsNote(e.target.value)}
+              maxLength={1000}
+              rows={3}
+              className="mt-1 w-full rounded-md border border-forest/15 bg-cream/80 px-3 py-2 text-sm"
+              placeholder="Boundaries in your own words, e.g. no marks above the collar, no photos during play, safeword is red."
+            />
+          </div>
+        </fieldset>
 
         <div>
           <Label htmlFor="visibility">Visibility</Label>

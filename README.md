@@ -28,6 +28,8 @@ Adding entries is safe. Renaming an entry, or moving a kink to a different categ
 
 Kinks are intentionally excluded if they involve minors, animals, incest, real non-consent, or financial domination.
 
+Each kink can be marked Favorite, Interested, Curious, Soft limit (stored as `NO`) or Hard limit, and members can add limits in their own words (`Profile.limitsNote`). Limits get their own section on profiles. Viewing someone shows a limits check listing where your interests meet their limits and the other way round (`src/lib/limits.ts`). Clashes lower the match ranking (hard limits more than soft), search cards flag hard-limit clashes, and search can hide them entirely.
+
 ## Mobile app content policy
 
 The iOS and Android apps run the same code under one policy, built to the stricter of Apple's and Google's rules on every point, so neither platform needs its own version. The server enforces it, so an app can't show more than it's allowed.

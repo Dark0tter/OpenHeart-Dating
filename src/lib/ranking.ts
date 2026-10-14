@@ -1,6 +1,5 @@
 import { distanceKm } from "@/lib/utils";
-
-type Level = "FAVORITE" | "INTERESTED" | "CURIOUS" | "NO" | "HARD_LIMIT";
+import { clashPenalty, type KinkLevel as Level } from "@/lib/limits";
 
 export type RankProfile = {
   identityIds: string[];
@@ -39,6 +38,8 @@ export type ScoreBreakdown = {
   activity: number;
   profileQuality: number;
   trust: number;
+  /** Kinks where one person's hard limit is something the other is into. */
+  hardClashes: number;
 };
 
 /**
@@ -65,21 +66,22 @@ export function scoreMatch(
 
   const theirs = new Map(candidate.kinks.map((k) => [k.kinkId, k.level]));
   let kinkRaw = 0;
-  let limitsClash = 0;
+  let penalty = 0;
+  let hardClashes = 0;
   for (const mine of viewer.kinks) {
     const other = theirs.get(mine.kinkId);
     if (!other) continue;
     const a = KINK_WEIGHT[mine.level];
     const b = KINK_WEIGHT[other];
     if (a && b) kinkRaw += Math.min(a, b);
-    if (
-      (mine.level === "FAVORITE" && other === "HARD_LIMIT") ||
-      (mine.level === "HARD_LIMIT" && other === "FAVORITE")
-    ) {
-      limitsClash -= 2;
+    const p = clashPenalty(mine.level, other);
+    penalty += p;
+    if (p > 0 && (mine.level === "HARD_LIMIT" || other === "HARD_LIMIT")) {
+      hardClashes += 1;
     }
   }
   const kinks = Math.min(kinkRaw, 18) / 3;
+  const limitsClash = -Math.min(penalty, 9);
 
   let distance = 0;
   if (
@@ -128,5 +130,6 @@ export function scoreMatch(
     activity,
     profileQuality,
     trust,
+    hardClashes,
   };
 }

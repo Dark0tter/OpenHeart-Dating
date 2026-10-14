@@ -22,6 +22,8 @@ export type SearchFilters = {
   verifiedOnly?: boolean;
   photoVerifiedOnly?: boolean;
   hasPhoto?: boolean;
+  /** Leave out people whose hard limits clash with the viewer's interests, or the other way round. */
+  hideHardClashes?: boolean;
   viewerLat?: number | null;
   viewerLng?: number | null;
   viewerUserId: string;
@@ -224,10 +226,17 @@ export async function searchProfiles(filters: SearchFilters) {
       if (!seeksThem || !theySeekViewer) continue;
     }
 
-    const score = viewerRank
-      ? scoreMatch(viewerRank, toRankProfile(p)).total
-      : 0;
-    candidates.push({ profile: p, km, score });
+    const breakdown = viewerRank
+      ? scoreMatch(viewerRank, toRankProfile(p))
+      : null;
+    const hardClashes = breakdown?.hardClashes ?? 0;
+    if (filters.hideHardClashes && hardClashes > 0) continue;
+    candidates.push({
+      profile: p,
+      km,
+      score: breakdown?.total ?? 0,
+      hardClashes,
+    });
   }
 
   if (sort === "best") {

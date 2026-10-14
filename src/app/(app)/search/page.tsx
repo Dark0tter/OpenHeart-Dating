@@ -17,6 +17,7 @@ type Card = {
   activity: string;
   verified: boolean;
   photoVerified: boolean;
+  hardClashes: number;
   identity: string[];
   orientation: string[];
   goals: string[];
@@ -32,6 +33,7 @@ type Filters = {
   verified: boolean;
   photoVerified: boolean;
   hasPhoto: boolean;
+  noClashes: boolean;
 };
 
 const DEFAULT_FILTERS: Filters = {
@@ -42,6 +44,7 @@ const DEFAULT_FILTERS: Filters = {
   verified: false,
   photoVerified: false,
   hasPhoto: false,
+  noClashes: false,
 };
 
 const DISTANCES = [
@@ -62,6 +65,7 @@ function query(f: Filters, page: number) {
   if (f.verified) q.set("verified", "1");
   if (f.photoVerified) q.set("photoVerified", "1");
   if (f.hasPhoto) q.set("hasPhoto", "1");
+  if (f.noClashes) q.set("noClashes", "1");
   return q.toString();
 }
 
@@ -209,6 +213,7 @@ export default function SearchPage() {
                 ["hasPhoto", "Members with photos"],
                 ["photoVerified", "Photo verified"],
                 ["verified", "Age verified"],
+                ["noClashes", "No hard-limit clashes with me"],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="flex items-center gap-2">
@@ -277,6 +282,12 @@ export default function SearchPage() {
                   {p.verified && (
                     <span className="font-medium text-forest">
                       Age verified
+                    </span>
+                  )}
+                  {p.hardClashes > 0 && (
+                    <span className="font-medium text-coral-deep">
+                      {p.hardClashes} hard-limit clash
+                      {p.hardClashes === 1 ? "" : "es"}
                     </span>
                   )}
                 </p>

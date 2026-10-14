@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PhotoGallery, type Gallery } from "@/components/photo-gallery";
+import { LimitsCheck, LimitsSection } from "@/components/limits-section";
+import type { Clash } from "@/lib/limits";
 
 type Member = {
   userId: string;
@@ -28,8 +30,12 @@ type Member = {
     favorite: string[];
     interested: string[];
     curious: string[];
+    softLimits: string[];
     hardLimits: string[];
   };
+  limitsNote: string | null;
+  clashes: Clash[];
+  limitsCompared: boolean;
   prompts?: { question: string; answer: string }[];
 };
 
@@ -180,6 +186,10 @@ export default function MemberPage() {
         </p>
       )}
 
+      {!m.isSelf && m.limitsCompared && (
+        <LimitsCheck name={m.displayName} clashes={m.clashes} />
+      )}
+
       {!m.isSelf && (
         <div className="flex flex-wrap gap-2">
           {r.matchId ? (
@@ -254,8 +264,13 @@ export default function MemberPage() {
         <Chips title="Favorite interests" items={m.kinks.favorite} />
         <Chips title="Into" items={m.kinks.interested} />
         <Chips title="Curious about" items={m.kinks.curious} />
-        <Chips title="Hard limits" items={m.kinks.hardLimits} />
       </section>
+
+      <LimitsSection
+        hardLimits={m.kinks.hardLimits}
+        softLimits={m.kinks.softLimits}
+        note={m.limitsNote}
+      />
 
       {!m.isSelf && !r.matchId && (
         <form onSubmit={onMessage} className="space-y-2">

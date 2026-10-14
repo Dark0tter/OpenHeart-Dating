@@ -51,6 +51,7 @@ enum KinkInterestLevel {
   FAVORITE
   INTERESTED
   CURIOUS
+  /// Shown as "Soft limit".
   NO
   HARD_LIMIT
 }
@@ -258,6 +259,8 @@ model Profile {
   userId      String     @unique
   displayName String
   bio         String?    @db.Text
+  /// Boundaries in the member's own words, beyond the kink list (e.g. "no marks above the collar").
+  limitsNote  String?    @db.Text
   pronouns    String?
   visibility  Visibility @default(PUBLIC)
   city        String?

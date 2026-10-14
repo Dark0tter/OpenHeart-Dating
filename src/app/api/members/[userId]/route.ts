@@ -7,6 +7,7 @@ import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import { galleryFor } from "@/lib/photos";
 import { promptQuestion } from "@/lib/constants/prompts";
+import { findClashes } from "@/lib/limits";
 import {
   activityLabel,
   ageFromDob,
@@ -21,6 +22,7 @@ const SHOWN_LEVELS: KinkInterestLevel[] = [
   KinkInterestLevel.FAVORITE,
   KinkInterestLevel.INTERESTED,
   KinkInterestLevel.CURIOUS,
+  KinkInterestLevel.NO,
   KinkInterestLevel.HARD_LIMIT,
 ];
 
@@ -73,39 +75,64 @@ export async function GET(_req: Request, ctx: Ctx) {
 
   const isSelf = viewer.id === userId;
   const [a, b] = orderedPair(viewer.id, userId);
-  const [gallery, youLiked, likedYou, match, following, albumRequests] =
-    await Promise.all([
-      galleryFor(userId, viewer, adultAllowedHere),
-      prisma.like.findUnique({
-        where: {
-          fromUserId_toUserId: { fromUserId: viewer.id, toUserId: userId },
+  const [
+    gallery,
+    youLiked,
+    likedYou,
+    match,
+    following,
+    albumRequests,
+    viewerKinks,
+  ] = await Promise.all([
+    galleryFor(userId, viewer, adultAllowedHere),
+    prisma.like.findUnique({
+      where: {
+        fromUserId_toUserId: { fromUserId: viewer.id, toUserId: userId },
+      },
+      select: { id: true },
+    }),
+    prisma.like.findUnique({
+      where: {
+        fromUserId_toUserId: { fromUserId: userId, toUserId: viewer.id },
+      },
+      select: { id: true },
+    }),
+    prisma.match.findFirst({
+      where: { userAId: a, userBId: b, unmatchedAt: null },
+      select: { id: true },
+    }),
+    prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: viewer.id,
+          followingId: userId,
         },
-        select: { id: true },
-      }),
-      prisma.like.findUnique({
-        where: {
-          fromUserId_toUserId: { fromUserId: userId, toUserId: viewer.id },
-        },
-        select: { id: true },
-      }),
-      prisma.match.findFirst({
-        where: { userAId: a, userBId: b, unmatchedAt: null },
-        select: { id: true },
-      }),
-      prisma.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: viewer.id,
-            followingId: userId,
+      },
+      select: { followerId: true },
+    }),
+    prisma.consentRequest.findMany({
+      where: { requesterId: viewer.id, ownerId: userId },
+      select: { scope: true, status: true },
+    }),
+    isSelf || !viewer.profile
+      ? []
+      : prisma.profileKink.findMany({
+          where: {
+            profileId: viewer.profile.id,
+            kink: { tier: { in: tiers } },
           },
-        },
-        select: { followerId: true },
-      }),
-      prisma.consentRequest.findMany({
-        where: { requesterId: viewer.id, ownerId: userId },
-        select: { scope: true, status: true },
-      }),
-    ]);
+          select: { kinkId: true, level: true },
+        }),
+  ]);
+
+  const clashes = findClashes(
+    viewerKinks,
+    profile.kinks.map((k) => ({
+      kinkId: k.kinkId,
+      level: k.level,
+      name: k.kink.name,
+    })),
+  );
 
   const v = viewer.profile;
   const distance =
@@ -151,8 +178,12 @@ export async function GET(_req: Request, ctx: Ctx) {
         favorite: kinksAt(KinkInterestLevel.FAVORITE),
         interested: kinksAt(KinkInterestLevel.INTERESTED),
         curious: kinksAt(KinkInterestLevel.CURIOUS),
+        softLimits: kinksAt(KinkInterestLevel.NO),
         hardLimits: kinksAt(KinkInterestLevel.HARD_LIMIT),
       },
+      limitsNote: profile.limitsNote ? filterText(profile.limitsNote) : null,
+      clashes,
+      limitsCompared: viewerKinks.length > 0 && profile.kinks.length > 0,
       prompts: profile.prompts.flatMap((p) => {
         const question = promptQuestion(p.promptId);
         return question ? [{ question, answer: filterText(p.answer) }] : [];
