@@ -20,6 +20,7 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/mod") ||
     request.nextUrl.pathname.startsWith("/notifications") ||
     request.nextUrl.pathname.startsWith("/events") ||
+    request.nextUrl.pathname.startsWith("/safety/check-in") ||
     request.nextUrl.pathname.startsWith("/suspended");
 
   if (isApp) {

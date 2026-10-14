@@ -292,7 +292,7 @@ export default function SettingsPage() {
         </Button>
       </form>
 
-      <form onSubmit={onReport} className="space-y-3">
+      <form onSubmit={onReport} id="report" className="scroll-mt-20 space-y-3">
         <h2 className="font-medium text-forest">Report user</h2>
         <div>
           <Label htmlFor="reportId">User ID</Label>
@@ -351,6 +351,34 @@ export default function SettingsPage() {
       >
         Sign out
       </Button>
+
+      <section className="space-y-2 rounded-md border border-forest/15 p-4">
+        <h2 className="font-medium text-forest">Your data and safety</h2>
+        <p className="text-sm text-ink/70">
+          Download a copy of everything we hold about you, or set up a check-in
+          before a date.
+        </p>
+        <div className="flex flex-wrap gap-3 text-sm">
+          <a
+            href="/api/account/export"
+            className="rounded-md border border-forest/30 px-3 py-1.5 text-forest hover:bg-mist"
+          >
+            Download my data
+          </a>
+          <Link
+            href="/safety/check-in"
+            className="rounded-md border border-forest/30 px-3 py-1.5 text-forest hover:bg-mist"
+          >
+            Date check-ins
+          </Link>
+          <Link
+            href="/safety"
+            className="rounded-md border border-forest/30 px-3 py-1.5 text-forest hover:bg-mist"
+          >
+            Safety tips
+          </Link>
+        </div>
+      </section>
 
       <form
         onSubmit={onDeleteAccount}

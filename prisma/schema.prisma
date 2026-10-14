@@ -158,6 +158,7 @@ model User {
   lastActiveAt    DateTime      @default(now())
 
   authTokens              AuthToken[]
+  safetyCheckIns          SafetyCheckIn[]
   roomBans                RoomBan[]
   eventsHosted            Event[]              @relation("EventsHosted")
   eventRsvps              EventRsvp[]
@@ -746,6 +747,31 @@ model EventRsvp {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([eventId, userId])
+  @@index([userId])
+}
+
+/// "Check on me" for a date. If the member doesn't tap "I'm safe" by checkInBy
+/// (plus a short grace period), their trusted contact gets an email with the
+/// details below. Deleted a week after it ends.
+/// status: "active" | "safe" | "alerted" | "cancelled".
+model SafetyCheckIn {
+  id           String    @id @default(uuid())
+  userId       String
+  meetingWith  String
+  place        String
+  startsAt     DateTime
+  checkInBy    DateTime
+  contactName  String
+  contactEmail String
+  note         String?   @db.Text
+  status       String    @default("active")
+  remindedAt   DateTime?
+  alertedAt    DateTime?
+  endedAt      DateTime?
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, checkInBy])
   @@index([userId])
 }
 

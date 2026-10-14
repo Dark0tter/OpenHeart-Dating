@@ -68,6 +68,7 @@ export const LIMITS = {
   supportPerIp: { limit: 10, windowSeconds: 60 * 60 },
   appealsPerUser: { limit: 3, windowSeconds: 24 * 60 * 60 },
   eventsPerUser: { limit: 5, windowSeconds: 24 * 60 * 60 },
+  exportsPerUser: { limit: 3, windowSeconds: 24 * 60 * 60 },
 } as const;
 
 export function limitFor(

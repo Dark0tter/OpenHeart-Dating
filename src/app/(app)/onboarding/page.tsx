@@ -129,6 +129,10 @@ function OnboardingInner() {
     if (params.get("verify") === "success") {
       setVerified(true);
       setMessage("Age verification complete. You can activate your profile.");
+    } else if (params.get("verify") === "pending") {
+      setMessage(
+        "Thanks — we're confirming your age now. This usually takes under a minute, and we'll notify you when it's done.",
+      );
     }
   }, [params, loadProfile]);
 

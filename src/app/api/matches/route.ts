@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { ageFromDob } from "@/lib/utils";
 import { photoSrc, primaryPhotoWhere } from "@/lib/photos";
+import { allowedTiers } from "@/lib/content-policy";
+import { textFilterFor } from "@/lib/moderation/app-text";
 
 export async function GET() {
   const user = await requireUser();
@@ -24,10 +26,13 @@ export async function GET() {
     },
   };
 
+  const filterText = textFilterFor(await allowedTiers(user));
   const matches = await prisma.match.findMany({
     where: {
       unmatchedAt: null,
       OR: [{ userAId: user.id }, { userBId: user.id }],
+      userA: { accountStatus: "ACTIVE" },
+      userB: { accountStatus: "ACTIVE" },
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -47,7 +52,13 @@ export async function GET() {
       return {
         id: m.id,
         createdAt: m.createdAt,
-        lastMessage: m.messages[0] ?? null,
+        lastMessage: m.messages[0]
+          ? {
+              ...m.messages[0],
+              body: m.messages[0].body && filterText(m.messages[0].body),
+              safetyFlag: undefined,
+            }
+          : null,
         otherUser: {
           id: other.id,
           displayName: other.profile?.displayName ?? "Member",

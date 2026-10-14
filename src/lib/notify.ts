@@ -12,6 +12,7 @@ export type NotificationType =
   | "album_granted"
   | "selfie_result"
   | "report_update"
+  | "verification"
   | "event";
 
 /** Away this long before a message also goes out by email. */

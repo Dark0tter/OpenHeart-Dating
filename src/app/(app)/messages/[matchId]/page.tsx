@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRealtime } from "@/components/realtime";
@@ -33,12 +33,15 @@ export default function ChatPage() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [theyreTyping, setTheyreTyping] = useState(false);
+  const [ended, setEnded] = useState(false);
+  const router = useRouter();
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSent = useRef(0);
   const bottom = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/messages/${matchId}`);
+    if (res.status === 404) setEnded(true);
     if (!res.ok) return;
     const data = await res.json();
     setMessages(data.messages);
@@ -104,6 +107,32 @@ export default function ChatPage() {
     }
   }
 
+  async function unmatch() {
+    if (
+      !confirm(
+        `Unmatch ${other?.displayName ?? "this person"}? The conversation disappears for both of you.`,
+      )
+    ) {
+      return;
+    }
+    const res = await fetch(`/api/matches/${matchId}`, { method: "DELETE" });
+    if (res.ok) router.push("/messages");
+  }
+
+  if (ended) {
+    return (
+      <div className="max-w-xl">
+        <p className="text-ink/70">This conversation has ended.</p>
+        <Link
+          href="/messages"
+          className="mt-2 inline-block text-forest underline"
+        >
+          Back to messages
+        </Link>
+      </div>
+    );
+  }
+
   const lastMine = [...messages].reverse().find((m) => m.senderId === me);
 
   return (
@@ -118,12 +147,40 @@ export default function ChatPage() {
             "Messages"
           )}
         </h1>
-        <Link
-          href="/messages"
-          className="text-sm text-forest/70 hover:underline"
-        >
-          All messages
-        </Link>
+        <details className="relative text-sm">
+          <summary className="cursor-pointer list-none rounded-md px-2 py-1 text-forest/80 hover:bg-mist">
+            Options
+          </summary>
+          <div className="absolute right-0 z-10 mt-1 w-48 rounded-md border border-forest/15 bg-cream p-1 shadow-sm">
+            <Link
+              href="/safety/check-in"
+              className="block rounded px-3 py-2 hover:bg-mist"
+            >
+              Date check-in
+            </Link>
+            {other && (
+              <Link
+                href={`/settings?report=${other.userId}#report`}
+                className="block rounded px-3 py-2 text-coral-deep hover:bg-mist"
+              >
+                Report
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={unmatch}
+              className="block w-full rounded px-3 py-2 text-left hover:bg-mist"
+            >
+              Unmatch
+            </button>
+            <Link
+              href="/messages"
+              className="block rounded px-3 py-2 hover:bg-mist"
+            >
+              All messages
+            </Link>
+          </div>
+        </details>
       </div>
       <div
         role="log"

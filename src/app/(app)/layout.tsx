@@ -9,6 +9,8 @@ import { currentAccount, isStaff } from "@/lib/session";
 import { flagById, flagStyle, THEME_MODES, type ThemeMode } from "@/lib/themes";
 
 const FOOTER_LINKS = [
+  { href: "/safety", label: "Safety tips" },
+  { href: "/support", label: "Support" },
   { href: "/guidelines", label: "Guidelines" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
