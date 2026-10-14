@@ -12,6 +12,8 @@ const LINKS = [
   { href: "/mod/selfies", label: "Selfies" },
   { href: "/mod/appeals", label: "Appeals" },
   { href: "/mod/support", label: "Support" },
+  { href: "/mod/rooms", label: "Rooms" },
+  { href: "/mod/events", label: "Events" },
   { href: "/mod/users", label: "Members" },
 ];
 

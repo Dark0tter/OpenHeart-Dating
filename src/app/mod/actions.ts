@@ -216,6 +216,33 @@ export async function appealAction(fd: FormData) {
   revalidatePath("/mod/appeals");
 }
 
+export async function roomHostAction(fd: FormData) {
+  const staff = await staffOrThrow();
+  const roomId = text(fd, "roomId");
+  const makeHost = text(fd, "action") === "make_host";
+  const userId =
+    text(fd, "userId") ||
+    (
+      await prisma.user.findUnique({
+        where: { email: text(fd, "email").toLowerCase() },
+        select: { id: true },
+      })
+    )?.id;
+  if (!userId) throw new Error("No member with that email");
+  const result = await prisma.roomMembership.updateMany({
+    where: { roomId, userId },
+    data: { isHost: makeHost },
+  });
+  if (!result.count) throw new Error("They need to join the room first");
+  await logAction({
+    actorId: staff.id,
+    action: makeHost ? "room_make_host" : "room_remove_host",
+    targetUserId: userId,
+    note: `room:${roomId}`,
+  });
+  revalidatePath("/mod/rooms");
+}
+
 export async function ticketAction(fd: FormData) {
   const staff = await staffOrThrow();
   await closeTicket({

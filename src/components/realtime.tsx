@@ -22,7 +22,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof EventSource === "undefined") return;
-    const es = new EventSource("/api/events");
+    const es = new EventSource("/api/live");
     es.addEventListener("ready", (e) => {
       setLive(Boolean(JSON.parse((e as MessageEvent).data).live));
     });

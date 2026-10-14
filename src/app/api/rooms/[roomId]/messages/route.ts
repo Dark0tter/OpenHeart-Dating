@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AccountStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireMember } from "@/lib/session";
+import { isStaff, requireMember } from "@/lib/session";
 import { blockedUserIds } from "@/lib/safety";
 import { touchRoomPresence } from "@/lib/rooms";
 import {
@@ -27,7 +27,17 @@ const postSchema = z.object({
 async function memberRoom(roomId: string, userId: string) {
   return prisma.roomMembership.findUnique({
     where: { roomId_userId: { roomId, userId } },
-    include: { room: { select: { isActive: true, name: true } } },
+    include: {
+      room: {
+        select: {
+          isActive: true,
+          name: true,
+          rules: true,
+          pinnedNotice: true,
+          slowModeSeconds: true,
+        },
+      },
+    },
   });
 }
 
@@ -76,8 +86,41 @@ export async function GET(req: Request, ctx: Ctx) {
   });
   if (!afterDate) rows.reverse();
 
+  const deletedIds = (
+    await prisma.roomMessage.findMany({
+      where: {
+        roomId,
+        deletedAt: { gte: new Date(Date.now() - 10 * 60_000) },
+      },
+      select: { id: true },
+    })
+  ).map((m) => m.id);
+
+  const hostIds = afterDate
+    ? []
+    : (
+        await prisma.roomMembership.findMany({
+          where: { roomId, isHost: true },
+          select: { userId: true },
+        })
+      ).map((h) => h.userId);
+
   return NextResponse.json({
     roomName: membership.room.name,
+    room: {
+      rules: membership.room.rules ? filterText(membership.room.rules) : null,
+      pinnedNotice: membership.room.pinnedNotice
+        ? filterText(membership.room.pinnedNotice)
+        : null,
+      slowModeSeconds: membership.room.slowModeSeconds,
+      hostIds,
+    },
+    deletedIds,
+    youAreHost: membership.isHost || isStaff(user.role),
+    mutedUntil:
+      membership.mutedUntil && membership.mutedUntil > new Date()
+        ? membership.mutedUntil
+        : null,
     messages: rows.map((m) => ({
       id: m.id,
       body: filterText(m.body),
@@ -113,17 +156,32 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Invalid message" }, { status: 400 });
   }
 
+  if (membership.mutedUntil && membership.mutedUntil > new Date()) {
+    return NextResponse.json(
+      {
+        error: `A host muted you in this room until ${membership.mutedUntil.toLocaleString()}.`,
+      },
+      { status: 403 },
+    );
+  }
+
+  const host = membership.isHost || isStaff(user.role);
+  const gapSeconds = host
+    ? MIN_SECONDS_BETWEEN_MESSAGES
+    : Math.max(MIN_SECONDS_BETWEEN_MESSAGES, membership.room.slowModeSeconds);
   const last = await prisma.roomMessage.findFirst({
     where: { roomId, senderId: user.id },
     orderBy: { createdAt: "desc" },
     select: { createdAt: true },
   });
-  if (
-    last &&
-    Date.now() - last.createdAt.getTime() < MIN_SECONDS_BETWEEN_MESSAGES * 1000
-  ) {
+  if (last && Date.now() - last.createdAt.getTime() < gapSeconds * 1000) {
     return NextResponse.json(
-      { error: "You're sending messages too quickly." },
+      {
+        error:
+          gapSeconds > MIN_SECONDS_BETWEEN_MESSAGES
+            ? `Slow mode is on: one message every ${gapSeconds} seconds.`
+            : "You're sending messages too quickly.",
+      },
       { status: 429 },
     );
   }

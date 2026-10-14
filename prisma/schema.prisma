@@ -158,6 +158,9 @@ model User {
   lastActiveAt    DateTime      @default(now())
 
   authTokens              AuthToken[]
+  roomBans                RoomBan[]
+  eventsHosted            Event[]              @relation("EventsHosted")
+  eventRsvps              EventRsvp[]
   notifications           Notification[]
   pushSubscriptions       PushSubscription[]
   appeals                 Appeal[]
@@ -681,6 +684,71 @@ model PushSubscription {
   @@index([userId])
 }
 
+/// Removed from a room by a host; can't rejoin until lifted.
+model RoomBan {
+  roomId     String
+  userId     String
+  bannedById String?
+  reason     String?
+  createdAt  DateTime @default(now())
+  room       ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+}
+
+enum EventKind {
+  MUNCH
+  SOCIAL
+  CLASS
+  ONLINE
+}
+
+/// Munches, meetups, classes and online events. The exact address and any
+/// online link are only shown to the host and members who RSVP "going".
+model Event {
+  id          String      @id @default(uuid())
+  hostId      String
+  roomId      String?
+  kind        EventKind
+  tier        ContentTier @default(STANDARD)
+  title       String
+  description String      @db.Text
+  startsAt    DateTime
+  endsAt      DateTime?
+  venueName   String?
+  address     String?
+  onlineUrl   String?
+  city        String?
+  state       String?
+  country     String?
+  latitude    Float?
+  longitude   Float?
+  capacity    Int?
+  cancelledAt DateTime?
+  remindedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  host        User        @relation("EventsHosted", fields: [hostId], references: [id], onDelete: Cascade)
+  room        ChatRoom?   @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  rsvps       EventRsvp[]
+
+  @@index([startsAt])
+  @@index([hostId])
+}
+
+/// status: "going" | "interested".
+model EventRsvp {
+  eventId   String
+  userId    String
+  status    String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
+}
+
 /// Append-only record of every staff action, for accountability and appeals.
 model ModAction {
   id           String   @id @default(uuid())
@@ -735,20 +803,26 @@ enum RoomKind {
 
 /// Interest-based group chat. Rosters are never exposed; members only see who posts.
 model ChatRoom {
-  id             String           @id @default(uuid())
-  slug           String           @unique
-  name           String
-  description    String?
-  kind           RoomKind
-  kinkCategoryId String?
-  goalTagId      String?
-  isActive       Boolean          @default(true)
-  createdAt      DateTime         @default(now())
-  kinkCategory   KinkCategory?    @relation(fields: [kinkCategoryId], references: [id], onDelete: SetNull)
-  goalTag        GoalTag?         @relation(fields: [goalTagId], references: [id], onDelete: SetNull)
-  members        RoomMembership[]
-  invites        RoomInvite[]
-  messages       RoomMessage[]
+  id              String           @id @default(uuid())
+  slug            String           @unique
+  name            String
+  description     String?
+  kind            RoomKind
+  kinkCategoryId  String?
+  goalTagId       String?
+  isActive        Boolean          @default(true)
+  /// Shown above the chat; set by hosts.
+  rules           String?          @db.Text
+  pinnedNotice    String?
+  slowModeSeconds Int              @default(2)
+  createdAt       DateTime         @default(now())
+  bans            RoomBan[]
+  events          Event[]
+  kinkCategory    KinkCategory?    @relation(fields: [kinkCategoryId], references: [id], onDelete: SetNull)
+  goalTag         GoalTag?         @relation(fields: [goalTagId], references: [id], onDelete: SetNull)
+  members         RoomMembership[]
+  invites         RoomInvite[]
+  messages        RoomMessage[]
 }
 
 model RoomMembership {
@@ -757,6 +831,9 @@ model RoomMembership {
   joinedAt   DateTime  @default(now())
   /// Updated while the member has the room open; drives the online list.
   lastSeenAt DateTime?
+  /// Hosts moderate the room: pin notices, set rules, delete messages, mute and ban.
+  isHost     Boolean   @default(false)
+  mutedUntil DateTime?
   room       ChatRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 

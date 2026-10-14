@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  CalendarDays,
   House,
   MessageCircle,
   MessagesSquare,
@@ -16,11 +17,11 @@ import { NotificationBell } from "@/components/notification-bell";
 
 const links: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/feed", label: "Feed", icon: House },
-  { href: "/rooms", label: "Rooms", icon: MessagesSquare },
   { href: "/search", label: "Search", icon: Search },
   { href: "/messages", label: "Messages", icon: MessageCircle },
+  { href: "/rooms", label: "Rooms", icon: MessagesSquare },
+  { href: "/events", label: "Events", icon: CalendarDays },
   { href: "/profile", label: "Profile", icon: UserRound },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppNav() {
@@ -56,6 +57,17 @@ export function AppNav() {
               ))}
             </div>
             <NotificationBell />
+            <Link
+              href="/settings"
+              aria-label="Settings"
+              aria-current={isActive("/settings") ? "page" : undefined}
+              className={cn(
+                "rounded-md p-2 hover:bg-mist",
+                isActive("/settings") ? "text-coral" : "text-forest",
+              )}
+            >
+              <Settings aria-hidden className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </nav>

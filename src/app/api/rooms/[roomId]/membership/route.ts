@@ -28,6 +28,15 @@ export async function POST(_req: Request, ctx: Ctx) {
   if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
     return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });
   }
+  const banned = await prisma.roomBan.findUnique({
+    where: { roomId_userId: { roomId, userId: user.id } },
+  });
+  if (banned) {
+    return NextResponse.json(
+      { error: "A host removed you from this room." },
+      { status: 403 },
+    );
+  }
 
   await prisma.$transaction([
     prisma.roomMembership.upsert({

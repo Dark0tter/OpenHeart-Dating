@@ -30,6 +30,10 @@ export default function RoomPage() {
   const [openActions, setOpenActions] = useState<string | null>(null);
   const [online, setOnline] = useState<OnlineMember[]>([]);
   const [youAreHidden, setYouAreHidden] = useState(false);
+  const [room, setRoom] = useState<RoomInfo | null>(null);
+  const [hostIds, setHostIds] = useState<string[]>([]);
+  const [youAreHost, setYouAreHost] = useState(false);
+  const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const lastSeen = useRef<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
@@ -44,6 +48,14 @@ export default function RoomPage() {
       return;
     }
     setRoomName(data.roomName);
+    setRoom(data.room);
+    if (!after) setHostIds(data.room.hostIds);
+    setYouAreHost(data.youAreHost);
+    setMutedUntil(data.mutedUntil);
+    if (data.deletedIds?.length) {
+      const gone = new Set<string>(data.deletedIds);
+      setMessages((prev) => prev.filter((m) => !gone.has(m.id)));
+    }
     if (data.messages.length > 0) {
       lastSeen.current = data.messages[data.messages.length - 1].createdAt;
       setMessages((prev) => {
@@ -131,6 +143,29 @@ export default function RoomPage() {
     }
   }
 
+  async function hostAction(payload: Record<string, unknown>, done: string) {
+    const res = await fetch(`/api/rooms/${roomId}/host`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setNotice(data.error ?? "That didn't work.");
+      return false;
+    }
+    setNotice(done);
+    setOpenActions(null);
+    if (payload.action === "delete_message") {
+      setMessages((prev) => prev.filter((m) => m.id !== payload.messageId));
+    }
+    if (payload.action === "ban") {
+      setMessages((prev) => prev.filter((m) => m.sender.id !== payload.userId));
+      setOnline((prev) => prev.filter((o) => o.id !== payload.userId));
+    }
+    return true;
+  }
+
   async function requestPrivate(userId: string, note: string) {
     const res = await fetch("/api/message-requests", {
       method: "POST",
@@ -180,6 +215,12 @@ export default function RoomPage() {
                   onFollow={() => follow(o.id, o.displayName)}
                   onBlock={() => block(o.id, o.displayName)}
                   reportHref={`/settings?report=${o.id}`}
+                  host={
+                    youAreHost && !hostIds.includes(o.id)
+                      ? (payload, done) =>
+                          hostAction({ ...payload, userId: o.id }, done)
+                      : undefined
+                  }
                 />
               )}
             </li>
@@ -203,8 +244,50 @@ export default function RoomPage() {
         </Link>
       </div>
       {notice && (
-        <p className="mt-3 rounded-md bg-mist px-3 py-2 text-sm text-forest">
+        <p
+          role="status"
+          className="mt-3 rounded-md bg-mist px-3 py-2 text-sm text-forest"
+        >
           {notice}
+        </p>
+      )}
+      {room?.pinnedNotice && (
+        <p className="mt-3 rounded-md border border-sage/40 bg-sage/10 px-3 py-2 text-sm text-forest">
+          <span className="font-medium">Pinned: </span>
+          {room.pinnedNotice}
+        </p>
+      )}
+      {(room?.rules || youAreHost) && (
+        <details className="mt-2 text-sm">
+          <summary className="cursor-pointer text-forest">
+            Room rules{youAreHost ? " & host settings" : ""}
+          </summary>
+          {room?.rules && (
+            <p className="mt-2 whitespace-pre-wrap text-ink/75">{room.rules}</p>
+          )}
+          {room?.slowModeSeconds && room.slowModeSeconds > 2 ? (
+            <p className="mt-1 text-xs text-ink/55">
+              Slow mode: one message every {room.slowModeSeconds} seconds.
+            </p>
+          ) : null}
+          {youAreHost && room && (
+            <HostSettings
+              room={room}
+              onSave={(s) =>
+                hostAction(
+                  { action: "settings", ...s },
+                  "Room settings saved.",
+                ).then((ok) => {
+                  if (ok) poll();
+                })
+              }
+            />
+          )}
+        </details>
+      )}
+      {mutedUntil && (
+        <p className="mt-2 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral-deep">
+          A host muted you here until {new Date(mutedUntil).toLocaleString()}.
         </p>
       )}
 
@@ -233,6 +316,11 @@ export default function RoomPage() {
                     >
                       {m.sender.displayName}
                     </button>
+                  )}
+                  {hostIds.includes(m.sender.id) && (
+                    <span className="ml-1 rounded bg-sage/30 px-1 text-[10px] font-medium uppercase text-forest">
+                      Host
+                    </span>
                   )}{" "}
                   ·{" "}
                   {new Date(m.createdAt).toLocaleTimeString([], {
@@ -254,7 +342,39 @@ export default function RoomPage() {
                     onFollow={() => follow(m.sender.id, m.sender.displayName)}
                     onBlock={() => block(m.sender.id, m.sender.displayName)}
                     reportHref={`/settings?report=${m.sender.id}`}
+                    host={
+                      youAreHost && !hostIds.includes(m.sender.id)
+                        ? (payload, done) =>
+                            hostAction(
+                              { ...payload, userId: m.sender.id },
+                              done,
+                            )
+                        : undefined
+                    }
+                    onDeleteMessage={
+                      youAreHost
+                        ? () =>
+                            hostAction(
+                              { action: "delete_message", messageId: m.id },
+                              "Message deleted.",
+                            )
+                        : undefined
+                    }
                   />
+                )}
+                {m.mine && youAreHost && (
+                  <button
+                    type="button"
+                    className="mt-1 text-xs text-ink/50 hover:underline"
+                    onClick={() =>
+                      hostAction(
+                        { action: "delete_message", messageId: m.id },
+                        "Message deleted.",
+                      )
+                    }
+                  >
+                    Delete
+                  </button>
                 )}
               </div>
             ))}
@@ -289,18 +409,96 @@ export default function RoomPage() {
   );
 }
 
+type RoomInfo = {
+  rules: string | null;
+  pinnedNotice: string | null;
+  slowModeSeconds: number;
+  hostIds: string[];
+};
+
+function HostSettings({
+  room,
+  onSave,
+}: {
+  room: RoomInfo;
+  onSave: (s: {
+    rules: string | null;
+    pinnedNotice: string | null;
+    slowModeSeconds: number;
+  }) => void;
+}) {
+  const [rules, setRules] = useState(room.rules ?? "");
+  const [pinned, setPinned] = useState(room.pinnedNotice ?? "");
+  const [slow, setSlow] = useState(room.slowModeSeconds);
+
+  return (
+    <form
+      className="mt-3 space-y-2 rounded-md border border-forest/15 bg-cream p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSave({
+          rules: rules.trim() || null,
+          pinnedNotice: pinned.trim() || null,
+          slowModeSeconds: slow,
+        });
+      }}
+    >
+      <label className="block text-xs font-medium text-forest">
+        Pinned notice
+        <Input
+          value={pinned}
+          onChange={(e) => setPinned(e.target.value)}
+          maxLength={300}
+          className="mt-1"
+        />
+      </label>
+      <label className="block text-xs font-medium text-forest">
+        Rules
+        <textarea
+          value={rules}
+          onChange={(e) => setRules(e.target.value)}
+          maxLength={3000}
+          rows={4}
+          className="mt-1 w-full rounded-md border border-forest/15 bg-cream/80 px-3 py-2 text-sm font-normal"
+        />
+      </label>
+      <label className="block text-xs font-medium text-forest">
+        Slow mode
+        <select
+          value={slow}
+          onChange={(e) => setSlow(Number(e.target.value))}
+          className="mt-1 block h-9 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm font-normal"
+        >
+          <option value={2}>Off</option>
+          <option value={10}>10 seconds</option>
+          <option value={30}>30 seconds</option>
+          <option value={60}>1 minute</option>
+          <option value={300}>5 minutes</option>
+        </select>
+      </label>
+      <Button type="submit" size="sm">
+        Save
+      </Button>
+    </form>
+  );
+}
+
 function MemberActions({
   name,
   onRequest,
   onFollow,
   onBlock,
   reportHref,
+  host,
+  onDeleteMessage,
 }: {
   name: string;
   onRequest: (note: string) => void;
   onFollow: () => void;
   onBlock: () => void;
   reportHref: string;
+  host?: (payload: Record<string, unknown>, done: string) => void;
+  onDeleteMessage?: () => void;
 }) {
   const [note, setNote] = useState("");
 
@@ -345,6 +543,71 @@ function MemberActions({
           </Link>
         </div>
       </form>
+      {(host || onDeleteMessage) && (
+        <div className="mt-3 border-t border-forest/10 pt-2">
+          <p className="text-xs font-medium text-forest">Host tools</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {onDeleteMessage && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={onDeleteMessage}
+              >
+                Delete message
+              </Button>
+            )}
+            {host && (
+              <>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    host(
+                      { action: "mute", minutes: 60 },
+                      `${name} is muted for 1 hour.`,
+                    )
+                  }
+                >
+                  Mute 1 hour
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    host(
+                      { action: "mute", minutes: 24 * 60 },
+                      `${name} is muted for 24 hours.`,
+                    )
+                  }
+                >
+                  Mute 24 hours
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const reason = prompt(
+                      `Remove ${name} from this room? Optional reason:`,
+                    );
+                    if (reason !== null) {
+                      host(
+                        { action: "ban", reason: reason || undefined },
+                        `${name} was removed from the room.`,
+                      );
+                    }
+                  }}
+                >
+                  Remove from room
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
