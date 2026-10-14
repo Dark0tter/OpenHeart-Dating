@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/session";
 import { searchProfiles } from "@/lib/discovery";
 import { ageFromDob } from "@/lib/utils";
+import { photoSrc } from "@/lib/photos";
 
 export async function GET(req: Request) {
   const user = await requireUser();
@@ -25,8 +26,7 @@ export async function GET(req: Request) {
     kinkIds: parseList("kinks"),
     minAge: num(searchParams.get("minAge")),
     maxAge: num(searchParams.get("maxAge")),
-    maxDistanceKm:
-      num(searchParams.get("distance")) ?? user.profile.radiusKm,
+    maxDistanceKm: num(searchParams.get("distance")) ?? user.profile.radiusKm,
     verifiedOnly: searchParams.get("verified") === "1",
     cursor: searchParams.get("cursor") ?? undefined,
     limit: num(searchParams.get("limit")) ?? 24,
@@ -47,9 +47,10 @@ export async function GET(req: Request) {
       orientation: p.orientationTags.map((t) => t.tag.label),
       goals: p.goalTags.map((t) => t.tag.label),
       relationshipStyles: p.relationshipStyleTags.map((t) => t.tag.label),
+      photoVerified: Boolean(p.user.photoVerifiedAt),
       photos: p.photos.map((ph) => ({
         id: ph.id,
-        url: ph.url,
+        url: photoSrc(ph.id, "thumb"),
         isPrimary: ph.isPrimary,
       })),
     })),

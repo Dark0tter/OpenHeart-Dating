@@ -20,7 +20,10 @@ export async function POST(req: Request) {
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Enter a valid email." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Enter a valid email." },
+      { status: 400 },
+    );
   }
   if (!(await passesBotCheck(parsed.data.botToken, ip))) {
     return NextResponse.json({ error: BOT_CHECK_FAILED }, { status: 400 });

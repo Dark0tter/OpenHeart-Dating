@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { currentAccount } from "@/lib/session";
+import { deleteAccount } from "@/lib/account-deletion";
 
 const schema = z.object({
   password: z.string().min(1),
@@ -11,10 +12,10 @@ const schema = z.object({
 
 /**
  * Permanent account deletion, available in-app and on the web (required by
- * both app stores). Every user-owned row cascades from `User`.
+ * both app stores), including for suspended accounts.
  */
 export async function DELETE(req: Request) {
-  const user = await requireUser();
+  const user = await currentAccount();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -31,6 +32,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Incorrect password." }, { status: 403 });
   }
 
-  await prisma.user.delete({ where: { id: user.id } });
+  await deleteAccount(prisma, user.id);
   return NextResponse.json({ deleted: true });
 }

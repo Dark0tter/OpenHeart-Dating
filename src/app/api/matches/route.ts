@@ -2,12 +2,27 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { ageFromDob } from "@/lib/utils";
+import { photoSrc, primaryPhotoWhere } from "@/lib/photos";
 
 export async function GET() {
   const user = await requireUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const otherUser = {
+    include: {
+      profile: {
+        include: {
+          photos: {
+            where: primaryPhotoWhere(),
+            take: 1,
+            orderBy: [{ isPrimary: "desc" as const }],
+          },
+        },
+      },
+    },
+  };
 
   const matches = await prisma.match.findMany({
     where: {
@@ -16,32 +31,8 @@ export async function GET() {
     },
     orderBy: { createdAt: "desc" },
     include: {
-      userA: {
-        include: {
-          profile: {
-            include: {
-              photos: {
-                where: { visibility: "PUBLIC" },
-                take: 1,
-                orderBy: [{ isPrimary: "desc" }],
-              },
-            },
-          },
-        },
-      },
-      userB: {
-        include: {
-          profile: {
-            include: {
-              photos: {
-                where: { visibility: "PUBLIC" },
-                take: 1,
-                orderBy: [{ isPrimary: "desc" }],
-              },
-            },
-          },
-        },
-      },
+      userA: otherUser,
+      userB: otherUser,
       messages: {
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -52,6 +43,7 @@ export async function GET() {
   return NextResponse.json({
     matches: matches.map((m) => {
       const other = m.userAId === user.id ? m.userB : m.userA;
+      const photo = other.profile?.photos[0];
       return {
         id: m.id,
         createdAt: m.createdAt,
@@ -60,7 +52,7 @@ export async function GET() {
           id: other.id,
           displayName: other.profile?.displayName ?? "Member",
           age: ageFromDob(other.dateOfBirth),
-          photo: other.profile?.photos[0]?.url ?? null,
+          photo: photo ? photoSrc(photo.id, "thumb") : null,
         },
       };
     }),

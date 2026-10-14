@@ -141,10 +141,27 @@ body {
 .oh-atmosphere {
   color: var(--oh-ink);
   background:
-    radial-gradient(ellipse 80% 60% at 10% 20%, var(--oh-glow-1), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 10%, var(--oh-glow-2), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, var(--oh-glow-3), transparent 45%),
-    linear-gradient(165deg, var(--oh-base-1) 0%, var(--oh-base-2) 45%, var(--oh-base-3) 100%);
+    radial-gradient(
+      ellipse 80% 60% at 10% 20%,
+      var(--oh-glow-1),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 90% 10%,
+      var(--oh-glow-2),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 50% 100%,
+      var(--oh-glow-3),
+      transparent 45%
+    ),
+    linear-gradient(
+      165deg,
+      var(--oh-base-1) 0%,
+      var(--oh-base-2) 45%,
+      var(--oh-base-3) 100%
+    );
   /* `clip` (not `hidden`) so the sticky top bar keeps working. */
   overflow-x: clip;
   overflow-wrap: anywhere;

@@ -74,7 +74,11 @@ export async function roomOnlineMembers(roomId: string, viewerUserId: string) {
     }));
 }
 
-const POSITIVE_LEVELS: KinkInterestLevel[] = ["FAVORITE", "INTERESTED", "CURIOUS"];
+const POSITIVE_LEVELS: KinkInterestLevel[] = [
+  "FAVORITE",
+  "INTERESTED",
+  "CURIOUS",
+];
 
 /** Rooms that match what the member listed on their profile (plus general rooms). */
 export async function interestRoomIds(userId: string): Promise<Set<string>> {

@@ -18,33 +18,125 @@ type Rule = {
 };
 
 const RULES: Rule[] = [
-  { category: "wishlist", label: "Amazon wishlist", on: "raw", pattern: /amazon\.[a-z.]+\/(?:hz\/)?(?:wishlist|registry)/ },
-  { category: "wishlist", label: "Amazon short link", on: "raw", pattern: /\b(?:amzn\.(?:to|eu|asia)|a\.co)\/\S+/ },
-  { category: "wishlist", label: "Amazon wishlist", on: "raw", pattern: /\bamazon\s+wish\s*list\b/ },
-  { category: "wishlist", label: "Throne wishlist", on: "raw", pattern: /\bthrone\.(?:com|gifts|me)\b|\bthrone\s+wish\s*list\b/ },
+  {
+    category: "wishlist",
+    label: "Amazon wishlist",
+    on: "raw",
+    pattern: /amazon\.[a-z.]+\/(?:hz\/)?(?:wishlist|registry)/,
+  },
+  {
+    category: "wishlist",
+    label: "Amazon short link",
+    on: "raw",
+    pattern: /\b(?:amzn\.(?:to|eu|asia)|a\.co)\/\S+/,
+  },
+  {
+    category: "wishlist",
+    label: "Amazon wishlist",
+    on: "raw",
+    pattern: /\bamazon\s+wish\s*list\b/,
+  },
+  {
+    category: "wishlist",
+    label: "Throne wishlist",
+    on: "raw",
+    pattern: /\bthrone\.(?:com|gifts|me)\b|\bthrone\s+wish\s*list\b/,
+  },
 
   { category: "payment", label: "Cash App", on: "compact", pattern: /cashapp/ },
-  { category: "payment", label: "Cash App $cashtag", on: "raw", pattern: /(?:^|\s)\$[a-z][a-z0-9_-]{2,20}\b/ },
+  {
+    category: "payment",
+    label: "Cash App $cashtag",
+    on: "raw",
+    pattern: /(?:^|\s)\$[a-z][a-z0-9_-]{2,20}\b/,
+  },
   { category: "payment", label: "Venmo", on: "compact", pattern: /venmo/ },
-  { category: "payment", label: "PayPal.me", on: "compact", pattern: /paypal(?:dot)?me/ },
+  {
+    category: "payment",
+    label: "PayPal.me",
+    on: "compact",
+    pattern: /paypal(?:dot)?me/,
+  },
   { category: "payment", label: "Zelle", on: "raw", pattern: /\bzelle\b/ },
 
-  { category: "tip_jar", label: "Buy Me a Coffee page", on: "raw", pattern: /buymeacoffee(?:\.com)?/ },
-  { category: "tip_jar", label: "Ko-fi page", on: "raw", pattern: /\bko-?fi\.com\b/ },
+  {
+    category: "tip_jar",
+    label: "Buy Me a Coffee page",
+    on: "raw",
+    pattern: /buymeacoffee(?:\.com)?/,
+  },
+  {
+    category: "tip_jar",
+    label: "Ko-fi page",
+    on: "raw",
+    pattern: /\bko-?fi\.com\b/,
+  },
 
-  { category: "paid_content", label: "OnlyFans", on: "compact", pattern: /onlyfans/ },
-  { category: "paid_content", label: "Fansly", on: "compact", pattern: /fansly/ },
-  { category: "paid_content", label: "Paid content site", on: "raw", pattern: /\b(?:patreon|fanvue|manyvids|loyalfans|fancentro|clips4sale)\.com\b|\bjustfor\.fans\b/ },
-  { category: "paid_content", label: "OnlyFans", on: "raw", pattern: /\b(?:check(?:\s+out)?|sub(?:scribe)?(?:\s+to)?|follow)\s+my\s+of\b/ },
+  {
+    category: "paid_content",
+    label: "OnlyFans",
+    on: "compact",
+    pattern: /onlyfans/,
+  },
+  {
+    category: "paid_content",
+    label: "Fansly",
+    on: "compact",
+    pattern: /fansly/,
+  },
+  {
+    category: "paid_content",
+    label: "Paid content site",
+    on: "raw",
+    pattern:
+      /\b(?:patreon|fanvue|manyvids|loyalfans|fancentro|clips4sale)\.com\b|\bjustfor\.fans\b/,
+  },
+  {
+    category: "paid_content",
+    label: "OnlyFans",
+    on: "raw",
+    pattern:
+      /\b(?:check(?:\s+out)?|sub(?:scribe)?(?:\s+to)?|follow)\s+my\s+of\b/,
+  },
 
-  { category: "money_request", label: "Request for money or gifts", on: "raw", pattern: /\bspoil\s+me\b/ },
-  { category: "money_request", label: "Request for money or gifts", on: "raw", pattern: /\bsend\s+(?:me\s+)?(?:money|cash|gifts?|tributes?)\b/ },
+  {
+    category: "money_request",
+    label: "Request for money or gifts",
+    on: "raw",
+    pattern: /\bspoil\s+me\b/,
+  },
+  {
+    category: "money_request",
+    label: "Request for money or gifts",
+    on: "raw",
+    pattern: /\bsend\s+(?:me\s+)?(?:money|cash|gifts?|tributes?)\b/,
+  },
 
   // Findom is not part of OpenHeart, as an interest or as solicitation.
-  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bf[i1!]n\s*-?\s*d[o0]m/ },
-  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bfinancial\s+(?:dom\w*|slave\w*|submission|sub)\b/ },
-  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\b(?:pay|cash|money)\s*-?\s*(?:pig|slave|piggy|dom|domme)s?\b/ },
-  { category: "findom", label: "Financial domination (findom)", on: "raw", pattern: /\bhuman\s*-?\s*atm\b|\bwallet\s+drain\w*/ },
+  {
+    category: "findom",
+    label: "Financial domination (findom)",
+    on: "raw",
+    pattern: /\bf[i1!]n\s*-?\s*d[o0]m/,
+  },
+  {
+    category: "findom",
+    label: "Financial domination (findom)",
+    on: "raw",
+    pattern: /\bfinancial\s+(?:dom\w*|slave\w*|submission|sub)\b/,
+  },
+  {
+    category: "findom",
+    label: "Financial domination (findom)",
+    on: "raw",
+    pattern: /\b(?:pay|cash|money)\s*-?\s*(?:pig|slave|piggy|dom|domme)s?\b/,
+  },
+  {
+    category: "findom",
+    label: "Financial domination (findom)",
+    on: "raw",
+    pattern: /\bhuman\s*-?\s*atm\b|\bwallet\s+drain\w*/,
+  },
 ];
 
 function normalizeRaw(text: string): string {
@@ -93,7 +185,10 @@ export function findSolicitation(
         label: rule.label,
         excerpt:
           rule.on === "raw"
-            ? haystack.slice(Math.max(0, m.index - 40), m.index + m[0].length + 40)
+            ? haystack.slice(
+                Math.max(0, m.index - 40),
+                m.index + m[0].length + 40,
+              )
             : value.slice(0, 120),
       });
     }

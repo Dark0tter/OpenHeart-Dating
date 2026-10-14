@@ -4,9 +4,9 @@ import { completeAgeVerification } from "@/lib/verification";
 
 const schema = z.object({
   token: z.string().min(1),
-  outcome: z.enum(["VERIFIED_ADULT", "NOT_VERIFIED", "REJECTED"]).default(
-    "VERIFIED_ADULT",
-  ),
+  outcome: z
+    .enum(["VERIFIED_ADULT", "NOT_VERIFIED", "REJECTED"])
+    .default("VERIFIED_ADULT"),
 });
 
 /**
@@ -50,7 +50,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
   if (!token) {
-    return NextResponse.redirect(new URL("/onboarding?verify=missing", req.url));
+    return NextResponse.redirect(
+      new URL("/onboarding?verify=missing", req.url),
+    );
   }
 
   const result = await completeAgeVerification({

@@ -85,7 +85,11 @@ export default function MessagesPage() {
                   {r.body}
                 </p>
                 <div className="mt-3 flex gap-2">
-                  <Button type="button" size="sm" onClick={() => respond(r.id, "accept")}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => respond(r.id, "accept")}
+                  >
                     Accept
                   </Button>
                   <Button

@@ -39,7 +39,10 @@ export async function GET(req: Request, ctx: Ctx) {
   const { roomId } = await ctx.params;
   const membership = await memberRoom(roomId, user.id);
   if (!membership?.room.isActive) {
-    return NextResponse.json({ error: "Join this room first." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Join this room first." },
+      { status: 403 },
+    );
   }
   const tiers = await allowedTiers(user);
   if (!(await roomAllowed(roomId, tiers))) {
@@ -96,7 +99,10 @@ export async function POST(req: Request, ctx: Ctx) {
   const { roomId } = await ctx.params;
   const membership = await memberRoom(roomId, user.id);
   if (!membership?.room.isActive) {
-    return NextResponse.json({ error: "Join this room first." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Join this room first." },
+      { status: 403 },
+    );
   }
   if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
     return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });

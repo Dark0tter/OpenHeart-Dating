@@ -27,7 +27,10 @@ export async function POST(req: Request) {
     viewerUserId: user.id,
   });
   if (!visible) {
-    return NextResponse.json({ error: "Member not available" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Member not available" },
+      { status: 404 },
+    );
   }
 
   await prisma.follow.upsert({

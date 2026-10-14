@@ -3,10 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 
 export type VerificationProvider =
-  | "persona"
-  | "veriff"
-  | "stripe_identity"
-  | "yoti";
+  "persona" | "veriff" | "stripe_identity" | "yoti";
 
 /**
  * Phase 1 stub: starts an age-verification session with the configured provider.

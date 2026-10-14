@@ -19,7 +19,7 @@ const NOT_ALLOWED = [
   "Cash App, Venmo, PayPal, Zelle, or other payment requests",
   "Buy Me a Coffee, Ko-fi, or other tip jars",
   "Promoting OnlyFans, Fansly, or other paid-content subscriptions",
-  "\"Spoil me\" profiles or repeated requests for money or gifts",
+  '"Spoil me" profiles or repeated requests for money or gifts',
   "Financial domination (findom), paypig, or tribute arrangements of any kind",
   "Escort advertising, spam, affiliate or recruitment schemes, and scams",
 ];
@@ -33,8 +33,8 @@ export default function GuidelinesPage() {
           Community guidelines
         </h1>
         <p className="mt-4 text-lg text-ink/75">
-          We&apos;re here for connection, not monetization. If you&apos;d like
-          a gift from someone, get to know them first: meet for coffee.
+          We&apos;re here for connection, not monetization. If you&apos;d like a
+          gift from someone, get to know them first: meet for coffee.
         </p>
 
         <h2 className="mt-10 font-[family-name:var(--font-fraunces)] text-2xl text-forest">
@@ -64,7 +64,10 @@ export default function GuidelinesPage() {
           How we enforce it
         </h2>
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-ink/85">
-          <li>Content with payment links or wishlists isn&apos;t posted, and a moderator reviews it.</li>
+          <li>
+            Content with payment links or wishlists isn&apos;t posted, and a
+            moderator reviews it.
+          </li>
           <li>Warning.</li>
           <li>Temporary suspension.</li>
           <li>Permanent ban for repeated violations.</li>

@@ -1,4 +1,9 @@
-import { AccountStatus, ConsentScope, Prisma, Visibility } from "@prisma/client";
+import {
+  AccountStatus,
+  ConsentScope,
+  Prisma,
+  Visibility,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedUserIds, isBlockedEitherWay } from "@/lib/safety";
 import { distanceKm } from "@/lib/utils";
@@ -90,9 +95,7 @@ export async function searchProfiles(filters: SearchFilters) {
       ...(filters.minAge || filters.maxAge
         ? {
             dateOfBirth: {
-              ...(filters.maxAge
-                ? { gte: yearsAgo(filters.maxAge + 1) }
-                : {}),
+              ...(filters.maxAge ? { gte: yearsAgo(filters.maxAge + 1) } : {}),
               ...(filters.minAge ? { lte: yearsAgo(filters.minAge) } : {}),
             },
           }
@@ -135,7 +138,7 @@ export async function searchProfiles(filters: SearchFilters) {
       relationshipStyleTags: { include: { tag: true } },
       seekingIdentityTags: true,
       photos: {
-        where: { visibility: "PUBLIC" },
+        where: { visibility: "PUBLIC", status: "APPROVED" },
         orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
         take: 3,
       },
@@ -144,6 +147,7 @@ export async function searchProfiles(filters: SearchFilters) {
           id: true,
           dateOfBirth: true,
           lastActiveAt: true,
+          photoVerifiedAt: true,
           verification: { select: { status: true } },
         },
       },

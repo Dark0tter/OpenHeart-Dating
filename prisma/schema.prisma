@@ -58,6 +58,13 @@ enum KinkInterestLevel {
 enum ConsentScope {
   ADULT_ALBUM
   PROFILE_ACCESS
+  PRIVATE_ALBUM
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ReportReason {
@@ -138,11 +145,16 @@ model User {
   role            UserRole      @default(MEMBER)
   /// Bumped to sign the member out on every device (password change or reset).
   sessionVersion  Int           @default(0)
+  /// Set when a moderator matches a pose selfie to the profile photos.
+  photoVerifiedAt DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   lastActiveAt    DateTime      @default(now())
 
   authTokens              AuthToken[]
+  selfieVerifications     SelfieVerification[]
+  consentRequestsSent     ConsentRequest[] @relation("ConsentRequestsSent")
+  consentRequestsReceived ConsentRequest[] @relation("ConsentRequestsReceived")
   profile                 Profile?
   verification            Verification?
   accounts                Account[]
@@ -262,17 +274,70 @@ model Profile {
   @@index([latitude, longitude])
 }
 
+/// Images are re-encoded on upload (metadata and location stripped) and only
+/// served through /api/photos/[id], which checks who may see each one.
 model Photo {
-  id         String          @id @default(uuid())
-  profileId  String
-  url        String
-  visibility PhotoVisibility @default(PUBLIC)
-  sortOrder  Int             @default(0)
-  isPrimary  Boolean         @default(false)
-  createdAt  DateTime        @default(now())
-  profile    Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id              String          @id @default(uuid())
+  profileId       String
+  url             String
+  storageKey      String?
+  thumbKey        String?
+  /// SHA-256 of the uploaded file, checked against BlockedImageHash.
+  contentHash     String?
+  width           Int?
+  height          Int?
+  visibility      PhotoVisibility @default(PUBLIC)
+  status          ReviewStatus    @default(PENDING)
+  rejectionReason String?
+  reviewedAt      DateTime?
+  sortOrder       Int             @default(0)
+  isPrimary       Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  profile         Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId, visibility])
+  @@index([status, createdAt])
+}
+
+/// Files moderators removed for serious violations can never be uploaded again.
+model BlockedImageHash {
+  hash      String   @id
+  reason    String
+  createdAt DateTime @default(now())
+}
+
+/// A selfie with a requested pose, compared with profile photos by a moderator.
+/// The selfie is deleted from storage as soon as it's reviewed.
+model SelfieVerification {
+  id         String       @id @default(uuid())
+  userId     String
+  storageKey String?
+  gesture    String
+  status     ReviewStatus @default(PENDING)
+  reviewerId String?
+  reviewNote String?
+  createdAt  DateTime     @default(now())
+  reviewedAt DateTime?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+/// "May I see your private photos?" Accepting creates a ConsentGrant.
+model ConsentRequest {
+  id          String               @id @default(uuid())
+  requesterId String
+  ownerId     String
+  scope       ConsentScope
+  status      MessageRequestStatus @default(PENDING)
+  createdAt   DateTime             @default(now())
+  respondedAt DateTime?
+  requester   User                 @relation("ConsentRequestsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+  owner       User                 @relation("ConsentRequestsReceived", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, ownerId, scope])
+  @@index([ownerId, status])
 }
 
 model IdentityTag {

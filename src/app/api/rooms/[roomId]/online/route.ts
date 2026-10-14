@@ -21,7 +21,10 @@ export async function GET(
     where: { roomId_userId: { roomId, userId: user.id } },
   });
   if (!membership) {
-    return NextResponse.json({ error: "Join this room first." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Join this room first." },
+      { status: 403 },
+    );
   }
   if (!(await roomAllowed(roomId, await allowedTiers(user)))) {
     return NextResponse.json({ error: WEB_ONLY_ERROR }, { status: 403 });

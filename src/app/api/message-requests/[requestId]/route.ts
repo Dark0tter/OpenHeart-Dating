@@ -45,7 +45,10 @@ export async function POST(
   }
 
   if (await isBlockedEitherWay(user.id, request.fromUserId)) {
-    return NextResponse.json({ error: "Member not available" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Member not available" },
+      { status: 404 },
+    );
   }
 
   const match = await prisma.$transaction((tx) => acceptRequestTx(tx, request));
