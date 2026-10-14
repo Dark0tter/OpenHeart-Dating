@@ -95,7 +95,7 @@ export async function POST(req: Request) {
           outcome === "VERIFIED_ADULT"
             ? "You can now activate your profile."
             : "You can try again from your profile. Contact support if you think this is a mistake.",
-        link: "/onboarding",
+        link: "/onboarding?step=golive",
       });
     }
   }

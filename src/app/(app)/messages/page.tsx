@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 
 type Request = {
   id: string;
@@ -132,13 +133,15 @@ export default function MessagesPage() {
           ))}
         </ul>
         {conversations.length === 0 && (
-          <p className="mt-3 text-sm text-ink/70">
-            No private chats yet. Meet people in{" "}
-            <Link href="/rooms" className="underline">
-              rooms
-            </Link>
-            .
-          </p>
+          <EmptyState
+            className="mt-3"
+            title="No private chats yet"
+            body="When you and someone like each other, you can message here. Rooms are a low-pressure way to get talking first."
+            actions={[
+              { href: "/search", label: "Find people" },
+              { href: "/rooms", label: "Go to rooms" },
+            ]}
+          />
         )}
       </section>
 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 
 type Card = {
   id: string;
@@ -135,7 +136,7 @@ export default function SearchPage() {
       {!hasLocation && (
         <p className="mt-4 rounded-md bg-mist px-3 py-2 text-sm text-forest">
           Set your location in{" "}
-          <Link href="/onboarding#location" className="underline">
+          <Link href="/onboarding?step=looking" className="underline">
             your profile
           </Link>{" "}
           to see distances and sort by nearest.
@@ -341,10 +342,15 @@ export default function SearchPage() {
       )}
 
       {!error && !loading && profiles.length === 0 && (
-        <p className="mt-10 text-ink/70">
-          Nobody matches these filters yet. Try a wider distance or fewer
-          filters.
-        </p>
+        <EmptyState
+          className="mt-10"
+          title="Nobody matches these filters yet"
+          body="Try a wider distance or fewer filters. We're a new community, so rooms and local events are also a great way to meet people."
+          actions={[
+            { href: "/rooms", label: "Go to rooms" },
+            { href: "/events", label: "Find events" },
+          ]}
+        />
       )}
     </div>
   );

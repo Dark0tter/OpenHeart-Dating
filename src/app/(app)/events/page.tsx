@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CommunityTabs } from "@/components/community-tabs";
 import { formatWhen, KIND_SHORT, type EventKindId } from "@/lib/event-format";
 
 type EventCard = {
@@ -47,6 +48,7 @@ export default function EventsPage() {
 
   return (
     <div>
+      <CommunityTabs />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           Events
@@ -85,7 +87,7 @@ export default function EventsPage() {
 
       {scope === "nearby" && !hasLocation && (
         <p className="mt-4 rounded-md bg-mist px-3 py-2 text-sm text-forest">
-          <Link href="/onboarding#location" className="underline">
+          <Link href="/onboarding?step=looking" className="underline">
             Set your location
           </Link>{" "}
           to see events near you.

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  CalendarDays,
   House,
   MessageCircle,
   MessagesSquare,
@@ -15,18 +14,35 @@ import {
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/notification-bell";
 
-const links: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/feed", label: "Feed", icon: House },
+const links: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  also?: string[];
+}[] = [
+  { href: "/feed", label: "Home", icon: House },
   { href: "/search", label: "Search", icon: Search },
   { href: "/messages", label: "Messages", icon: MessageCircle },
-  { href: "/rooms", label: "Rooms", icon: MessagesSquare },
-  { href: "/events", label: "Events", icon: CalendarDays },
-  { href: "/profile", label: "Profile", icon: UserRound },
+  {
+    href: "/rooms",
+    label: "Community",
+    icon: MessagesSquare,
+    also: ["/events"],
+  },
+  {
+    href: "/profile",
+    label: "Profile",
+    icon: UserRound,
+    also: ["/onboarding"],
+  },
 ];
 
 export function AppNav() {
   const pathname = usePathname();
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (href: string) => {
+    const l = links.find((x) => x.href === href);
+    return [href, ...(l?.also ?? [])].some((p) => pathname.startsWith(p));
+  };
 
   return (
     <>
@@ -77,7 +93,7 @@ export function AppNav() {
         aria-label="Main"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-forest/10 bg-bloom/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       >
-        <ul className="grid grid-cols-6">
+        <ul className="grid grid-cols-5">
           {links.map(({ href, label, icon: Icon }) => {
             const active = isActive(href);
             return (
@@ -86,7 +102,7 @@ export function AppNav() {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                    "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors",
                     active ? "text-coral" : "text-forest/80 hover:text-ink",
                   )}
                 >

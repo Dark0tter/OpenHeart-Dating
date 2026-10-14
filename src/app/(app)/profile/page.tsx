@@ -32,7 +32,14 @@ const STEP_LINKS: Record<string, string> = {
   photos3: "#photos",
   selfie: "#selfie",
   email: "/settings",
-  location: "/onboarding#location",
+  location: "/onboarding?step=looking",
+  bio: "/onboarding?step=about",
+  prompts: "/onboarding?step=about",
+  pronouns: "/onboarding?step=about",
+  identity: "/onboarding?step=identity",
+  orientation: "/onboarding?step=identity",
+  goals: "/onboarding?step=looking",
+  age: "/onboarding?step=golive",
 };
 
 function Completeness({

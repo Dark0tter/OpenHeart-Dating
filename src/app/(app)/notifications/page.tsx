@@ -102,7 +102,7 @@ export default function NotificationsPage() {
                     {!i.readAt && <span className="sr-only"> (unread)</span>}
                   </p>
                   {i.body && <p className="text-sm text-ink/70">{i.body}</p>}
-                  <p className="text-xs text-ink/45">{when(i.createdAt)}</p>
+                  <p className="text-xs text-ink/70">{when(i.createdAt)}</p>
                 </div>
               </div>
             );

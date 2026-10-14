@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
+import { GettingStarted } from "@/components/getting-started";
 
 type Post = {
   id: string;
@@ -57,6 +59,7 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-2xl">
+      <GettingStarted />
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Feed
       </h1>
@@ -93,7 +96,7 @@ export default function FeedPage() {
               <span className="font-medium text-forest">
                 {p.author.displayName}
               </span>
-              <span className="text-ink/45">
+              <span className="text-ink/70">
                 {new Date(p.createdAt).toLocaleString()}
               </span>
             </div>
@@ -102,7 +105,7 @@ export default function FeedPage() {
               <button
                 type="button"
                 onClick={() => remove(p.id)}
-                className="mt-2 text-xs text-ink/45 hover:text-coral-deep"
+                className="mt-2 text-xs text-ink/70 hover:text-coral-deep"
               >
                 Delete
               </button>
@@ -112,10 +115,15 @@ export default function FeedPage() {
       </ul>
 
       {loaded && posts.length === 0 && (
-        <p className="mt-8 text-ink/70">
-          Nothing here yet. Like or follow people and their posts will show up
-          here.
-        </p>
+        <EmptyState
+          title="Your feed is quiet for now"
+          body="Posts from people you like or follow show up here. A few good ways to meet people:"
+          actions={[
+            { href: "/search", label: "Browse people near you" },
+            { href: "/rooms", label: "Chat in a room" },
+            { href: "/events", label: "Find a munch or event" },
+          ]}
+        />
       )}
       {nextCursor && (
         <Button

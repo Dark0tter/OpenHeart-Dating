@@ -45,7 +45,7 @@ export async function SponsorSlot() {
       >
         Learn more
       </a>
-      <p className="mt-2 text-[11px] text-ink/45">
+      <p className="mt-2 text-[11px] text-ink/70">
         Chosen from your profile settings only.{" "}
         <Link href="/privacy" className="underline">
           Why this?

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CommunityTabs } from "@/components/community-tabs";
 
 type Room = {
   id: string;
@@ -62,6 +63,7 @@ export default function RoomsPage() {
 
   return (
     <div>
+      <CommunityTabs />
       <h1 className="font-[family-name:var(--font-fraunces)] text-3xl text-forest">
         Rooms
       </h1>
