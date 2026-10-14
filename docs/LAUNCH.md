@@ -24,13 +24,13 @@ Prices are what each service listed when this was written; check before paying.
 | DigitalOcean Managed Postgres | ~$15/month | Daily backups included; do one restore test before launch |
 | DigitalOcean Spaces (photos) | ~$5/month | 250 GB included |
 | DMCA agent registration | $6 every 3 years | US Copyright Office online form; protects you when members upload someone else's photos |
-| Persona (age and photo checks) | Ask sales | Request startup pricing; until then, adult photos stay locked for everyone, which is the safe default |
+| Age verification | Free to start | Didit: 500 free checks a month, then about $0.33 each. Persona (startup program) and Veriff are drop-in alternatives |
 
 Before real members sign up:
 
 - `ALLOW_VERIFICATION_STUB=false` and `PHOTO_REVIEW_MODE=pre`.
 - Make yourself admin: `npm run staff:set -- you@example.com ADMIN`, then turn on notifications in Settings on your phone.
-- Do one test signup through Persona's sandbox, one test date check-in, and one test call between two accounts.
+- Do one test signup through the verification provider's sandbox and confirm the session disappears from its dashboard afterwards, one test date check-in, and one test call between two accounts.
 
 ## Stage 3: legal, before advertising the site
 
@@ -38,7 +38,7 @@ Before real members sign up:
 - **Lawyer review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety`. Look for an attorney who works with adult platforms; many offer flat-fee document reviews. Topics to raise:
   - Section 230 and FOSTA-SESTA.
   - 18 U.S.C. 2257 record keeping, since members can post explicit photos on the website.
-  - State age-verification laws, which Persona checks are meant to satisfy.
+  - State age-verification laws, which the ID checks are meant to satisfy.
   - GDPR and the UK Online Safety Act, if you accept members from Europe or the UK.
 - **Sponsor contracts.** A one-page agreement saying sponsors get anonymous daily totals only, no member data, and you can pull an ad at any time.
 

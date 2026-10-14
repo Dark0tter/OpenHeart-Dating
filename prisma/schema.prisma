@@ -548,19 +548,23 @@ model SeekingOrientationTag {
 
 /// Never store ID documents or images — provider handles capture; we keep status + reference only.
 model Verification {
-  id                String             @id @default(uuid())
-  userId            String             @unique
-  status            VerificationStatus @default(NOT_VERIFIED)
-  provider          String?
-  providerReference String?
-  verificationToken String?            @unique
-  verifiedAt        DateTime?
+  id                    String             @id @default(uuid())
+  userId                String             @unique
+  status                VerificationStatus @default(NOT_VERIFIED)
+  provider              String?
+  providerReference     String?
+  verificationToken     String?            @unique
+  verifiedAt            DateTime?
   /// Keyed hash of the verified name and birthdate, so a banned person can't
   /// verify a new account. Never reversible; no ID data is stored.
-  identityHash      String?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identityHash          String?
+  /// The provider's own id for the check (inquiry/session), used to delete it.
+  providerSessionId     String?
+  /// When the provider confirmed it deleted the ID images and personal data.
+  providerDataDeletedAt DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Like {

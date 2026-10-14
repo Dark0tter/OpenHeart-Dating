@@ -26,6 +26,16 @@ export async function POST() {
     );
   }
 
-  const session = await startAgeVerification(user.id);
-  return NextResponse.json(session);
+  try {
+    return NextResponse.json(await startAgeVerification(user.id));
+  } catch (err) {
+    console.error("Couldn't start age verification", err);
+    return NextResponse.json(
+      {
+        error:
+          "We couldn't reach our verification partner. Please try again in a few minutes.",
+      },
+      { status: 502 },
+    );
+  }
 }

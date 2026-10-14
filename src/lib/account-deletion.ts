@@ -1,5 +1,6 @@
 import { AccountStatus, type PrismaClient } from "@prisma/client";
 import { deleteObject } from "@/lib/storage";
+import { deleteProviderData } from "@/lib/verification";
 
 /**
  * Removes stored files first, then the account; every row cascades from User.
@@ -9,7 +10,7 @@ import { deleteObject } from "@/lib/storage";
  * cleanup job once the hold is lifted (finishHeldDeletions).
  */
 export async function deleteAccount(prisma: PrismaClient, userId: string) {
-  const [photos, selfies, held] = await Promise.all([
+  const [photos, selfies, held, verification] = await Promise.all([
     prisma.photo.findMany({
       where: { profile: { userId } },
       select: { storageKey: true, thumbKey: true },
@@ -21,7 +22,22 @@ export async function deleteAccount(prisma: PrismaClient, userId: string) {
     prisma.report.count({
       where: { reportedUserId: userId, legalHold: true },
     }),
+    prisma.verification.findUnique({
+      where: { userId },
+      select: {
+        provider: true,
+        providerSessionId: true,
+        providerDataDeletedAt: true,
+      },
+    }),
   ]);
+
+  if (verification?.providerSessionId && !verification.providerDataDeletedAt) {
+    await deleteProviderData(
+      verification.provider,
+      verification.providerSessionId,
+    );
+  }
 
   await Promise.all([
     ...photos.flatMap((p) => [

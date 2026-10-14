@@ -4,6 +4,7 @@ import { notify } from "@/lib/notify";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { expireCalls } from "@/lib/calls";
 import { deleteAccount, finishHeldDeletions } from "@/lib/account-deletion";
+import { retryProviderDeletions } from "@/lib/verification";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -196,10 +197,12 @@ async function cleanup(now: Date) {
   const deletedAccounts = await finishHeldDeletions(prisma);
   const pruned = await pruneOldRecords(now);
   const abandonedAccounts = await deleteAbandonedSignups(now);
+  const verificationDataDeleted = await retryProviderDeletions(now);
 
   return {
     deletedAccounts,
     abandonedAccounts,
+    verificationDataDeleted,
     ...pruned,
     checkIns: checkIns.count,
     notifications: notifications.count,

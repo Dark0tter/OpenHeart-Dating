@@ -87,7 +87,25 @@ services:
       - key: ALLOW_VERIFICATION_STUB
         scope: RUN_TIME
         value: "false"
-      # Persona hosted age verification; webhook URL: ${APP_URL}/api/verification/persona-webhook
+      # Age verification: didit | persona | veriff. Each provider's webhook is
+      # ${APP_URL}/api/verification/<provider>-webhook
+      - key: VERIFICATION_PROVIDER
+        scope: RUN_TIME
+        value: didit
+      - key: DIDIT_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: DIDIT_WORKFLOW_ID
+        scope: RUN_TIME
+      - key: DIDIT_WEBHOOK_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: VERIFF_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VERIFF_SHARED_SECRET
+        scope: RUN_TIME
+        type: SECRET
       - key: PERSONA_TEMPLATE_ID
         scope: RUN_TIME
       - key: PERSONA_ENVIRONMENT_ID

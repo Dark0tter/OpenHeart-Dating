@@ -17,7 +17,11 @@ import { sendLike } from "@/lib/matching";
 import { blockUser } from "@/lib/safety";
 import { rateLimit } from "@/lib/rate-limit";
 import { runJobs, CHECKIN_GRACE_MS } from "@/lib/jobs";
-import { applyProviderDecision } from "@/lib/verification";
+import {
+  applyProviderDecision,
+  finishVerification,
+  retryProviderDeletions,
+} from "@/lib/verification";
 import { banUser, emailBanHash, identityBanHash, isBanned } from "@/lib/bans";
 import { deleteAccount } from "@/lib/account-deletion";
 import { orderedPair } from "@/lib/utils";
@@ -237,6 +241,90 @@ describe("unmatched conversation clean-up", () => {
     expect(
       await prisma.message.count({ where: { matchId: reported.id } }),
     ).toBe(1);
+  });
+});
+
+describe("provider data deletion", () => {
+  function fakeFetch(status: number) {
+    const urls: string[] = [];
+    const impl = (async (url: string) => {
+      urls.push(url);
+      return new Response(null, { status });
+    }) as unknown as typeof fetch;
+    return { impl, urls };
+  }
+
+  async function pendingCheck() {
+    const user = await makeUser();
+    const reference = `didit_ref_${user.id}`;
+    await prisma.verification.create({
+      data: {
+        userId: user.id,
+        status: "PENDING",
+        provider: "didit",
+        providerReference: reference,
+      },
+    });
+    return { user, reference };
+  }
+
+  it("deletes the provider's copy as soon as the result arrives", async () => {
+    vi.stubEnv("DIDIT_API_KEY", "test-key");
+    const { user, reference } = await pendingCheck();
+    const sessionId = randomUUID();
+    const ok = fakeFetch(204);
+    await finishVerification(
+      "didit",
+      {
+        reference,
+        sessionId,
+        outcome: "VERIFIED_ADULT",
+        identity: { first: "Ana", last: "Lee", birthdate: "1990-05-01" },
+      },
+      ok.impl,
+    );
+    const v = await prisma.verification.findUniqueOrThrow({
+      where: { userId: user.id },
+    });
+    expect(v.status).toBe("VERIFIED_ADULT");
+    expect(v.providerSessionId).toBe(sessionId);
+    expect(v.providerDataDeletedAt).not.toBeNull();
+    expect(ok.urls).toEqual([
+      `https://verification.didit.me/v3/session/${sessionId}/delete/`,
+    ]);
+    vi.unstubAllEnvs();
+  });
+
+  it("keeps retrying a failed deletion until the provider confirms", async () => {
+    vi.stubEnv("DIDIT_API_KEY", "test-key");
+    const { user, reference } = await pendingCheck();
+    const sessionId = randomUUID();
+    await finishVerification(
+      "didit",
+      {
+        reference,
+        sessionId,
+        outcome: "REJECTED",
+        identity: { first: null, last: null, birthdate: null },
+      },
+      fakeFetch(500).impl,
+    );
+    const failed = await prisma.verification.findUniqueOrThrow({
+      where: { userId: user.id },
+    });
+    expect(failed.providerDataDeletedAt).toBeNull();
+
+    const later = new Date(Date.now() + 16 * MIN);
+    const ok = fakeFetch(204);
+    await retryProviderDeletions(later, ok.impl);
+    const done = await prisma.verification.findUniqueOrThrow({
+      where: { userId: user.id },
+    });
+    expect(done.providerDataDeletedAt).not.toBeNull();
+    expect(ok.urls).toContain(
+      `https://verification.didit.me/v3/session/${sessionId}/delete/`,
+    );
+    vi.unstubAllEnvs();
   });
 });
 

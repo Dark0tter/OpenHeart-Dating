@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import type { ProviderDecision } from "@/lib/verification-decision";
+import { decisionFromBirthdate } from "@/lib/verification-decision";
 
 const TOLERANCE_SECONDS = 5 * 60;
 const PERSONA_API = "https://api.withpersona.com/api/v1";
@@ -31,6 +33,47 @@ export async function redactPersonaInquiry(
     console.error(`Persona redaction failed for ${inquiryId}`, err);
     return false;
   }
+}
+
+type InquiryAttributes = Record<string, unknown>;
+
+type PersonaEvent = {
+  data?: {
+    attributes?: {
+      name?: string;
+      payload?: { data?: { id?: string; attributes?: InquiryAttributes } };
+    };
+  };
+};
+
+function attr(a: InquiryAttributes, kebab: string, camel: string) {
+  const v = a[kebab] ?? a[camel];
+  return typeof v === "string" ? v : null;
+}
+
+/** Turns a Persona inquiry webhook into our decision; null means "not final yet". */
+export function personaDecision(event: PersonaEvent): ProviderDecision | null {
+  const name = event.data?.attributes?.name ?? "";
+  const inquiry = event.data?.attributes?.payload?.data;
+  const a = inquiry?.attributes ?? {};
+  const reference = attr(a, "reference-id", "referenceId");
+  if (!reference) return null;
+
+  const identity = {
+    first: attr(a, "name-first", "nameFirst"),
+    last: attr(a, "name-last", "nameLast"),
+    birthdate: attr(a, "birthdate", "birthdate"),
+  };
+  const base = { reference, sessionId: inquiry?.id ?? "", identity };
+
+  if (name === "inquiry.approved") {
+    return { ...base, ...decisionFromBirthdate(identity.birthdate, null) };
+  }
+  if (name === "inquiry.declined") return { ...base, outcome: "REJECTED" };
+  if (name === "inquiry.failed" || name === "inquiry.expired") {
+    return { ...base, outcome: "NOT_VERIFIED" };
+  }
+  return null;
 }
 
 /**
