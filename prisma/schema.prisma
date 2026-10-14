@@ -165,6 +165,7 @@ model User {
   eventRsvps              EventRsvp[]
   notifications           Notification[]
   pushSubscriptions       PushSubscription[]
+  deviceTokens            DeviceToken[]
   appeals                 Appeal[]
   supportTickets          SupportTicket[]
   selfieVerifications     SelfieVerification[]
@@ -686,6 +687,20 @@ model PushSubscription {
   auth      String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// An iPhone or Android app install that can receive notifications.
+model DeviceToken {
+  id         String   @id @default(uuid())
+  userId     String
+  /// "ios" (APNs token) or "android" (Firebase token)
+  platform   String
+  token      String   @unique
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

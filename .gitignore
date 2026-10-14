@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Local photo storage (development only)
 .uploads/
+
+# Firebase config for the Android app (download from the Firebase console)
+mobile/android/app/google-services.json

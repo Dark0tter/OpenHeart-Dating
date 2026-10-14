@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
+import { forgetThisDevice } from "@/lib/native-app";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -347,7 +348,10 @@ export default function SettingsPage() {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => signOut({ callbackUrl: "/" })}
+        onClick={async () => {
+          await forgetThisDevice();
+          await signOut({ callbackUrl: "/" });
+        }}
       >
         Sign out
       </Button>

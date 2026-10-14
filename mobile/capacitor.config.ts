@@ -26,6 +26,11 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "never",
   },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+  },
   android: {
     allowMixedContent: false,
   },

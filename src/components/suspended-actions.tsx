@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { forgetThisDevice } from "@/lib/native-app";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -120,7 +121,10 @@ export function SuspendedAccountActions() {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => signOut({ callbackUrl: "/" })}
+        onClick={async () => {
+          await forgetThisDevice();
+          await signOut({ callbackUrl: "/" });
+        }}
       >
         Sign out
       </Button>

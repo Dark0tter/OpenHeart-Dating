@@ -133,6 +133,19 @@ services:
         type: SECRET
       - key: VAPID_SUBJECT
         scope: RUN_TIME
+      # iPhone app notifications (APNs .p8 key) and Android (Firebase service account).
+      - key: APNS_KEY_ID
+        scope: RUN_TIME
+      - key: APNS_TEAM_ID
+        scope: RUN_TIME
+      - key: APNS_PRIVATE_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: APNS_BUNDLE_ID
+        scope: RUN_TIME
+      - key: FCM_SERVICE_ACCOUNT_JSON
+        scope: RUN_TIME
+        type: SECRET
       # Only needed if DATABASE_URL goes through a transaction-mode pooler.
       - key: REALTIME_DATABASE_URL
         scope: RUN_TIME

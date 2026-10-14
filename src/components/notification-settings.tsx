@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  disableNativePush,
+  enableNativePush,
+  nativePushAvailable,
+  nativePushState,
+} from "@/lib/native-app";
 
 const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -27,6 +33,12 @@ export function NotificationSettings() {
         setReadReceipts(d.readReceipts ?? true);
       });
 
+    if (nativePushAvailable()) {
+      nativePushState()
+        .then(setPush)
+        .catch(() => setPush("off"));
+      return;
+    }
     if (!VAPID_KEY) return setPush("unconfigured");
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       return setPush("unsupported");
@@ -52,6 +64,18 @@ export function NotificationSettings() {
 
   async function enablePush() {
     setMsg(null);
+    if (nativePushAvailable()) {
+      const state = await enableNativePush().catch(() => "off" as const);
+      setPush(state);
+      setMsg(
+        state === "on"
+          ? "Notifications are on for this phone."
+          : state === "blocked"
+            ? "Notifications are turned off for OpenHeart in your phone's Settings app."
+            : "Couldn't turn on notifications. Please try again.",
+      );
+      return;
+    }
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
       setPush(permission === "denied" ? "blocked" : "off");
@@ -77,6 +101,12 @@ export function NotificationSettings() {
   }
 
   async function disablePush() {
+    if (nativePushAvailable()) {
+      await disableNativePush();
+      setPush("off");
+      setMsg("Notifications are off for this phone.");
+      return;
+    }
     const reg = await navigator.serviceWorker.getRegistration("/sw.js");
     const sub = await reg?.pushManager.getSubscription();
     if (sub) {
@@ -113,7 +143,9 @@ export function NotificationSettings() {
         )}
         {push === "blocked" && (
           <p className="text-sm text-ink/70">
-            Notifications are blocked in your browser settings for this site.
+            {nativePushAvailable()
+              ? "Notifications are turned off for OpenHeart in your phone's Settings app."
+              : "Notifications are blocked in your browser settings for this site."}
           </p>
         )}
         {push === "unsupported" && (

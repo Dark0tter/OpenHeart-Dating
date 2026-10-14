@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { publish } from "@/lib/realtime";
 import { sendEmail } from "@/lib/email";
 import { appUrl } from "@/lib/request";
+import { sendNativePush } from "@/lib/native-push";
 
 export type NotificationType =
   | "match"
@@ -112,7 +113,10 @@ export async function notify(
   }
 
   await publish(userId, { type: "notification" });
-  await sendPush(userId, n);
+  await Promise.all([
+    sendPush(userId, n),
+    sendNativePush(userId, n).catch(() => {}),
+  ]);
 
   if (!n.email || !user.notifyEmail || !user.emailVerified) return;
   const away = Date.now() - user.lastActiveAt.getTime() > AWAY_MS;

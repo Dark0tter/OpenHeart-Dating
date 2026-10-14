@@ -122,7 +122,12 @@ npm run ios       # opens Xcode (needs a Mac and an Apple Developer account to p
 npm run android   # opens Android Studio
 ```
 
-Before publishing, set the bundle ID (`OPENHEART_APP_ID`, default `com.openheartdating.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires. Web push doesn't work inside the iOS app; native push (APNs and Firebase) is a later addition.
+Before publishing, set the bundle ID (`OPENHEART_APP_ID`, default `com.openheartdating.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires.
+
+**App notifications.** The apps use Apple's and Google's own (free) push services; the server talks to them directly (`src/lib/native-push.ts`). Members turn them on in Settings → Notifications inside the app, and tapping one opens the right page.
+
+- iPhone: in Xcode, open the App target → Signing & Capabilities and make sure **Push Notifications** is listed (the entitlements file is already in the project). Create an APNs key in your Apple Developer account and set `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`, `APNS_BUNDLE_ID`.
+- Android: create a free Firebase project, add an Android app with the same package name, download `google-services.json` into `mobile/android/app/` (it's git-ignored), and set `FCM_SERVICE_ACCOUNT_JSON` from a service-account key.
 
 ## Important API surfaces
 

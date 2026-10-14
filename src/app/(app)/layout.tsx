@@ -4,6 +4,7 @@ import { SponsorSlot } from "@/components/sponsor-slot";
 import { SponsorGate } from "@/components/sponsor-gate";
 import { EmailBanner } from "@/components/email-banner";
 import { RealtimeProvider } from "@/components/realtime";
+import { NativePushBridge } from "@/components/native-push-bridge";
 import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { currentAccount, isStaff } from "@/lib/session";
@@ -41,6 +42,7 @@ export default async function AppLayout({
     >
       <RealtimeProvider>
         <AppNav />
+        <NativePushBridge />
         {user && !user.emailVerified && <EmailBanner email={user.email} />}
         {user && isStaff(user.role) && (
           <div className="bg-forest px-4 py-1.5 text-center text-xs text-cream">
