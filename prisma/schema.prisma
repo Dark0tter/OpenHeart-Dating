@@ -87,7 +87,7 @@ enum ReportSource {
 }
 
 /// Sexual interests are special-category data (GDPR Art. 9), so interest-based
-/// sponsor placement is opt-in; GENERIC is the default.
+/// sponsor matching is a choice; GENERIC is the default.
 enum AdPreference {
   GENERIC
   PROFILE_INTERESTS

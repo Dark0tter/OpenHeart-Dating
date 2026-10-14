@@ -35,13 +35,13 @@ export default function PrivacyPage() {
           The sponsor block
         </h2>
         <p className="mt-3 text-ink/75">
-          Free members see one small, labelled block at the bottom of the page.
+          Every member sees one small, labelled block at the bottom of the page.
           It never pops up, plays video, or covers what you&apos;re doing. By
-          default it shows general community listings. If you opt in, it can
-          match listings to the interests and relationship goals on your
-          profile, and it will never show something you marked as a No or Hard
-          Limit. It never uses your browsing, searches, messages, or device.
-          Donors can turn it off on the website.
+          default it shows general community listings. If you choose to in
+          Settings, it can match listings to the interests and relationship
+          goals on your profile instead, and it will never show something you
+          marked as a No or Hard Limit. It never uses your browsing, searches,
+          messages, or device. Donors can turn it off on the website.
         </p>
         <p className="mt-3 text-ink/75">
           Sponsors are approved by a person before they appear. It only appears

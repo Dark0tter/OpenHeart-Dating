@@ -242,8 +242,9 @@ export default function Home() {
               <li>We do not sell your personal information.</li>
               <li>We do not build behavioral advertising profiles.</li>
               <li>
-                The one small sponsor block you&apos;ll see is chosen only from
-                interests you put on your profile, and only if you opt in.
+                You&apos;ll see one small, labelled sponsor block: no pop-ups,
+                no video, no tracking. It shows general listings unless you
+                choose to match it to the interests on your profile.
               </li>
             </ul>
           </div>
