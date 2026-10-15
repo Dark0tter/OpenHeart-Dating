@@ -55,7 +55,9 @@ export async function POST(req: Request) {
   if (visibility === PhotoVisibility.ADULT) {
     if (isRestricted(await allowedTiers(user))) {
       return NextResponse.json(
-        { error: "Adult photos can only be added on the OpenHeart website." },
+        {
+          error: "Adult photos can only be added on the Kindred Kinks website.",
+        },
         { status: 403 },
       );
     }

@@ -112,7 +112,7 @@ const RULES: Rule[] = [
     pattern: /\bsend\s+(?:me\s+)?(?:money|cash|gifts?|tributes?)\b/,
   },
 
-  // Findom is not part of OpenHeart, as an interest or as solicitation.
+  // Findom is not part of Kindred Kinks, as an interest or as solicitation.
   {
     category: "findom",
     label: "Financial domination (findom)",
@@ -246,7 +246,7 @@ export function solicitationErrorBody(labels: string[]) {
   return {
     code: "FINANCIAL_SOLICITATION",
     error:
-      "OpenHeart doesn't allow wishlists, payment or tip links, paid-content promotion, findom, or requests for money or gifts. " +
+      "Kindred Kinks doesn't allow wishlists, payment or tip links, paid-content promotion, findom, or requests for money or gifts. " +
       `Please remove: ${labels.join(", ")}.`,
     matched: labels,
   };

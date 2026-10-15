@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       to: data.contactEmail,
       subject: `${name} added you as their safety contact`,
       paragraphs: [
-        `Hi ${data.contactName}, ${name} is going on a date and asked OpenHeart to email you if they don't check in by ${data.checkInBy.toUTCString()}.`,
+        `Hi ${data.contactName}, ${name} is going on a date and asked Kindred Kinks to email you if they don't check in by ${data.checkInBy.toUTCString()}.`,
         "You don't need to do anything now. If you get a second email saying they haven't checked in, please try to reach them.",
       ],
     });
@@ -149,7 +149,7 @@ export async function PATCH(req: Request) {
       to: checkIn.contactEmail,
       subject: `${name} has checked in and is safe`,
       paragraphs: [
-        `Good news: ${name} just checked in on OpenHeart and says they're safe.`,
+        `Good news: ${name} just checked in on Kindred Kinks and says they're safe.`,
       ],
     });
   }

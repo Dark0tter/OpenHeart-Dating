@@ -70,8 +70,8 @@ export async function suspendUser(opts: {
   await emailMember(
     opts.userId,
     permanent
-      ? "Your OpenHeart account has been banned"
-      : "Your OpenHeart account has been suspended",
+      ? "Your Kindred Kinks account has been banned"
+      : "Your Kindred Kinks account has been suspended",
     [
       permanent
         ? "Your account was permanently banned, and you can't open a new one."
@@ -118,7 +118,7 @@ export async function warnUser(opts: {
     reportId: opts.reportId,
     note: opts.message,
   });
-  await emailMember(opts.userId, "A note from the OpenHeart safety team", [
+  await emailMember(opts.userId, "A note from the Kindred Kinks safety team", [
     opts.message,
     "Repeated issues can lead to suspension. Our community guidelines are at " +
       `${appUrl()}/guidelines.`,
@@ -435,7 +435,10 @@ export async function reviewAppeal(opts: {
     appeal.userId,
     opts.approve ? "Your appeal was approved" : "Your appeal was reviewed",
     opts.approve
-      ? ["Your OpenHeart account has been restored. Welcome back.", opts.note]
+      ? [
+          "Your Kindred Kinks account has been restored. Welcome back.",
+          opts.note,
+        ]
       : [
           "We reviewed your appeal and the suspension stays in place.",
           opts.note,
@@ -462,7 +465,7 @@ export async function closeTicket(opts: {
     await sendEmail({
       to: ticket.email,
       subject: `Re: ${ticket.subject}`,
-      paragraphs: [opts.reply, "— OpenHeart support"],
+      paragraphs: [opts.reply, "— Kindred Kinks support"],
     });
   }
 }

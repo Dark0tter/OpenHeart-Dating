@@ -74,7 +74,7 @@ export function NotificationSettings() {
         state === "on"
           ? "Notifications are on for this phone."
           : state === "blocked"
-            ? "Notifications are turned off for OpenHeart in your phone's Settings app."
+            ? "Notifications are turned off for Kindred Kinks in your phone's Settings app."
             : "Couldn't turn on notifications. Please try again.",
       );
       return;
@@ -147,14 +147,14 @@ export function NotificationSettings() {
         {push === "blocked" && (
           <p className="text-sm text-ink/70">
             {nativePushAvailable()
-              ? "Notifications are turned off for OpenHeart in your phone's Settings app."
+              ? "Notifications are turned off for Kindred Kinks in your phone's Settings app."
               : "Notifications are blocked in your browser settings for this site."}
           </p>
         )}
         {push === "unsupported" && (
           <p className="text-sm text-ink/70">
             This browser doesn&apos;t support notifications. On iPhone, add
-            OpenHeart to your Home Screen first.
+            Kindred Kinks to your Home Screen first.
           </p>
         )}
         {push === "unconfigured" && (

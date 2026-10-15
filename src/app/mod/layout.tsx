@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isAdmin, requireStaff } from "@/lib/session";
 
-export const metadata = { title: "Moderation · OpenHeart" };
+export const metadata = { title: "Moderation · Kindred Kinks" };
 
 const LINKS = [
   { href: "/mod", label: "Overview" },
@@ -32,7 +32,7 @@ export default async function ModLayout({
             href="/mod"
             className="font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
-            OpenHeart moderation
+            Kindred Kinks moderation
           </Link>
           <nav className="flex flex-wrap gap-4 text-sm">
             {LINKS.map((l) => (

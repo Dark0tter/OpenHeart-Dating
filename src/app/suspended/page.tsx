@@ -9,7 +9,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { currentAccount } from "@/lib/session";
 
-export const metadata = { title: "Account suspended · OpenHeart" };
+export const metadata = { title: "Account suspended · Kindred Kinks" };
 
 export default async function SuspendedPage() {
   const user = await currentAccount();

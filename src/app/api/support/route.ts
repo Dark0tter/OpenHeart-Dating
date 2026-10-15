@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     to: data.email,
     subject: `We got your message: ${data.subject}`,
     paragraphs: [
-      `Thanks for contacting OpenHeart. Your request (${label}) is number ${ticket.id.slice(0, 8)}. We'll reply to this address.`,
+      `Thanks for contacting Kindred Kinks. Your request (${label}) is number ${ticket.id.slice(0, 8)}. We'll reply to this address.`,
       "If someone is in immediate danger, contact local emergency services first.",
     ],
   });

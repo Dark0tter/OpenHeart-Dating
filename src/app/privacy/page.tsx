@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Privacy promise — OpenHeart",
+  title: "Privacy promise — Kindred Kinks",
 };
 
 export default function PrivacyPage() {
@@ -15,8 +15,8 @@ export default function PrivacyPage() {
           Our privacy promise
         </h1>
         <p className="mt-4 text-lg text-ink/75">
-          Members are the customers, not the product. OpenHeart only uses what
-          you choose to tell it.
+          Members are the customers, not the product. Kindred Kinks only uses
+          what you choose to tell it.
         </p>
 
         <ul className="mt-8 space-y-2 text-ink/85">

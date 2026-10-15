@@ -70,7 +70,7 @@ export async function PATCH(req: Request) {
     // Store rules: adult content in the apps may only be enabled off-app.
     if (await isAppRequest()) {
       return NextResponse.json(
-        { error: "Change this setting on the OpenHeart website." },
+        { error: "Change this setting on the Kindred Kinks website." },
         { status: 403 },
       );
     }

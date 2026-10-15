@@ -7,9 +7,9 @@ import { waitlistThreshold } from "@/lib/waitlist";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Waiting list — OpenHeart",
+  title: "Waiting list — Kindred Kinks",
   description:
-    "Get one email when OpenHeart has enough members near you. No spam, and we delete your address after.",
+    "Get one email when Kindred Kinks has enough members near you. No spam, and we delete your address after.",
 };
 
 export default function WaitlistPage() {
@@ -24,7 +24,7 @@ export default function WaitlistPage() {
           Not many people near you yet?
         </h1>
         <p>
-          OpenHeart is growing one city at a time. Leave your email and
+          Kindred Kinks is growing one city at a time. Leave your email and
           we&apos;ll send you <strong>one</strong> email when there are{" "}
           {waitlistThreshold()} verified members in your city. Then we delete
           your address.

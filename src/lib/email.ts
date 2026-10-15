@@ -25,13 +25,13 @@ export function renderEmail(email: Email) {
     ...email.paragraphs,
     ...(email.action ? [`${email.action.label}: ${email.action.url}`] : []),
     "",
-    `OpenHeart · ${appUrl()}`,
-    "You're getting this because of your OpenHeart account. Notification emails can be turned off in Settings.",
+    `Kindred Kinks · ${appUrl()}`,
+    "You're getting this because of your Kindred Kinks account. Notification emails can be turned off in Settings.",
   ].join("\n\n");
 
   const html = `<!doctype html><html><body style="margin:0;background:#f6f1ec;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1f2a24">
 <div style="max-width:520px;margin:0 auto;padding:32px 24px">
-<p style="font-size:22px;color:#2f4a3a;margin:0 0 24px">OpenHeart</p>
+<p style="font-size:22px;color:#2f4a3a;margin:0 0 24px">Kindred Kinks</p>
 ${email.paragraphs.map((p) => `<p style="font-size:15px;line-height:1.6;margin:0 0 16px">${escapeHtml(p)}</p>`).join("\n")}
 ${
   email.action
@@ -39,7 +39,7 @@ ${
 <p style="font-size:12px;color:#6b7280;word-break:break-all">If the button doesn't work, copy this link: ${escapeHtml(email.action.url)}</p>`
     : ""
 }
-<p style="font-size:12px;color:#6b7280;margin-top:32px">You're getting this because of your OpenHeart account. Notification emails can be turned off in Settings.</p>
+<p style="font-size:12px;color:#6b7280;margin-top:32px">You're getting this because of your Kindred Kinks account. Notification emails can be turned off in Settings.</p>
 </div></body></html>`;
 
   return { text, html };

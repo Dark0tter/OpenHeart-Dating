@@ -193,7 +193,7 @@ export async function applyProviderDecision(opts: {
         where: { id: existing.userId },
         data: {
           accountStatus: "SUSPENDED",
-          statusReason: "This person was previously banned from OpenHeart.",
+          statusReason: "This person was previously banned from Kindred Kinks.",
           statusChangedAt: new Date(),
           suspendedUntil: null,
         },

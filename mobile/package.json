@@ -1,8 +1,8 @@
 {
-  "name": "openheart-mobile",
+  "name": "kindredkinks-mobile",
   "version": "0.1.0",
   "private": true,
-  "description": "iOS and Android shells for the OpenHeart website (Capacitor).",
+  "description": "iOS and Android shells for the Kindred Kinks website (Capacitor).",
   "scripts": {
     "sync": "cap sync",
     "ios": "cap open ios",

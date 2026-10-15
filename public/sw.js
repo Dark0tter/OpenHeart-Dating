@@ -1,4 +1,4 @@
-/* OpenHeart service worker: shows push notifications and opens the right page. */
+/* Kindred Kinks service worker: shows push notifications and opens the right page. */
 
 self.addEventListener("push", (event) => {
   let data = {};
@@ -7,13 +7,13 @@ self.addEventListener("push", (event) => {
   } catch {
     data = {};
   }
-  const title = data.title || "OpenHeart";
+  const title = data.title || "Kindred Kinks";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",
       icon: "/icon-192.png",
       badge: "/icon-192.png",
-      tag: data.url || "openheart",
+      tag: data.url || "kindredkinks",
       data: { url: data.url || "/" },
     }),
   );

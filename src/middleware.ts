@@ -4,6 +4,14 @@ import { isIndexable } from "@/lib/public-pages";
 
 /** Keeps everything but the public pages out of search engines, and sends signed-out visitors to log in. */
 export function middleware(request: NextRequest) {
+  const host = request.headers.get("host") ?? "";
+  if (host.startsWith("www.")) {
+    const { pathname, search } = request.nextUrl;
+    return NextResponse.redirect(
+      `https://${host.slice(4)}${pathname}${search}`,
+      308,
+    );
+  }
   const response = NextResponse.next();
   if (!isIndexable(request.nextUrl.pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");

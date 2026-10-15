@@ -199,8 +199,8 @@ export default function SettingsPage() {
         </legend>
         {inApp ? (
           <p className="text-sm text-ink/70">
-            The app shows a limited version of OpenHeart. You can change this
-            setting on the OpenHeart website.
+            The app shows a limited version of Kindred Kinks. You can change
+            this setting on the Kindred Kinks website.
           </p>
         ) : (
           <>
@@ -275,7 +275,9 @@ export default function SettingsPage() {
         ))}
         {adPreference !== null && !inApp && (
           <Link href="/supporter" className="text-sm text-forest underline">
-            {supporter ? "Your Supporter badge" : "Donate to support OpenHeart"}
+            {supporter
+              ? "Your Supporter badge"
+              : "Donate to support Kindred Kinks"}
           </Link>
         )}
       </fieldset>

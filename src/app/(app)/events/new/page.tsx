@@ -216,7 +216,8 @@ export default function NewEventPage() {
 
         <p className="text-xs text-ink/70">
           No ticket sales, paid entry links or money requests — events are free
-          to list and attend through OpenHeart. Follow the community guidelines.
+          to list and attend through Kindred Kinks. Follow the community
+          guidelines.
         </p>
         {error && (
           <p role="alert" className="text-sm text-coral-deep">

@@ -26,6 +26,15 @@ Prices are what each service listed when this was written; check before paying.
 | DMCA agent registration | $6 every 3 years | US Copyright Office online form; protects you when members upload someone else's photos |
 | Age verification | Free to start | Didit: 500 free checks a month, then about $0.33 each. Persona (startup program) and Veriff are drop-in alternatives |
 
+### Connecting kindredkinks.com (DNS on Cloudflare)
+
+1. Deploy the app once. `.do/app.yaml` already lists `kindredkinks.com` (primary) and `www.kindredkinks.com`. In App Platform → Settings → Domains, each shows a CNAME target like `kindredkinks-xxxxx.ondigitalocean.app`.
+2. In Cloudflare → DNS, add a `CNAME` for `@` and one for `www`, both pointing at that target. Leave them **DNS only (grey cloud)** until App Platform shows the domains as active and has issued certificates; then you can switch to Proxied if you want, with SSL/TLS mode set to **Full (strict)**.
+3. `APP_URL` follows the primary domain automatically, so sign-in links and emails will use `https://kindredkinks.com`.
+4. Email: in Resend, add the domain `kindredkinks.com` and copy the DKIM, SPF and return-path records it gives you into Cloudflare DNS (DNS only). `EMAIL_FROM` is already `Kindred Kinks <hello@kindredkinks.com>`. Add a DMARC record too (`TXT _dmarc` → `v=DMARC1; p=none; rua=mailto:you@yourmail`) so mail isn't flagged as spam.
+5. Turnstile: add `kindredkinks.com` to the site's allowed hostnames.
+6. For a support inbox, Cloudflare Email Routing (free) can forward `support@kindredkinks.com` and `hello@kindredkinks.com` to your personal email; set `SUPPORT_EMAIL=support@kindredkinks.com`.
+
 Before real members sign up:
 
 - `ALLOW_VERIFICATION_STUB=false` and `PHOTO_REVIEW_MODE=pre`.

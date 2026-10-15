@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>OpenHeart</string>
+        <string>Kindred Kinks</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -67,8 +67,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>OpenHeart uses your camera for video calls with your matches and for photo verification.</string>
+	<string>Kindred Kinks uses your camera for video calls with your matches and for photo verification.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OpenHeart uses your microphone for voice and video calls with your matches.</string>
+	<string>Kindred Kinks uses your microphone for voice and video calls with your matches.</string>
 </dict>
 </plist>

@@ -140,7 +140,7 @@ export async function POST(req: Request) {
   }
   if (!(await allowedTiers(user)).includes(data.tier)) {
     return NextResponse.json(
-      { error: "Create adult events on the OpenHeart website." },
+      { error: "Create adult events on the Kindred Kinks website." },
       { status: 403 },
     );
   }

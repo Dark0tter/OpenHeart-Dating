@@ -31,7 +31,7 @@ export async function geocodeCity(parts: {
     url.searchParams.set("featureType", "city");
     const res = await fetch(url, {
       headers: {
-        "User-Agent": `OpenHeartDating/1.0 (${SUPPORT_EMAIL || "support"})`,
+        "User-Agent": `KindredKinks/1.0 (${SUPPORT_EMAIL || "support"})`,
         "Accept-Language": "en",
       },
       signal: AbortSignal.timeout(4000),

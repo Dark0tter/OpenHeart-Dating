@@ -138,11 +138,11 @@ export async function notify(
     to: user.email,
     subject: n.title,
     paragraphs: [
-      n.body ?? "You have something new on OpenHeart.",
+      n.body ?? "You have something new on Kindred Kinks.",
       `You can turn these emails off in Settings: ${appUrl()}/settings`,
     ],
     action: n.link
-      ? { label: "Open OpenHeart", url: `${appUrl()}${n.link}` }
+      ? { label: "Go to Kindred Kinks", url: `${appUrl()}${n.link}` }
       : undefined,
   });
   if (sent) {

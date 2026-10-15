@@ -10,7 +10,7 @@ export async function SiteHeader() {
         href="/"
         className="font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-forest md:text-3xl"
       >
-        OpenHeart
+        Kindred Kinks
       </Link>
       <nav className="flex items-center gap-3 text-sm md:gap-5">
         {session?.user ? (

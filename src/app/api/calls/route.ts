@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   await publish(check.otherId, { type: "call", callId: call.id });
   await pushOnly(check.otherId, {
     title: video ? "Incoming video call" : "Incoming call",
-    body: "Someone you matched with is calling you on OpenHeart.",
+    body: "Someone you matched with is calling you on Kindred Kinks.",
     link: `/messages/${matchId}`,
   });
   return NextResponse.json({ callId: call.id, iceServers: iceServers() });

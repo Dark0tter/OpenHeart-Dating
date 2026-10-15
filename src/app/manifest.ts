@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OpenHeart Dating",
-    short_name: "OpenHeart",
+    name: "Kindred Kinks",
+    short_name: "Kindred Kinks",
     description: "Privacy-first dating for LGBTQIA+ and kink-positive people.",
     start_url: "/feed",
     display: "standalone",

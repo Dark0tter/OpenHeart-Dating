@@ -768,7 +768,8 @@ function OnboardingInner() {
             {tags.contentRestricted && (
               <p className="text-sm text-ink/70">
                 The app shows a shorter list. You can see and edit the full list
-                on the OpenHeart website, and anything you set there is kept.
+                on the Kindred Kinks website, and anything you set there is
+                kept.
               </p>
             )}
             <KinkPicker

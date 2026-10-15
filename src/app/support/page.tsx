@@ -4,7 +4,7 @@ import { SupportForm } from "@/components/support-form";
 import { currentAccount } from "@/lib/session";
 import { isAppRequest } from "@/lib/content-policy";
 
-export const metadata: Metadata = { title: "Support — OpenHeart" };
+export const metadata: Metadata = { title: "Support — Kindred Kinks" };
 
 export default async function SupportPage() {
   const user = await currentAccount();

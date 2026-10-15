@@ -54,9 +54,9 @@ describe("authenticator codes (RFC 6238)", () => {
 
   it("builds a standard authenticator link", () => {
     const url = otpauthUrl(RFC_B32, "a@b.co");
-    expect(url).toContain("otpauth://totp/OpenHeart%3Aa%40b.co?");
+    expect(url).toContain("otpauth://totp/Kindred%20Kinks%3Aa%40b.co?");
     expect(url).toContain(`secret=${RFC_B32}`);
-    expect(url).toContain("issuer=OpenHeart");
+    expect(url).toContain("issuer=Kindred%20Kinks");
   });
 });
 

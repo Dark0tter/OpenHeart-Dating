@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     const dob = new Date(parsed.data.dateOfBirth);
     if (Number.isNaN(dob.getTime()) || !isAdult(dob)) {
       return NextResponse.json(
-        { error: "You must be 18 or older to join OpenHeart." },
+        { error: "You must be 18 or older to join Kindred Kinks." },
         { status: 400 },
       );
     }

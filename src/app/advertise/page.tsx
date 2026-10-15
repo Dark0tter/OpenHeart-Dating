@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SponsorInquiryForm } from "@/components/sponsor-inquiry-form";
 
 export const metadata: Metadata = {
-  title: "Advertise with us — OpenHeart",
+  title: "Advertise with us — Kindred Kinks",
   description:
     "Reach LGBTQIA+ and kink-positive adults in your city with one small, clearly labelled listing. No tracking, no pop-ups.",
 };
@@ -37,10 +37,10 @@ export default function AdvertisePage() {
       >
         <div>
           <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
-            Advertise with OpenHeart
+            Advertise with Kindred Kinks
           </h1>
           <p className="mt-3">
-            OpenHeart is a free, privacy-first dating and community site for
+            Kindred Kinks is a free, privacy-first dating and community site for
             LGBTQIA+ and kink-positive adults. Sponsors keep it free for
             everyone, so we keep ads respectful of our members.
           </p>

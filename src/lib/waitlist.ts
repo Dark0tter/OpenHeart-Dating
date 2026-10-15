@@ -59,9 +59,9 @@ export async function joinWaitlist(input: WaitlistInput) {
   if (!keepConfirmed) {
     await sendEmail({
       to: input.email,
-      subject: "Confirm your spot on the OpenHeart waiting list",
+      subject: "Confirm your spot on the Kindred Kinks waiting list",
       paragraphs: [
-        `Confirm and we'll email you once OpenHeart has ${waitlistThreshold()} members near ${input.city}. That's the only email we'll send.`,
+        `Confirm and we'll email you once Kindred Kinks has ${waitlistThreshold()} members near ${input.city}. That's the only email we'll send.`,
         "If you didn't ask for this, ignore this email and we'll delete your address in a week.",
       ],
       action: {
@@ -149,9 +149,9 @@ export async function notifyCity(city: string, state: string | null) {
   for (const e of entries) {
     const ok = await sendEmail({
       to: e.email,
-      subject: `OpenHeart is ready in ${e.city}`,
+      subject: `Kindred Kinks is ready in ${e.city}`,
       paragraphs: [
-        `You asked us to tell you when OpenHeart had more people near ${e.city}. There are now ${live} verified members there.`,
+        `You asked us to tell you when Kindred Kinks had more people near ${e.city}. There are now ${live} verified members there.`,
         "Joining is free, and setting up takes about five minutes. This is the only email you'll get from the waiting list, and we've now deleted your address from it.",
       ],
       action: { label: "Join free", url: `${appUrl()}/register` },

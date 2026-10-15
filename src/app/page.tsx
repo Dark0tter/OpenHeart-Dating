@@ -125,7 +125,7 @@ export default function Home() {
         <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-8 md:flex-row md:items-center md:justify-between md:px-10 md:pb-24">
           <div className="max-w-xl">
             <h1 className="animate-oh-rise font-[family-name:var(--font-fraunces)] text-5xl leading-[1.05] tracking-tight text-forest md:text-7xl">
-              OpenHeart
+              Kindred Kinks
             </h1>
             <p className="animate-oh-rise-delay mt-5 max-w-md text-lg leading-relaxed text-ink/75 md:text-xl">
               Dating and community for LGBTQIA+ and kink-curious adults — where
@@ -195,7 +195,7 @@ export default function Home() {
               id="different"
               className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
             >
-              What makes OpenHeart different
+              What makes Kindred Kinks different
             </h2>
             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map(({ icon: Icon, title, body }) => (
@@ -293,7 +293,7 @@ export default function Home() {
 
       <footer className="relative z-10 border-t border-forest/10 bg-cream/60 px-6 py-8 md:px-10">
         <nav
-          aria-label="About OpenHeart"
+          aria-label="About Kindred Kinks"
           className="mx-auto flex max-w-5xl flex-wrap gap-5 text-sm text-forest/80"
         >
           <Link href="/privacy" className="underline hover:text-ink">

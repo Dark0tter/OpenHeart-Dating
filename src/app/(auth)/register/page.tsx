@@ -55,7 +55,7 @@ export default function RegisterPage() {
           href="/"
           className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
         >
-          OpenHeart
+          Kindred Kinks
         </Link>
         <p className="mt-2 text-sm text-ink/70">
           18+ only. Email, password, and date of birth required.
@@ -112,8 +112,8 @@ export default function RegisterPage() {
               >
                 Community Guidelines
               </Link>
-              . OpenHeart has zero tolerance for abusive users and objectionable
-              content.
+              . Kindred Kinks has zero tolerance for abusive users and
+              objectionable content.
             </span>
           </label>
           <BotCheck />

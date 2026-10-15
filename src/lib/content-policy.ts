@@ -5,13 +5,13 @@ import { prisma } from "@/lib/prisma";
 /**
  * The iOS and Android apps are the same web app in a native shell. The shell
  * must append this token to its WebView user agent (Capacitor:
- * `appendUserAgent`) and send it as the `x-openheart-client: app` header on
+ * `appendUserAgent`) and send it as the `x-kindredkinks-client: app` header on
  * any direct API calls. Both platforms get the same, stricter policy.
  *
  * Spoofing only ever removes content, so the check needs no secret.
  */
-export const APP_USER_AGENT_TOKEN = "OpenHeartApp";
-export const APP_CLIENT_HEADER = "x-openheart-client";
+export const APP_USER_AGENT_TOKEN = "KindredKinksApp";
+export const APP_CLIENT_HEADER = "x-kindredkinks-client";
 
 const ALL_TIERS: ContentTier[] = [
   ContentTier.STANDARD,
@@ -67,4 +67,4 @@ export async function roomAllowed(
 }
 
 export const WEB_ONLY_ERROR =
-  "This is only available on the OpenHeart website.";
+  "This is only available on the Kindred Kinks website.";

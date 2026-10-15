@@ -1,20 +1,28 @@
 # DigitalOcean App Platform spec.
-# Create the managed Postgres cluster "openheart-db" first, then:
+# Create the managed Postgres cluster "kindredkinks-db" first, then:
 #   doctl apps create --spec .do/app.yaml
 # Secrets marked type: SECRET are set in the App Platform dashboard, never committed.
-name: openheart-dating
+name: kindredkinks
 region: nyc
 
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED
 
+# DNS is on Cloudflare: add the CNAME records App Platform shows for each
+# domain (see docs/LAUNCH.md). www redirects to the bare domain in middleware.
+domains:
+  - domain: kindredkinks.com
+    type: PRIMARY
+  - domain: www.kindredkinks.com
+    type: ALIAS
+
 databases:
   - name: db
     engine: PG
     version: "16"
     production: true
-    cluster_name: openheart-db
+    cluster_name: kindredkinks-db
 
 jobs:
   - name: migrate
@@ -70,6 +78,7 @@ services:
         type: SECRET
       - key: EMAIL_FROM
         scope: RUN_TIME
+        value: "Kindred Kinks <hello@kindredkinks.com>"
       - key: TURNSTILE_SECRET_KEY
         scope: RUN_TIME
         type: SECRET

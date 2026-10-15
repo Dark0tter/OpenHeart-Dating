@@ -152,7 +152,9 @@ export default function RoomPage() {
 
   async function block(userId: string, name: string) {
     if (
-      !confirm(`Block ${name}? You won't see each other anywhere on OpenHeart.`)
+      !confirm(
+        `Block ${name}? You won't see each other anywhere on Kindred Kinks.`,
+      )
     ) {
       return;
     }

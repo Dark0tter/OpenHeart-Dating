@@ -53,7 +53,7 @@ export function AppNav() {
             href="/feed"
             className="font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
-            OpenHeart
+            Kindred Kinks
           </Link>
           <div className="flex items-center gap-1">
             <div className="hidden gap-1 text-sm md:flex">

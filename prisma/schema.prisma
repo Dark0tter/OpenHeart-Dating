@@ -1,4 +1,4 @@
-// OpenHeart Dating — Phase 1 schema
+// Kindred Kinks — Phase 1 schema
 // Identity, attraction, and preferences are tag-driven (no binary gender search columns).
 
 generator client {

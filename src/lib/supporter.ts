@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 export const SUPPORTER_PERKS = [
   "A Supporter badge on your profile on the website (you can hide it)",
   "The option to hide the sponsor block on the website",
-  "Keeping OpenHeart free, independent, and tracker-free for everyone",
+  "Keeping Kindred Kinks free, independent, and tracker-free for everyone",
 ];
 
 const DAY = 24 * 60 * 60 * 1000;

@@ -30,7 +30,7 @@ export function MemberGate({
   return (
     <EmptyState
       title="Finish setting up to meet people"
-      body="Everyone on OpenHeart is a verified adult. Verify your age and make your profile live, and you'll be able to browse, like, and message."
+      body="Everyone on Kindred Kinks is a verified adult. Verify your age and make your profile live, and you'll be able to browse, like, and message."
       actions={[{ href: "/onboarding", label: "Finish setting up" }]}
     />
   );

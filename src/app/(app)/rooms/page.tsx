@@ -74,7 +74,7 @@ export default function RoomsPage() {
       </p>
       {restricted && (
         <p className="mt-2 text-sm text-ink/70">
-          More rooms are available on the OpenHeart website.
+          More rooms are available on the Kindred Kinks website.
         </p>
       )}
       {error && (

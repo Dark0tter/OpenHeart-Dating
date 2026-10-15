@@ -1,4 +1,4 @@
-package com.openheartdating.app;
+package com.kindredkinks.app;
 
 import com.getcapacitor.BridgeActivity;
 

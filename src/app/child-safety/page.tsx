@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ContactLine } from "@/components/contact-line";
 
 export const metadata: Metadata = {
-  title: "Child safety standards — OpenHeart",
+  title: "Child safety standards — Kindred Kinks",
 };
 
 export default function ChildSafetyPage() {
@@ -19,7 +19,7 @@ export default function ChildSafetyPage() {
           Child safety standards
         </h1>
         <p>
-          OpenHeart is for adults only. We prohibit child sexual abuse and
+          Kindred Kinks is for adults only. We prohibit child sexual abuse and
           exploitation (CSAE) of any kind, and we work to keep minors off the
           platform entirely.
         </p>

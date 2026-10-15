@@ -1,4 +1,4 @@
-# OpenHeart Dating
+# Kindred Kinks
 
 Privacy-first dating for LGBTQIA+ people, kink-positive adults, and users with elevated safety needs — without artificial paywalls on likes, messages, matching, or filtering.
 
@@ -34,7 +34,7 @@ Each kink can be marked Favorite, Interested, Curious, Soft limit (stored as `NO
 
 The iOS and Android apps run the same code under one policy, built to the stricter of Apple's and Google's rules on every point, so neither platform needs its own version. The server enforces it, so an app can't show more than it's allowed.
 
-- **How the app is detected.** The native shell appends `OpenHeartApp` to its WebView user agent (Capacitor: `appendUserAgent`) and sends `x-openheart-client: app` on direct API calls. See `src/lib/content-policy.ts`.
+- **How the app is detected.** The native shell appends `KindredKinksApp` to its WebView user agent (Capacitor: `appendUserAgent`) and sends `x-kindredkinks-client: app` on direct API calls. See `src/lib/content-policy.ts`.
 - **Three content tiers** (`ContentTier`):
   - `STANDARD`: shown everywhere.
   - `ADULT_TEXT`: shown in the apps only to verified adults who turned on "Show the full interest list" on the website. The setting can't be changed from inside the app.
@@ -118,16 +118,16 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 
 ## Mobile apps
 
-`mobile/` holds the Capacitor shells for iOS and Android. They load the live website with `OpenHeartApp` added to the user agent, so the server applies the app store content policy below.
+`mobile/` holds the Capacitor shells for iOS and Android. They load the live website with `KindredKinksApp` added to the user agent, so the server applies the app store content policy below.
 
 ```bash
 cd mobile && npm install
-OPENHEART_URL=https://your-domain npm run sync
+KINDREDKINKS_URL=https://your-domain npm run sync
 npm run ios       # opens Xcode (needs a Mac and an Apple Developer account to publish)
 npm run android   # opens Android Studio
 ```
 
-Before publishing, set the bundle ID (`OPENHEART_APP_ID`, default `com.openheartdating.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires.
+Before publishing, set the bundle ID (`KINDREDKINKS_APP_ID`, default `com.kindredkinks.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires.
 
 **App notifications.** The apps use Apple's and Google's own (free) push services; the server talks to them directly (`src/lib/native-push.ts`). Members turn them on in Settings → Notifications inside the app, and tapping one opens the right page.
 
@@ -191,7 +191,7 @@ Members are the customers, not the product.
 The App Platform spec lives in `.do/app.yaml` and deploys from `main` of
 [Dark0tter/OpenHeart-Dating](https://github.com/Dark0tter/OpenHeart-Dating) on every push.
 
-1. Create a managed PostgreSQL 16 cluster named `openheart-db` (same region as the app, `nyc`).
+1. Create a managed PostgreSQL 16 cluster named `kindredkinks-db` (same region as the app, `nyc`).
 2. Create the app: **Apps → Create App → import `.do/app.yaml`**, or `doctl apps create --spec .do/app.yaml`.
 3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus `BAN_HASH_SECRET` (set once, never change), age-verification keys (Didit, Persona or Veriff) and S3 (Spaces) keys when ready.
 4. Each deploy runs the `migrate` pre-deploy job (`prisma migrate deploy` + idempotent tag seed) before the web service goes live. `/api/health` checks the database.
@@ -217,7 +217,7 @@ Step-by-step with costs, cheapest first: [docs/LAUNCH.md](docs/LAUNCH.md). In sh
 - App: DigitalOcean App Platform
 - DB: DigitalOcean Managed PostgreSQL
 - DNS/WAF: Cloudflare
-- Domain example: `openheartdating.com`
+- Domain: `kindredkinks.com` (DNS on Cloudflare; `www` redirects to the bare domain)
 
 ## Design note
 

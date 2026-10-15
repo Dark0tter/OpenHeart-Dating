@@ -12,7 +12,7 @@ function secret(): string {
     process.env.BAN_HASH_SECRET ||
     process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET ||
-    "openheart-dev-only"
+    "kindredkinks-dev-only"
   );
 }
 

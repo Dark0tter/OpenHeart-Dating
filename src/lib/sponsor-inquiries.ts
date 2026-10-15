@@ -35,10 +35,10 @@ export async function createSponsorInquiry(input: InquiryInput) {
 
   await sendEmail({
     to: input.email,
-    subject: "Thanks for your interest in sponsoring OpenHeart",
+    subject: "Thanks for your interest in sponsoring Kindred Kinks",
     paragraphs: [
       `Hi ${input.contactName}, thanks for getting in touch about ${input.businessName}. A person will reply to this address, usually within a few days.`,
-      "OpenHeart never shares member data with sponsors. You'd receive anonymous daily totals of views and clicks only.",
+      "Kindred Kinks never shares member data with sponsors. You'd receive anonymous daily totals of views and clicks only.",
     ],
   });
 

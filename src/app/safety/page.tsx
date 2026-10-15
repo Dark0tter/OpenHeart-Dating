@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = { title: "Safety tips — OpenHeart" };
+export const metadata: Metadata = { title: "Safety tips — Kindred Kinks" };
 
 const SECTIONS: { title: string; tips: string[] }[] = [
   {
     title: "Before you meet",
     tips: [
-      "Keep chatting on OpenHeart until you trust someone. Scammers push to move to WhatsApp, Telegram or text quickly.",
+      "Keep chatting on Kindred Kinks until you trust someone. Scammers push to move to WhatsApp, Telegram or text quickly.",
       "A short video call is a good way to check someone is who their photos say.",
       "Look for the photo-verified badge, and be cautious with brand-new profiles that have one photo and little else.",
       "Never send money, gift cards, crypto or verification codes to someone you haven't met — no matter the story.",
@@ -63,8 +63,8 @@ export default function SafetyPage() {
           Dating safely
         </h1>
         <p>
-          Most people on OpenHeart are here for the same reasons you are. These
-          habits help keep it that way.
+          Most people on Kindred Kinks are here for the same reasons you are.
+          These habits help keep it that way.
         </p>
         <p className="rounded-md bg-sage/15 px-4 py-3 text-forest">
           Going on a date?{" "}

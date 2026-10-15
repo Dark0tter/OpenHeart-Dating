@@ -74,7 +74,7 @@ export async function staffAlerts(now: Date) {
     }
     await sendEmail({
       to: r.email,
-      subject: `[OpenHeart] ${title}`,
+      subject: `[Kindred Kinks] ${title}`,
       paragraphs: [
         one
           ? "A member filed an urgent report. Please review it as soon as you can."
@@ -165,7 +165,7 @@ export async function dailyDigest(now: Date) {
   for (const r of await recipients()) {
     await sendEmail({
       to: r.email,
-      subject: `[OpenHeart] Daily summary: ${waiting} item${waiting === 1 ? "" : "s"} waiting`,
+      subject: `[Kindred Kinks] Daily summary: ${waiting} item${waiting === 1 ? "" : "s"} waiting`,
       paragraphs: lines,
       action: {
         label: "Open the moderation dashboard",

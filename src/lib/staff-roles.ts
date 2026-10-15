@@ -86,7 +86,7 @@ export async function setStaffRole(opts: {
   if (promoting) {
     await notify(userId, {
       type: "staff_alert",
-      title: `You're now ${role === UserRole.ADMIN ? "an admin" : "a moderator"} on OpenHeart`,
+      title: `You're now ${role === UserRole.ADMIN ? "an admin" : "a moderator"} on Kindred Kinks`,
       body: "Thank you for helping keep the community safe. Your tools are in Moderation; you'll be asked to turn on two-step sign-in first.",
       link: "/mod",
       email: true,
@@ -97,8 +97,8 @@ export async function setStaffRole(opts: {
     type: "staff_alert",
     title:
       role === UserRole.MEMBER
-        ? "Your OpenHeart staff access has ended"
-        : "Your OpenHeart staff access has changed",
+        ? "Your Kindred Kinks staff access has ended"
+        : "Your Kindred Kinks staff access has changed",
     link: role === UserRole.MEMBER ? "/feed" : "/mod",
     email: true,
   });

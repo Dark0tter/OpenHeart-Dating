@@ -157,7 +157,7 @@ export async function GET() {
 
   const data = {
     exportedAt: new Date().toISOString(),
-    note: `Photos can be downloaded individually while signed in at ${appUrl()}/api/photos/<id>. ID documents are never stored by OpenHeart.`,
+    note: `Photos can be downloaded individually while signed in at ${appUrl()}/api/photos/<id>. ID documents are never stored by Kindred Kinks.`,
     account: {
       id: user.id,
       email: user.email,
@@ -228,7 +228,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(data, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="openheart-data-${new Date().toISOString().slice(0, 10)}.json"`,
+      "Content-Disposition": `attachment; filename="kindredkinks-data-${new Date().toISOString().slice(0, 10)}.json"`,
       "Cache-Control": "no-store",
     },
   });

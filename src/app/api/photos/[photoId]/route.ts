@@ -72,7 +72,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (data.visibility === PhotoVisibility.ADULT) {
     if (isRestricted(await allowedTiers(user))) {
       return NextResponse.json(
-        { error: "Adult photos can only be managed on the OpenHeart website." },
+        {
+          error:
+            "Adult photos can only be managed on the Kindred Kinks website.",
+        },
         { status: 403 },
       );
     }

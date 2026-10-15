@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ContactLine } from "@/components/contact-line";
 
 export const metadata: Metadata = {
-  title: "Terms of use — OpenHeart",
+  title: "Terms of use — Kindred Kinks",
 };
 
 const PROHIBITED = [
@@ -34,9 +34,9 @@ export default function TermsPage() {
             Who can join
           </h2>
           <p className="mt-2">
-            OpenHeart is for adults 18 and over. You must give your real date of
-            birth and pass age verification before your profile goes live. One
-            account per person.
+            Kindred Kinks is for adults 18 and over. You must give your real
+            date of birth and pass age verification before your profile goes
+            live. One account per person.
           </p>
         </section>
 
@@ -85,7 +85,7 @@ export default function TermsPage() {
             Mobile apps
           </h2>
           <p className="mt-2">
-            The iPhone and Android apps show a limited version of OpenHeart.
+            The iPhone and Android apps show a limited version of Kindred Kinks.
             Some interests, rooms, and all adult photos are only available on
             the website.
           </p>
@@ -96,11 +96,11 @@ export default function TermsPage() {
             Donations
           </h2>
           <p className="mt-2">
-            OpenHeart is free to use. Donations are optional gifts that help
-            keep it running; they are never required to use any part of
-            OpenHeart, and they don&apos;t buy access to features, matches, or
-            other members. Donations aren&apos;t tax-deductible. Donors may get
-            a cosmetic thank-you (a badge and the option to hide the sponsor
+            Kindred Kinks is free to use. Donations are optional gifts that help
+            keep it running; they are never required to use any part of Kindred
+            Kinks, and they don&apos;t buy access to features, matches, or other
+            members. Donations aren&apos;t tax-deductible. Donors may get a
+            cosmetic thank-you (a badge and the option to hide the sponsor
             block) on the website only.
           </p>
         </section>

@@ -14,7 +14,7 @@ export function AuthShell({
           href="/"
           className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
         >
-          OpenHeart
+          Kindred Kinks
         </Link>
         {subtitle && <p className="mt-2 text-sm text-ink/70">{subtitle}</p>}
         {children}

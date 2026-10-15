@@ -5,11 +5,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: openheart
-      POSTGRES_PASSWORD: openheart
-      POSTGRES_DB: openheart
+      POSTGRES_USER: kindredkinks
+      POSTGRES_PASSWORD: kindredkinks
+      POSTGRES_DB: kindredkinks
     volumes:
-      - openheart_pg:/var/lib/postgresql/data
+      - kindredkinks_pg:/var/lib/postgresql/data
 
 volumes:
-  openheart_pg:
+  kindredkinks_pg:

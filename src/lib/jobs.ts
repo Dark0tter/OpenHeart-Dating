@@ -81,7 +81,7 @@ async function checkIns(now: Date) {
       to: c.contactEmail,
       subject: `${name} hasn't checked in after their date`,
       paragraphs: [
-        `Hi ${c.contactName}, ${name} asked OpenHeart to let you know if they didn't check in after meeting someone. They planned to check in by ${c.checkInBy.toUTCString()} and haven't yet.`,
+        `Hi ${c.contactName}, ${name} asked Kindred Kinks to let you know if they didn't check in after meeting someone. They planned to check in by ${c.checkInBy.toUTCString()} and haven't yet.`,
         `Who they were meeting: ${c.meetingWith}`,
         `Where: ${c.place}`,
         `When: ${c.startsAt.toUTCString()}`,

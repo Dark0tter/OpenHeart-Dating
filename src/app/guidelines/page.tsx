@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Community guidelines — OpenHeart",
+  title: "Community guidelines — Kindred Kinks",
 };
 
 const WELCOME = [

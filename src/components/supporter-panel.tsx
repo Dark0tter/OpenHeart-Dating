@@ -39,20 +39,20 @@ export function SupporterPanel() {
       <div>
         <h1 className="flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           <Heart aria-hidden className="h-7 w-7 text-coral" />
-          Support OpenHeart
+          Support Kindred Kinks
         </h1>
         <p className="mt-2 text-ink/70">
-          OpenHeart is free: likes, messages, search, calls and matching never
-          cost anything, and never will. Donations are completely optional. They
-          help pay for servers and safety tools, and they don&apos;t unlock any
-          part of dating on OpenHeart.
+          Kindred Kinks is free: likes, messages, search, calls and matching
+          never cost anything, and never will. Donations are completely
+          optional. They help pay for servers and safety tools, and they
+          don&apos;t unlock any part of dating on Kindred Kinks.
         </p>
       </div>
 
       {s.active ? (
         <section className="rounded-lg border border-forest/15 bg-mist/60 p-5">
           <p className="font-medium text-forest">
-            Thank you for supporting OpenHeart.
+            Thank you for supporting Kindred Kinks.
           </p>
           {s.until && (
             <p className="mt-1 text-sm text-ink/70">
@@ -105,9 +105,9 @@ export function SupporterPanel() {
       )}
 
       <p className="text-xs text-ink/60">
-        Donations are voluntary gifts to OpenHeart, not a membership or a
+        Donations are voluntary gifts to Kindred Kinks, not a membership or a
         purchase, and aren&apos;t tax-deductible. Nobody is ever required to
-        donate to use OpenHeart.
+        donate to use Kindred Kinks.
       </p>
     </div>
   );

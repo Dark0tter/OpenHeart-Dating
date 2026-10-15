@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">OpenHeart</string>
-    <string name="title_activity_main">OpenHeart</string>
-    <string name="package_name">com.openheartdating.app</string>
-    <string name="custom_url_scheme">com.openheartdating.app</string>
+    <string name="app_name">Kindred Kinks</string>
+    <string name="title_activity_main">Kindred Kinks</string>
+    <string name="package_name">com.kindredkinks.app</string>
+    <string name="custom_url_scheme">com.kindredkinks.app</string>
 </resources>

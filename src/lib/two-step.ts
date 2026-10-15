@@ -18,7 +18,7 @@ import { prisma } from "@/lib/prisma";
 
 const STEP_SECONDS = 30;
 const DIGITS = 6;
-const ISSUER = "OpenHeart";
+const ISSUER = "Kindred Kinks";
 const RECOVERY_CODE_COUNT = 10;
 const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -123,7 +123,8 @@ export function openSecret(sealed: string): string | null {
 
 export function otpauthUrl(secretB32: string, email: string): string {
   const label = encodeURIComponent(`${ISSUER}:${email}`);
-  return `otpauth://totp/${label}?secret=${secretB32}&issuer=${ISSUER}&algorithm=SHA1&digits=${DIGITS}&period=${STEP_SECONDS}`;
+  const issuer = encodeURIComponent(ISSUER);
+  return `otpauth://totp/${label}?secret=${secretB32}&issuer=${issuer}&algorithm=SHA1&digits=${DIGITS}&period=${STEP_SECONDS}`;
 }
 
 function normalizeRecovery(code: string): string {
