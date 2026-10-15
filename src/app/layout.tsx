@@ -25,8 +25,16 @@ export const metadata: Metadata = {
     title: "Kindred Kinks — Dating without artificial paywalls",
     description:
       "Privacy-first dating and community for LGBTQIA+ and kink-positive adults. Free likes, messages, and matching.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
-  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
+  twitter: { card: "summary_large_image", images: ["/og-image.png"] },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 /** `cover` lets the app shell draw under the iPhone notch and home bar; nav bars pad with safe-area insets. */

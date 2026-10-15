@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --oh-ink: #1a2420;
-  --oh-forest: #2d4a3e;
-  --oh-sage: #4f725e;
-  --oh-mist: #e8efe9;
-  --oh-bloom: #f3ebe3;
-  --oh-coral: #ad4b3b;
-  --oh-coral-deep: #9e3f30;
-  --oh-cream: #faf6f1;
+  --oh-ink: #24142a;
+  --oh-forest: #4a2257;
+  --oh-sage: #7b5580;
+  --oh-mist: #f0e6ef;
+  --oh-bloom: #f8f0ef;
+  --oh-coral: #b0433f;
+  --oh-coral-deep: #9a3836;
+  --oh-cream: #fdf8f6;
   --background: var(--oh-bloom);
   --foreground: var(--oh-ink);
-  --oh-glow-1: rgba(107, 143, 122, 0.28);
-  --oh-glow-2: rgba(196, 92, 74, 0.16);
-  --oh-glow-3: rgba(45, 74, 62, 0.12);
-  --oh-base-1: #f7f1ea;
-  --oh-base-2: #e8efe9;
-  --oh-base-3: #f3ebe3;
+  --oh-glow-1: rgba(123, 85, 128, 0.24);
+  --oh-glow-2: rgba(250, 146, 133, 0.2);
+  --oh-glow-3: rgba(74, 34, 87, 0.12);
+  --oh-base-1: #faf2f0;
+  --oh-base-2: #f0e6ef;
+  --oh-base-3: #f8f0ef;
 }
 
 /*
@@ -26,43 +26,43 @@
  */
 [data-mode="dark"] {
   color-scheme: dark;
-  --oh-ink: #e6ede8;
-  --oh-forest: #a8d5bd;
-  --oh-sage: #86b09a;
-  --oh-mist: #24312b;
-  --oh-bloom: #111815;
-  --oh-coral: #ec8a76;
-  --oh-coral-deep: #f4a99a;
-  --oh-cream: #182520;
-  --background: #111815;
-  --foreground: #e6ede8;
-  --oh-glow-1: rgba(107, 143, 122, 0.16);
-  --oh-glow-2: rgba(236, 138, 118, 0.08);
-  --oh-glow-3: rgba(168, 213, 189, 0.06);
-  --oh-base-1: #0f1613;
-  --oh-base-2: #131c18;
-  --oh-base-3: #111815;
+  --oh-ink: #f1e7f0;
+  --oh-forest: #e9b9e0;
+  --oh-sage: #c49cc4;
+  --oh-mist: #2f1a37;
+  --oh-bloom: #170c1c;
+  --oh-coral: #fa9285;
+  --oh-coral-deep: #fcb3a9;
+  --oh-cream: #22122a;
+  --background: #170c1c;
+  --foreground: #f1e7f0;
+  --oh-glow-1: rgba(196, 156, 196, 0.14);
+  --oh-glow-2: rgba(250, 146, 133, 0.08);
+  --oh-glow-3: rgba(233, 185, 224, 0.06);
+  --oh-base-1: #140a18;
+  --oh-base-2: #1a0f20;
+  --oh-base-3: #170c1c;
 }
 
 @media (prefers-color-scheme: dark) {
   [data-mode="system"] {
     color-scheme: dark;
-    --oh-ink: #e6ede8;
-    --oh-forest: #a8d5bd;
-    --oh-sage: #86b09a;
-    --oh-mist: #24312b;
-    --oh-bloom: #111815;
-    --oh-coral: #ec8a76;
-    --oh-coral-deep: #f4a99a;
-    --oh-cream: #182520;
-    --background: #111815;
-    --foreground: #e6ede8;
-    --oh-glow-1: rgba(107, 143, 122, 0.16);
-    --oh-glow-2: rgba(236, 138, 118, 0.08);
-    --oh-glow-3: rgba(168, 213, 189, 0.06);
-    --oh-base-1: #0f1613;
-    --oh-base-2: #131c18;
-    --oh-base-3: #111815;
+    --oh-ink: #f1e7f0;
+    --oh-forest: #e9b9e0;
+    --oh-sage: #c49cc4;
+    --oh-mist: #2f1a37;
+    --oh-bloom: #170c1c;
+    --oh-coral: #fa9285;
+    --oh-coral-deep: #fcb3a9;
+    --oh-cream: #22122a;
+    --background: #170c1c;
+    --foreground: #f1e7f0;
+    --oh-glow-1: rgba(196, 156, 196, 0.14);
+    --oh-glow-2: rgba(250, 146, 133, 0.08);
+    --oh-glow-3: rgba(233, 185, 224, 0.06);
+    --oh-base-1: #140a18;
+    --oh-base-2: #1a0f20;
+    --oh-base-3: #170c1c;
   }
 }
 
@@ -108,12 +108,12 @@
 
 /* Keep overscroll (and the mobile apps' bounce area) in the theme's background. */
 body:has([data-mode="dark"]) {
-  background: #111815;
+  background: #170c1c;
 }
 
 @media (prefers-color-scheme: dark) {
   body:has([data-mode="system"]) {
-    background: #111815;
+    background: #170c1c;
   }
 }
 

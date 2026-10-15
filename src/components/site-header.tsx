@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { auth } from "@/lib/auth";
 
 export async function SiteHeader() {
@@ -8,8 +9,9 @@ export async function SiteHeader() {
     <header className="relative z-20 flex items-center justify-between px-6 py-5 md:px-10">
       <Link
         href="/"
-        className="font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-forest md:text-3xl"
+        className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-forest md:text-3xl"
       >
+        <BrandMark className="h-8 w-8 md:h-9 md:w-9" />
         Kindred Kinks
       </Link>
       <nav className="flex items-center gap-3 text-sm md:gap-5">

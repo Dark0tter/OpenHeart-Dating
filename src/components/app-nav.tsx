@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { usePathname } from "next/navigation";
 import {
   House,
@@ -51,8 +52,9 @@ export function AppNav() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link
             href="/feed"
-            className="font-[family-name:var(--font-fraunces)] text-xl text-forest"
+            className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
+            <BrandMark className="h-7 w-7" />
             Kindred Kinks
           </Link>
           <div className="flex items-center gap-1">

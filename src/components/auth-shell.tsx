@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 
 export function AuthShell({
   subtitle,
@@ -12,8 +13,9 @@ export function AuthShell({
       <main id="main" className="w-full max-w-md">
         <Link
           href="/"
-          className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
+          className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest"
         >
+          <BrandMark className="h-9 w-9" />
           Kindred Kinks
         </Link>
         {subtitle && <p className="mt-2 text-sm text-ink/70">{subtitle}</p>}

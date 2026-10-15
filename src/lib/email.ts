@@ -29,13 +29,13 @@ export function renderEmail(email: Email) {
     "You're getting this because of your Kindred Kinks account. Notification emails can be turned off in Settings.",
   ].join("\n\n");
 
-  const html = `<!doctype html><html><body style="margin:0;background:#f6f1ec;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1f2a24">
+  const html = `<!doctype html><html><body style="margin:0;background:#f8f0ef;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#24142a">
 <div style="max-width:520px;margin:0 auto;padding:32px 24px">
-<p style="font-size:22px;color:#2f4a3a;margin:0 0 24px">Kindred Kinks</p>
+<p style="font-size:22px;color:#4a2257;margin:0 0 24px">Kindred Kinks</p>
 ${email.paragraphs.map((p) => `<p style="font-size:15px;line-height:1.6;margin:0 0 16px">${escapeHtml(p)}</p>`).join("\n")}
 ${
   email.action
-    ? `<p style="margin:24px 0"><a href="${escapeHtml(email.action.url)}" style="background:#2f4a3a;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block;font-size:15px">${escapeHtml(email.action.label)}</a></p>
+    ? `<p style="margin:24px 0"><a href="${escapeHtml(email.action.url)}" style="background:#4a2257;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block;font-size:15px">${escapeHtml(email.action.label)}</a></p>
 <p style="font-size:12px;color:#6b7280;word-break:break-all">If the button doesn't work, copy this link: ${escapeHtml(email.action.url)}</p>`
     : ""
 }

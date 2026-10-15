@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
   appName: "Kindred Kinks",
   webDir: "www",
   appendUserAgent: "KindredKinksApp",
-  backgroundColor: "#f3ebe3",
+  backgroundColor: "#f8f0ef",
   server: {
     url: siteUrl,
     allowNavigation: [host],
