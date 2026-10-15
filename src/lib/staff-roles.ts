@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { logAction } from "@/lib/moderation/staff-actions";
 import { roleRank } from "@/lib/roles";
+import { disableTwoStep } from "@/lib/two-step";
 
 export const ASSIGNABLE_ROLES = [
   UserRole.MEMBER,
@@ -86,7 +87,7 @@ export async function setStaffRole(opts: {
     await notify(userId, {
       type: "staff_alert",
       title: `You're now ${role === UserRole.ADMIN ? "an admin" : "a moderator"} on OpenHeart`,
-      body: "Thank you for helping keep the community safe. Your tools are in Moderation.",
+      body: "Thank you for helping keep the community safe. Your tools are in Moderation; you'll be asked to turn on two-step sign-in first.",
       link: "/mod",
       email: true,
     });
@@ -102,4 +103,57 @@ export async function setStaffRole(opts: {
     email: true,
   });
   return { ok: true, message: `${name} is now ${ROLE_LABEL[role]}.` };
+}
+
+/**
+ * For a staff member who lost their phone and recovery codes: turns off
+ * two-step and signs them out, so they set it up again on next sign-in.
+ */
+export async function resetStaffTwoStep(opts: {
+  actor: { id: string; role: UserRole };
+  userId: string;
+  reason: string;
+}): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  const reason = opts.reason.trim();
+  if (opts.actor.role !== UserRole.OWNER) {
+    return { ok: false, error: "Only the owner can reset two-step sign-in." };
+  }
+  if (opts.userId === opts.actor.id) {
+    return { ok: false, error: "Reset your own with npm run two-step:reset." };
+  }
+  if (!reason)
+    return { ok: false, error: "Write a short reason for the reset." };
+  const target = await prisma.user.findUnique({
+    where: { id: opts.userId },
+    select: {
+      role: true,
+      totpEnabledAt: true,
+      profile: { select: { displayName: true } },
+    },
+  });
+  if (
+    !target ||
+    target.role === UserRole.MEMBER ||
+    target.role === UserRole.OWNER
+  ) {
+    return {
+      ok: false,
+      error: "Only moderators and admins can be reset here.",
+    };
+  }
+  if (!target.totpEnabledAt) {
+    return { ok: false, error: "They haven't set up two-step sign-in yet." };
+  }
+  await disableTwoStep(opts.userId);
+  await logAction({
+    actorId: opts.actor.id,
+    action: "two_step_reset",
+    targetUserId: opts.userId,
+    note: reason,
+  });
+  const name = target.profile?.displayName ?? "They";
+  return {
+    ok: true,
+    message: `${name} will set up two-step sign-in again next time they sign in.`,
+  };
 }

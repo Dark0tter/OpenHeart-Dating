@@ -7,6 +7,9 @@ import { RealtimeProvider } from "@/components/realtime";
 import { NativePushBridge } from "@/components/native-push-bridge";
 import { CallProvider } from "@/components/call-provider";
 import { MemberGate } from "@/components/member-gate";
+import { AnnouncementBar } from "@/components/announcement-bar";
+import { currentAnnouncements } from "@/lib/announcements";
+import { isAppRequest } from "@/lib/content-policy";
 import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { currentAccount, isStaff } from "@/lib/session";
@@ -19,6 +22,7 @@ const FOOTER_LINKS = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/child-safety", label: "Child safety" },
+  { href: "/advertise", label: "Advertise with us" },
 ];
 
 export default async function AppLayout({
@@ -34,6 +38,9 @@ export default async function AppLayout({
     ? (user!.themeMode as ThemeMode)
     : "system";
   const flag = flagById(user?.themeFlag);
+  const announcements = user
+    ? await currentAnnouncements({ app: await isAppRequest() }).catch(() => [])
+    : [];
 
   return (
     <div
@@ -47,6 +54,9 @@ export default async function AppLayout({
           <AppNav />
           <NativePushBridge />
           {user && !user.emailVerified && <EmailBanner email={user.email} />}
+          {user && announcements.length > 0 && (
+            <AnnouncementBar items={announcements} />
+          )}
           {user && isStaff(user.role) && (
             <div className="bg-forest px-4 py-1.5 text-center text-xs text-cream">
               <Link href="/mod" className="underline">

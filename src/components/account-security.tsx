@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,17 @@ export function AccountSecurity() {
           Changing your password signs you out on every device.
         </p>
       </form>
+      <div className="space-y-1">
+        <Link
+          href="/settings/two-step"
+          className="text-sm text-forest underline"
+        >
+          Two-step sign-in
+        </Link>
+        <p className="text-sm text-ink/70">
+          Ask for a code from your phone as well as your password.
+        </p>
+      </div>
       <div className="space-y-2">
         <Button type="button" variant="ghost" onClick={onSignOutEverywhere}>
           Sign out on all devices

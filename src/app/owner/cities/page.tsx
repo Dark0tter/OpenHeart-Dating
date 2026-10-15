@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Bars, SectionTitle } from "@/components/owner-ui";
 import { cityStats, countryStats } from "@/lib/owner-stats";
+import { waitlistDemand, waitlistThreshold } from "@/lib/waitlist";
+import { emailWaitlist } from "@/app/owner/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +23,15 @@ function readiness(active30: number) {
 export default async function OwnerCities({
   searchParams,
 }: {
-  searchParams: Promise<{ country?: string }>;
+  searchParams: Promise<{ country?: string; sent?: string }>;
 }) {
-  const { country } = await searchParams;
-  const [cities, countries] = await Promise.all([
+  const { country, sent } = await searchParams;
+  const [cities, countries, waiting] = await Promise.all([
     cityStats({ country }),
     countryStats(),
+    waitlistDemand(),
   ]);
+  const threshold = waitlistThreshold();
 
   return (
     <div>
@@ -125,6 +129,67 @@ export default async function OwnerCities({
         about where a local business will pay around $100 a month for the
         sponsor spot.
       </p>
+
+      <div id="waitlist" className="scroll-mt-6">
+        <SectionTitle>Waiting list</SectionTitle>
+      </div>
+      <p className="mt-1 text-sm text-ink/70">
+        Confirmed people waiting for their city to fill up, from the{" "}
+        <Link href="/waitlist" className="underline">
+          waiting list page
+        </Link>
+        . Each city&apos;s list gets one email automatically once it has{" "}
+        {threshold} live members (change with <code>WAITLIST_NOTIFY_AT</code>
+        ), and their addresses are deleted right after. A long list here is a
+        good sign of where to promote next.
+      </p>
+      {sent && (
+        <p
+          role="status"
+          className="mt-3 rounded-md bg-mist px-3 py-2 text-sm text-forest"
+        >
+          {sent}
+        </p>
+      )}
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-forest/15 text-ink/70">
+            <tr>
+              <th className="py-2 pr-4 font-medium">City</th>
+              <th className="py-2 pr-4 text-right font-medium">Waiting</th>
+              <th className="py-2 pr-4 text-right font-medium">
+                Live members there
+              </th>
+              <th className="py-2 font-medium" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-forest/10">
+            {waiting.map((w) => (
+              <tr key={`${w.city}|${w.state ?? ""}`}>
+                <td className="py-2 pr-4">
+                  {[w.city, w.state, w.country].filter(Boolean).join(", ")}
+                </td>
+                <td className="py-2 pr-4 text-right tabular-nums">
+                  {w.waiting}
+                </td>
+                <td className="py-2 pr-4 text-right tabular-nums">{w.live}</td>
+                <td className="py-2">
+                  <form action={emailWaitlist}>
+                    <input type="hidden" name="city" value={w.city} />
+                    <input type="hidden" name="state" value={w.state ?? ""} />
+                    <button className="rounded-md border border-forest/20 px-2.5 py-1 text-xs hover:bg-mist">
+                      Email them now
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {waiting.length === 0 && (
+          <p className="mt-3 text-sm text-ink/70">Nobody waiting.</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -81,6 +81,18 @@ export default function PrivacyPage() {
           wishlists, and paid-content promotion. Matching content is not posted,
           and a note goes to our moderation team for review.
         </p>
+        <p className="mt-3 text-ink/75">
+          If you join the waiting list, we keep only your email and city. We
+          delete it if you don&apos;t confirm within a week, and right after we
+          send the one email telling you your city is ready. Businesses that ask
+          about sponsoring give us their contact details so we can reply; we
+          delete closed inquiries after a year.
+        </p>
+        <p className="mt-3 text-ink/75">
+          You can turn on two-step sign-in in Settings. We store your
+          authenticator key encrypted, and recovery codes only in scrambled
+          form.
+        </p>
 
         <p className="mt-12 text-sm text-ink/70">
           See also our{" "}

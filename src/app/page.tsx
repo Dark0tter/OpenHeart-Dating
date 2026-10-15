@@ -274,6 +274,13 @@ export default function Home() {
               Safety tips
             </Link>
           </div>
+          <p className="mt-5 text-sm text-cream/80">
+            Not many people near you yet?{" "}
+            <Link href="/waitlist" className="underline hover:text-cream">
+              Get one email when your city fills up
+            </Link>
+            .
+          </p>
         </section>
       </main>
 
@@ -303,6 +310,12 @@ export default function Home() {
           </Link>
           <Link href="/child-safety" className="underline hover:text-ink">
             Child safety
+          </Link>
+          <Link href="/waitlist" className="underline hover:text-ink">
+            Waiting list
+          </Link>
+          <Link href="/advertise" className="underline hover:text-ink">
+            Advertise with us
           </Link>
         </nav>
       </footer>

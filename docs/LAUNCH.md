@@ -29,7 +29,8 @@ Prices are what each service listed when this was written; check before paying.
 Before real members sign up:
 
 - `ALLOW_VERIFICATION_STUB=false` and `PHOTO_REVIEW_MODE=pre`.
-- Make yourself owner: `npm run staff:set -- you@example.com OWNER` (after verifying your age on the site), then turn on notifications in Settings on your phone. Your dashboard is at `/owner`; promote and demote moderators from `/owner/staff`.
+- Make yourself owner: `npm run staff:set -- you@example.com OWNER` (after verifying your age on the site). The first time you open `/owner` or `/mod` you'll be asked to set up two-step sign-in with an authenticator app; save the recovery codes somewhere safe (if you lose both, `npm run two-step:reset -- you@example.com`). Then turn on notifications in Settings on your phone. Promote and demote moderators from `/owner/staff`.
+- Pick your first city and promote there. Point people elsewhere to `/waitlist`; the owner Cities page shows where demand is building.
 - Do one test signup through the verification provider's sandbox and confirm the session disappears from its dashboard afterwards, one test date check-in, and one test call between two accounts.
 
 ## Stage 3: legal, before advertising the site
@@ -40,7 +41,7 @@ Before real members sign up:
   - 18 U.S.C. 2257 record keeping, since members can post explicit photos on the website.
   - State age-verification laws, which the ID checks are meant to satisfy.
   - GDPR and the UK Online Safety Act, if you accept members from Europe or the UK.
-- **Sponsor contracts.** A one-page agreement saying sponsors get anonymous daily totals only, no member data, and you can pull an ad at any time.
+- **Sponsor contracts.** Businesses can reach you from `/advertise`; inquiries land on the owner Ads page. Use a one-page agreement saying sponsors get anonymous daily totals only, no member data, and you can pull an ad at any time.
 
 ## Stage 4: phone apps
 

@@ -168,6 +168,7 @@ export async function GET() {
       lastActiveAt: user.lastActiveAt,
       termsAcceptedAt: user.termsAcceptedAt,
       photoVerifiedAt: user.photoVerifiedAt,
+      twoStepSignInSince: user.totpEnabledAt,
       ageVerification: user.verification
         ? {
             status: user.verification.status,

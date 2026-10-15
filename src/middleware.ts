@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isIndexable } from "@/lib/public-pages";
 
-/** Global noindex for profile discoverability protection + Cloudflare-friendly header. */
+/** Keeps everything but the public pages out of search engines, and sends signed-out visitors to log in. */
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  if (!isIndexable(request.nextUrl.pathname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
 
   // Soft gate: app routes expect a session cookie from Auth.js
   const isApp =
@@ -20,6 +23,7 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/members") ||
     request.nextUrl.pathname.startsWith("/mod") ||
+    request.nextUrl.pathname.startsWith("/owner") ||
     request.nextUrl.pathname.startsWith("/notifications") ||
     request.nextUrl.pathname.startsWith("/events") ||
     request.nextUrl.pathname.startsWith("/safety/check-in") ||

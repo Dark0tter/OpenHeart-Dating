@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/owner/cities", label: "Cities" },
   { href: "/owner/ads", label: "Ads" },
   { href: "/owner/staff", label: "Staff" },
+  { href: "/owner/announcements", label: "Announcements" },
 ];
 
 export default async function OwnerLayout({

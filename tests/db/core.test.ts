@@ -28,7 +28,26 @@ import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
 import { busy, canCall, expireCalls, RING_MS } from "@/lib/calls";
-import { setStaffRole } from "@/lib/staff-roles";
+import { resetStaffTwoStep, setStaffRole } from "@/lib/staff-roles";
+import {
+  base32Decode,
+  beginTwoStep,
+  confirmTwoStep,
+  currentStep,
+  hotp,
+  verifySecondStep,
+} from "@/lib/two-step";
+import {
+  cleanUpWaitlist,
+  confirmWaitlist,
+  joinWaitlist,
+  leaveWaitlist,
+  liveMembersIn,
+  notifyCity,
+  UNCONFIRMED_TTL_MS,
+} from "@/lib/waitlist";
+import { createSponsorInquiry } from "@/lib/sponsor-inquiries";
+import { currentAnnouncements } from "@/lib/announcements";
 import { cityStats } from "@/lib/owner-stats";
 import {
   endSupporter,
@@ -908,5 +927,217 @@ describe("owner city counts", () => {
     const austin = rows.find((r) => r.city?.toLowerCase() === "austin");
     expect(austin?.members).toBe(2);
     expect(rows.find((r) => r.city === "Dallas")?.members).toBe(1);
+  });
+});
+
+describe("two-step sign-in", () => {
+  const codeAt = (secret: string, nowMs: number) =>
+    hotp(base32Decode(secret), currentStep(nowMs));
+
+  it("turns on only with a working code, then accepts each code once", async () => {
+    const user = await makeUser();
+    const now = Date.now();
+    const { secret } = await beginTwoStep(user.id, user.email);
+    const stored = await prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+    });
+    expect(stored.totpSecret).not.toContain(secret);
+    expect(stored.totpEnabledAt).toBeNull();
+
+    expect(await confirmTwoStep(user.id, "000000", now)).toBeNull();
+    const codes = await confirmTwoStep(user.id, codeAt(secret, now), now);
+    expect(codes).toHaveLength(10);
+    const on = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(on.totpEnabledAt).not.toBeNull();
+    expect(on.sessionVersion).toBe(stored.sessionVersion + 1);
+
+    expect(
+      await verifySecondStep(user.id, codeAt(secret, now), now),
+    ).toBeNull();
+    const later = now + 60_000;
+    expect(await verifySecondStep(user.id, codeAt(secret, later), later)).toBe(
+      "totp",
+    );
+    expect(
+      await verifySecondStep(user.id, codeAt(secret, later), later),
+    ).toBeNull();
+
+    expect(await verifySecondStep(user.id, codes![0], later)).toBe("recovery");
+    expect(
+      await verifySecondStep(user.id, codes![0].toUpperCase(), later),
+    ).toBeNull();
+    const after = await prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+    });
+    expect(after.recoveryCodes).toHaveLength(9);
+  });
+
+  it("lets the owner reset a moderator who lost their phone", async () => {
+    const boss = await prisma.user.update({
+      where: { id: (await makeUser("Owner")).id },
+      data: { role: "OWNER" },
+    });
+    const mod = await prisma.user.update({
+      where: { id: (await makeUser("Mod")).id },
+      data: { role: "MODERATOR" },
+    });
+    const { secret } = await beginTwoStep(mod.id, mod.email);
+    await confirmTwoStep(mod.id, codeAt(secret, Date.now()));
+
+    expect(
+      await resetStaffTwoStep({ actor: mod, userId: boss.id, reason: "x" }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await resetStaffTwoStep({ actor: boss, userId: mod.id, reason: "" }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await resetStaffTwoStep({
+        actor: boss,
+        userId: mod.id,
+        reason: "Lost phone",
+      }),
+    ).toMatchObject({ ok: true });
+    const after = await prisma.user.findUniqueOrThrow({
+      where: { id: mod.id },
+    });
+    expect(after.totpEnabledAt).toBeNull();
+    expect(after.totpSecret).toBeNull();
+  });
+});
+
+describe("city waiting list", () => {
+  async function liveIn(city: string, state: string | null) {
+    const user = await makeUser();
+    await prisma.profile.update({
+      where: { userId: user.id },
+      data: { city, state, isActive: true },
+    });
+    await prisma.verification.create({
+      data: { userId: user.id, status: "VERIFIED_ADULT", provider: "persona" },
+    });
+    return user;
+  }
+
+  it("needs a confirmed email, emails once the city is ready, then forgets them", async () => {
+    const city = `Testville ${randomUUID().slice(0, 6)}`;
+    const email = `${randomUUID()}@test.local`;
+    await joinWaitlist({ email, city, state: "OR", country: null });
+    expect(
+      sent.some((m) => m.to === email && m.subject.includes("Confirm")),
+    ).toBe(true);
+    const entry = await prisma.waitlistEntry.findUniqueOrThrow({
+      where: { email },
+    });
+
+    expect((await notifyCity(city, "OR")).sent).toBe(0);
+    expect(await confirmWaitlist(entry.token)).toBe(true);
+
+    await liveIn(city, "Oregon");
+    await liveIn(city.toUpperCase(), "or");
+    await liveIn(city, null);
+    expect(await liveMembersIn(city, "OR")).toBe(2);
+    expect(await liveMembersIn(city, null)).toBe(3);
+
+    sent.length = 0;
+    const res = await notifyCity(city, "or");
+    expect(res.sent).toBe(1);
+    expect(sent[0]?.subject).toContain("ready");
+    expect(
+      await prisma.waitlistEntry.findUnique({ where: { email } }),
+    ).toBeNull();
+  });
+
+  it("removes people who ask, and unconfirmed sign-ups after a week", async () => {
+    const a = `${randomUUID()}@test.local`;
+    const b = `${randomUUID()}@test.local`;
+    await joinWaitlist({
+      email: a,
+      city: "Leaveton",
+      state: null,
+      country: null,
+    });
+    await joinWaitlist({
+      email: b,
+      city: "Leaveton",
+      state: null,
+      country: null,
+    });
+    const entryA = await prisma.waitlistEntry.findUniqueOrThrow({
+      where: { email: a },
+    });
+    expect(await leaveWaitlist(entryA.token)).toBe(true);
+    expect(
+      await prisma.waitlistEntry.findUnique({ where: { email: a } }),
+    ).toBeNull();
+
+    await cleanUpWaitlist(new Date(Date.now() + UNCONFIRMED_TTL_MS + 60_000));
+    expect(
+      await prisma.waitlistEntry.findUnique({ where: { email: b } }),
+    ).toBeNull();
+  });
+});
+
+describe("sponsor inquiries", () => {
+  it("saves the inquiry, thanks the business, and tells the owner", async () => {
+    const boss = await prisma.user.update({
+      where: { id: (await makeUser("Owner")).id },
+      data: { role: "OWNER" },
+    });
+    const email = `${randomUUID()}@biz.test`;
+    await createSponsorInquiry({
+      businessName: "Rainbow Books",
+      contactName: "Sam",
+      email,
+      website: null,
+      city: "Austin",
+      message: "We'd like a month in Austin.",
+    });
+    expect(
+      await prisma.sponsorInquiry.count({ where: { email, status: "NEW" } }),
+    ).toBe(1);
+    expect(sent.some((m) => m.to === email)).toBe(true);
+    expect(
+      await prisma.notification.count({
+        where: { userId: boss.id, type: "staff_alert" },
+      }),
+    ).toBe(1);
+  });
+});
+
+describe("announcements", () => {
+  it("shows current ones, and hides website-only ones in the apps", async () => {
+    const now = new Date();
+    const hour = 3600_000;
+    const make = (data: {
+      message: string;
+      websiteOnly?: boolean;
+      startsAt?: Date;
+      endsAt?: Date;
+    }) => prisma.announcement.create({ data });
+    const live = await make({ message: "live" });
+    const webOnly = await make({ message: "web", websiteOnly: true });
+    const ended = await make({
+      message: "ended",
+      endsAt: new Date(now.getTime() - hour),
+    });
+    const future = await make({
+      message: "future",
+      startsAt: new Date(now.getTime() + hour),
+    });
+
+    const web = (await currentAnnouncements({ app: false }, now)).map(
+      (a) => a.id,
+    );
+    const app = (await currentAnnouncements({ app: true }, now)).map(
+      (a) => a.id,
+    );
+    expect(web).toEqual(expect.arrayContaining([live.id, webOnly.id]));
+    expect(web).not.toContain(ended.id);
+    expect(web).not.toContain(future.id);
+    expect(app).toContain(live.id);
+    expect(app).not.toContain(webOnly.id);
+    await prisma.announcement.deleteMany({
+      where: { id: { in: [live.id, webOnly.id, ended.id, future.id] } },
+    });
   });
 });

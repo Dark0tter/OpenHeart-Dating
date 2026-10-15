@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -73,12 +74,16 @@ export async function requireMember() {
   return { ...user, profile: user.profile };
 }
 
-/** Staff at or above `minimum`. The owner passes every check. */
+/**
+ * Staff at or above `minimum`. The owner passes every check. Staff without
+ * two-step sign-in are sent to set it up first.
+ */
 export async function requireStaff(
   minimum: "MODERATOR" | "ADMIN" | "OWNER" = "MODERATOR",
 ) {
   const user = await requireUser();
   if (!user) return null;
   if (roleRank(user.role) < roleRank(minimum)) return null;
+  if (!user.totpEnabledAt) redirect("/settings/two-step?staff=1");
   return user;
 }

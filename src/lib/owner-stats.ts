@@ -236,6 +236,7 @@ export async function staffList(now = new Date()) {
       role: true,
       accountStatus: true,
       lastActiveAt: true,
+      totpEnabledAt: true,
       profile: { select: { displayName: true } },
     },
   });

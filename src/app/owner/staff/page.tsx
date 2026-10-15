@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { SectionTitle } from "@/components/owner-ui";
 import { staffList } from "@/lib/owner-stats";
 import { ROLE_LABEL } from "@/lib/staff-roles";
-import { changeRole } from "@/app/owner/actions";
+import { changeRole, resetTwoStep } from "@/app/owner/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -167,6 +167,13 @@ export default async function OwnerStaff({
                     {s.profile?.displayName ?? "No profile"}
                   </Link>
                   <span className="block text-xs text-ink/60">{s.email}</span>
+                  <span
+                    className={`block text-xs ${s.totpEnabledAt ? "text-ink/60" : "text-coral-deep"}`}
+                  >
+                    {s.totpEnabledAt
+                      ? "Two-step sign-in on"
+                      : "Two-step sign-in not set up yet (asked on next visit)"}
+                  </span>
                   {s.accountStatus !== "ACTIVE" && (
                     <span className="block text-xs text-coral-deep">
                       {s.accountStatus.toLowerCase()}
@@ -210,6 +217,23 @@ export default async function OwnerStaff({
                         needsReason
                         danger
                       />
+                      {s.totpEnabledAt && (
+                        <form
+                          action={resetTwoStep}
+                          className="flex flex-wrap items-center gap-1.5"
+                        >
+                          <input type="hidden" name="userId" value={s.id} />
+                          <input
+                            name="reason"
+                            required
+                            maxLength={300}
+                            placeholder="Why (e.g. lost phone)"
+                            aria-label="Reason for two-step reset"
+                            className={`${input} w-56`}
+                          />
+                          <button className={btn}>Reset two-step</button>
+                        </form>
+                      )}
                     </>
                   )}
                 </td>

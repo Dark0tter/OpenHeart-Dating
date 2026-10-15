@@ -110,7 +110,9 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 - **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and munches with RSVPs (address only shown to people going).
 - **Safety:** date check-ins that email a trusted contact if you don't check in, `/safety` tips, block, report, age verification through Didit, Persona or Veriff by signed webhook, with the provider's copy of the ID deleted as soon as the result arrives.
 - **Trust and safety staff tools** (`/mod`): report queue with assignment, user history, warnings, suspensions with appeals (decided by a different moderator), photo and selfie review, support tickets, room and event moderation, child-safety escalation that preserves evidence under legal hold, and a full audit log. Staff can only act on people ranked below them.
-- **Owner dashboard** (`/owner`, owner only): members and growth, sign-up funnel, members by country and city with local-sponsor readiness, the sponsor network (views, clicks, approvals, audience settings), the moderation queue, which services are switched on, and staff management: search for a member to make them a moderator or admin, and demote with a reason that goes in the audit log. Make yourself owner with `npm run staff:set -- you@example.com OWNER`; that command is the only way to create an owner.
+- **Owner dashboard** (`/owner`, owner only): members and growth, sign-up funnel, members by country and city with local-sponsor readiness, the sponsor network (views, clicks, approvals, audience settings), the moderation queue, which services are switched on, and staff management: search for a member to make them a moderator or admin, and demote with a reason that goes in the audit log. Also sponsor inquiries from `/advertise`, the city waiting list, and site-wide announcements. Make yourself owner with `npm run staff:set -- you@example.com OWNER`; that command is the only way to create an owner.
+- **Two-step sign-in** (`src/lib/two-step.ts`): authenticator-app codes plus ten one-time recovery codes, optional for members and required for all staff (staff tools send them to set it up first). Keys are stored encrypted with a key derived from `AUTH_SECRET`. The owner can reset a moderator's from `/owner/staff`; for your own account, `npm run two-step:reset -- you@example.com`.
+- **Growth:** `/waitlist` takes an email and city (confirmed by email) and sends one email when that city has `WAITLIST_NOTIFY_AT` live members (default 50), then deletes the address. `/advertise` explains sponsorship and sends inquiries to the owner. Public pages are in the sitemap; everything else is `noindex`.
 - **Staff alerts** (`src/lib/staff-alerts.ts`): urgent reports reach every moderator and admin within a minute by push, in-app and email; a daily summary email lists what's waiting and anything past the 24-hour promise.
 - **Background jobs** (`src/lib/jobs.ts`): run every minute inside the server, one instance at a time.
 
@@ -182,7 +184,7 @@ Members are the customers, not the product.
 - GDPR / CCPA: data download and account deletion are built in
 - DMCA + ToS + Community Guidelines
 - Never permanently store government ID images (tokens + status only)
-- Profile pages send `noindex,nofollow` + `X-Robots-Tag`
+- Only the public pages in `src/lib/public-pages.ts` can be indexed; profiles and everything behind sign-in send `X-Robots-Tag: noindex, nofollow`
 
 ## Deploying to DigitalOcean
 

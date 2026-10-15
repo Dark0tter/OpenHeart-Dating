@@ -8,11 +8,13 @@ import { prisma } from "@/lib/prisma";
 import { limitFor } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request";
 import { passesBotCheck } from "@/lib/bot-check";
+import { verifySecondStep } from "@/lib/two-step";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   botToken: z.string().optional(),
+  code: z.string().max(20).optional(),
 });
 
 class RateLimited extends CredentialsSignin {
@@ -21,6 +23,14 @@ class RateLimited extends CredentialsSignin {
 
 class BotCheckFailed extends CredentialsSignin {
   code = "bot_check";
+}
+
+class TwoStepRequired extends CredentialsSignin {
+  code = "two_step";
+}
+
+class TwoStepInvalid extends CredentialsSignin {
+  code = "two_step_invalid";
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -37,6 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         botToken: {},
+        code: {},
       },
       async authorize(raw, request) {
         const parsed = credentialsSchema.safeParse(raw);
@@ -64,6 +75,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.passwordHash,
         );
         if (!valid) return null;
+
+        if (user.totpEnabledAt) {
+          const code = parsed.data.code?.trim();
+          if (!code) throw new TwoStepRequired();
+          if (!(await verifySecondStep(user.id, code))) {
+            throw new TwoStepInvalid();
+          }
+        }
 
         await prisma.user.update({
           where: { id: user.id },

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Bars, pct, SectionTitle, shortDay, Stat } from "@/components/owner-ui";
 import { adStats } from "@/lib/owner-stats";
+import { prisma } from "@/lib/prisma";
+import { updateInquiry } from "@/app/owner/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +11,23 @@ const STATUS_CLS: Record<string, string> = {
   "Waiting for approval": "text-coral-deep",
 };
 
-export default async function OwnerAds() {
-  const a = await adStats();
+const INQUIRY_LABEL = { NEW: "New", CONTACTED: "Contacted", CLOSED: "Closed" };
+
+export default async function OwnerAds({
+  searchParams,
+}: {
+  searchParams: Promise<{ inquiries?: string }>;
+}) {
+  const { inquiries: show } = await searchParams;
+  const [a, inquiries, newInquiries] = await Promise.all([
+    adStats(),
+    prisma.sponsorInquiry.findMany({
+      where: show === "all" ? {} : { status: { not: "CLOSED" } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.sponsorInquiry.count({ where: { status: "NEW" } }),
+  ]);
   const live = a.placements.filter((p) => p.status === "Live").length;
   const waiting = a.placements.filter(
     (p) => p.status === "Waiting for approval",
@@ -42,6 +59,12 @@ export default async function OwnerAds() {
           value={waiting}
           href="/mod/sponsors"
           urgent={waiting > 0}
+        />
+        <Stat
+          label="New sponsor inquiries"
+          value={newInquiries}
+          href="#inquiries"
+          urgent={newInquiries > 0}
         />
         <Stat label="Views, last 30 days" value={views30} />
         <Stat
@@ -158,6 +181,99 @@ export default async function OwnerAds() {
       <p className="mt-4 text-xs text-ink/60">
         Send each sponsor their own numbers from this table when you bill them.
       </p>
+
+      <div id="inquiries" className="scroll-mt-6">
+        <SectionTitle>Sponsor inquiries</SectionTitle>
+      </div>
+      <p className="mt-1 text-sm text-ink/70">
+        From the{" "}
+        <Link href="/advertise" className="underline">
+          Advertise with us
+        </Link>{" "}
+        page.{" "}
+        <Link
+          href={
+            show === "all"
+              ? "/owner/ads#inquiries"
+              : "/owner/ads?inquiries=all#inquiries"
+          }
+          className="underline"
+        >
+          {show === "all" ? "Hide closed" : "Show closed too"}
+        </Link>
+      </p>
+      <ul className="mt-3 space-y-3">
+        {inquiries.length === 0 && (
+          <li className="text-sm text-ink/70">None yet.</li>
+        )}
+        {inquiries.map((q) => (
+          <li
+            key={q.id}
+            className="rounded-lg border border-forest/10 bg-cream/60 p-4 text-sm"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p>
+                <span className="font-medium text-forest">
+                  {q.businessName}
+                </span>
+                <span className="text-ink/60">
+                  {" "}
+                  · {q.contactName} ·{" "}
+                  <a href={`mailto:${q.email}`} className="underline">
+                    {q.email}
+                  </a>
+                  {q.city ? ` · ${q.city}` : ""}
+                </span>
+              </p>
+              <span className="text-xs text-ink/60">
+                {q.createdAt.toLocaleDateString("en-US", {
+                  dateStyle: "medium",
+                })}
+              </span>
+            </div>
+            {q.website && (
+              <a
+                href={q.website}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="text-xs text-forest underline"
+              >
+                {q.website}
+              </a>
+            )}
+            <p className="mt-2 whitespace-pre-wrap">{q.message}</p>
+            <form
+              action={updateInquiry}
+              className="mt-3 flex flex-wrap items-center gap-2"
+            >
+              <input type="hidden" name="id" value={q.id} />
+              <select
+                name="status"
+                defaultValue={q.status}
+                aria-label="Status"
+                className="h-8 rounded-md border border-forest/15 bg-cream/80 px-2 text-xs"
+              >
+                {Object.entries(INQUIRY_LABEL).map(([v, l]) => (
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+              <input
+                name="staffNotes"
+                defaultValue={q.staffNotes ?? ""}
+                maxLength={2000}
+                placeholder="Notes (price quoted, follow-up date…)"
+                aria-label="Notes"
+                className="h-8 min-w-64 flex-1 rounded-md border border-forest/15 bg-cream/80 px-2 text-xs"
+              />
+              <button className="rounded-md border border-forest/20 px-2.5 py-1 text-xs hover:bg-mist">
+                Save
+              </button>
+            </form>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fraunces } from "next/font/google";
 import { Providers } from "@/app/providers";
+import { appUrl } from "@/lib/request";
 import "./globals.css";
 
 const figtree = Figtree({
@@ -17,11 +18,15 @@ export const metadata: Metadata = {
   title: "OpenHeart — Dating without artificial paywalls",
   description:
     "Privacy-first dating for LGBTQIA+ people, kink-positive adults, and anyone who needs safer discoverability. Free likes, messages, and matching.",
-  robots: { index: false, follow: false },
-  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
-  other: {
-    "X-Robots-Tag": "noindex, nofollow",
+  metadataBase: new URL(appUrl()),
+  openGraph: {
+    type: "website",
+    siteName: "OpenHeart",
+    title: "OpenHeart — Dating without artificial paywalls",
+    description:
+      "Privacy-first dating and community for LGBTQIA+ and kink-positive adults. Free likes, messages, and matching.",
   },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
 };
 
 /** `cover` lets the app shell draw under the iPhone notch and home bar; nav bars pad with safe-area insets. */
@@ -38,9 +43,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta name="robots" content="noindex,nofollow" />
-      </head>
       <body
         className={`${figtree.variable} ${fraunces.variable} min-h-screen antialiased`}
       >

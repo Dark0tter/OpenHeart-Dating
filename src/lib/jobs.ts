@@ -5,6 +5,7 @@ import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { expireCalls } from "@/lib/calls";
 import { deleteAccount, finishHeldDeletions } from "@/lib/account-deletion";
 import { retryProviderDeletions } from "@/lib/verification";
+import { cleanUpWaitlist, notifyReadyCities } from "@/lib/waitlist";
 
 /**
  * Timed work: date check-in reminders and alerts, event reminders, and data
@@ -31,6 +32,8 @@ export async function runJobs(now = new Date()) {
         checkIns: await checkIns(now),
         eventReminders: await eventReminders(now),
         calls: await expireCalls(now),
+        waitlist:
+          now.getUTCMinutes() % 15 === 0 ? await notifyReadyCities() : 0,
         cleanup: await cleanup(now),
       };
     },
@@ -198,11 +201,20 @@ async function cleanup(now: Date) {
   const pruned = await pruneOldRecords(now);
   const abandonedAccounts = await deleteAbandonedSignups(now);
   const verificationDataDeleted = await retryProviderDeletions(now);
+  const waitlistUnconfirmed = await cleanUpWaitlist(now);
+  const sponsorInquiries = await prisma.sponsorInquiry.deleteMany({
+    where: {
+      status: "CLOSED",
+      updatedAt: { lt: new Date(now.getTime() - 365 * DAY) },
+    },
+  });
 
   return {
     deletedAccounts,
     abandonedAccounts,
     verificationDataDeleted,
+    waitlistUnconfirmed,
+    sponsorInquiries: sponsorInquiries.count,
     ...pruned,
     checkIns: checkIns.count,
     notifications: notifications.count,

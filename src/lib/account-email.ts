@@ -52,3 +52,19 @@ export async function sendPasswordChangedEmail(email: string) {
     action: { label: "Reset my password", url: `${appUrl()}/forgot-password` },
   });
 }
+
+export async function sendTwoStepChangedEmail(email: string, on: boolean) {
+  return sendEmail({
+    to: email,
+    subject: on
+      ? "Two-step sign-in is on for your OpenHeart account"
+      : "Two-step sign-in was turned off on your OpenHeart account",
+    paragraphs: [
+      on
+        ? "Signing in now needs your password and a code from your authenticator app. Keep your recovery codes somewhere safe."
+        : "Signing in now needs only your password. Every device was signed out.",
+      "If you didn't do this, reset your password right away and contact support.",
+    ],
+    action: { label: "Reset my password", url: `${appUrl()}/forgot-password` },
+  });
+}

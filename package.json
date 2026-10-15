@@ -17,6 +17,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "staff:set": "tsx scripts/set-role.ts",
+    "two-step:reset": "tsx scripts/two-step-reset.ts",
     "vapid:generate": "web-push generate-vapid-keys"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "next-auth": "^5.0.0-beta.32",
     "pg": "^8.23.1",
     "prisma": "^6.19.0",
+    "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sharp": "^0.35.5",
@@ -47,6 +49,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
