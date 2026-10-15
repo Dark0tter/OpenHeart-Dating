@@ -66,12 +66,18 @@ keep coming back, whether conversations actually happen, and whether the
 owner Cities page and waiting list show demand beyond your first city. Members
 asking for an app is a good sign too. Until then, skip everything below.
 
+The Apple and Google developer accounts are already paid for through another
+app. One account publishes any number of apps, so there's no new fee; the
+store lists whichever name the account is under as the seller. Apple can close
+a whole developer account over repeated rule breaks, which would take the
+other app down too, so follow the store review tips below closely.
+
 | What | Cost | Notes |
 | --- | --- | --- |
-| D-U-N-S number | Free | From Dun & Bradstreet. Apple requires it to enroll as an organization, so the stores show "CertiScan.IS Inc." as the seller instead of your personal name. Can take a couple of weeks |
+| D-U-N-S number | Free | Only if the Apple account is in your personal name and you want "CertiScan.IS Inc." shown as the seller: Apple needs it to convert the account to an organization. From Dun & Bradstreet; can take a couple of weeks |
 | Firebase project | Free | Android notifications (`FCM_SERVICE_ACCOUNT_JSON`, `google-services.json`) |
-| Apple Developer Program | $99/year | Fee waivers exist for some nonprofits |
-| Google Play Console | $25 once | |
+| Apple Developer Program | Already paid | Existing account |
+| Google Play Console | Already paid | Existing account. Personal accounts opened after November 2023 must run a 14-day closed test with at least 12 testers before a new app can go public |
 | Apple push key (APNs) | Free with the Apple account | Certificates, Identifiers & Profiles → Keys → new key with Apple Push Notifications. Fill in `APNS_*` |
 | Xcode | Free | Open `mobile/ios`, confirm the Push Notifications capability is on for the App target, set your team |
 | `google-services.json` | Free | Download from Firebase, put it in `mobile/android/app/` (it's ignored by git on purpose) |
