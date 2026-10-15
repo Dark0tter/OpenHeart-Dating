@@ -56,7 +56,7 @@ export default function RegisterPage() {
           href="/"
           className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest"
         >
-          <BrandMark className="h-9 w-9" />
+          <BrandMark className="h-16 w-8" />
           Kindred Kinks
         </Link>
         <p className="mt-2 text-sm text-ink/70">

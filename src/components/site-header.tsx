@@ -11,7 +11,7 @@ export async function SiteHeader() {
         href="/"
         className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-forest md:text-3xl"
       >
-        <BrandMark className="h-8 w-8 md:h-9 md:w-9" />
+        <BrandMark className="h-14 w-7 md:h-16 md:w-8" />
         Kindred Kinks
       </Link>
       <nav className="flex items-center gap-3 text-sm md:gap-5">

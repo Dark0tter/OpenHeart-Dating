@@ -54,7 +54,7 @@ export function AppNav() {
             href="/feed"
             className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
-            <BrandMark className="h-7 w-7" />
+            <BrandMark className="h-10 w-5" />
             Kindred Kinks
           </Link>
           <div className="flex items-center gap-1">
