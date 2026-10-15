@@ -1125,10 +1125,11 @@ describe("announcements", () => {
       startsAt: new Date(now.getTime() + hour),
     });
 
-    const web = (await currentAnnouncements({ app: false }, now)).map(
+    const soon = new Date(Date.now() + 1000);
+    const web = (await currentAnnouncements({ app: false }, soon)).map(
       (a) => a.id,
     );
-    const app = (await currentAnnouncements({ app: true }, now)).map(
+    const app = (await currentAnnouncements({ app: true }, soon)).map(
       (a) => a.id,
     );
     expect(web).toEqual(expect.arrayContaining([live.id, webOnly.id]));

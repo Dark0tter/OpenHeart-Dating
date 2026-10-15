@@ -51,7 +51,9 @@ export function createAnnouncement(
   input: AnnouncementInput,
   createdById: string,
 ) {
-  return prisma.announcement.create({ data: { ...input, createdById } });
+  return prisma.announcement.create({
+    data: { ...input, createdById, startsAt: new Date() },
+  });
 }
 
 export function endAnnouncement(id: string, now = new Date()) {
