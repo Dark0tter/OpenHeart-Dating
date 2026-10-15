@@ -28,7 +28,7 @@ Prices are what each service listed when this was written; check before paying.
 
 ### Connecting kindredkinks.com (DNS on Cloudflare)
 
-1. Deploy the app once. `.do/app.yaml` already lists `kindredkinks.com` (primary) and `www.kindredkinks.com`. In App Platform → Settings → Domains, each shows a CNAME target like `kindredkinks-xxxxx.ondigitalocean.app`.
+1. App Platform keeps its own copy of the app settings and doesn't re-read `.do/app.yaml` on each push. If the app already exists, apply the file once: App Platform → your app → Settings → App Spec → Edit, paste the contents of `.do/app.yaml`, and save (or `doctl apps update <app-id> --spec .do/app.yaml`). It lists `kindredkinks.com` (primary) and `www.kindredkinks.com`. In App Platform → Settings → Domains, each shows a CNAME target like `kindredkinks-xxxxx.ondigitalocean.app`.
 2. In Cloudflare → DNS, add a `CNAME` for `@` and one for `www`, both pointing at that target. Leave them **DNS only (grey cloud)** until App Platform shows the domains as active and has issued certificates; then you can switch to Proxied if you want, with SSL/TLS mode set to **Full (strict)**.
 3. `APP_URL` follows the primary domain automatically, so sign-in links and emails will use `https://kindredkinks.com`.
 4. Email: in Resend, add the domain `kindredkinks.com` and copy the DKIM, SPF and return-path records it gives you into Cloudflare DNS (DNS only). `EMAIL_FROM` is already `Kindred Kinks <hello@kindredkinks.com>`. Add a DMARC record too (`TXT _dmarc` → `v=DMARC1; p=none; rua=mailto:you@yourmail`) so mail isn't flagged as spam.

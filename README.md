@@ -191,7 +191,7 @@ Members are the customers, not the product.
 The App Platform spec lives in `.do/app.yaml` and deploys from `main` of
 [Dark0tter/OpenHeart-Dating](https://github.com/Dark0tter/OpenHeart-Dating) on every push.
 
-1. Create a managed PostgreSQL 16 cluster named `kindredkinks-db` (same region as the app, `nyc`).
+1. Create a managed PostgreSQL 16 cluster named `openheart-db` (same region as the app, `nyc`).
 2. Create the app: **Apps → Create App → import `.do/app.yaml`**, or `doctl apps create --spec .do/app.yaml`.
 3. In the app's settings, fill in the secret env vars: `AUTH_SECRET` (`openssl rand -base64 32`), plus `BAN_HASH_SECRET` (set once, never change), age-verification keys (Didit, Persona or Veriff) and S3 (Spaces) keys when ready.
 4. Each deploy runs the `migrate` pre-deploy job (`prisma migrate deploy` + idempotent tag seed) before the web service goes live. `/api/health` checks the database.

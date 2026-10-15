@@ -1,5 +1,6 @@
 # DigitalOcean App Platform spec.
-# Create the managed Postgres cluster "kindredkinks-db" first, then:
+# Create the managed Postgres cluster "openheart-db" first (database clusters
+# can't be renamed, so it keeps the original name), then:
 #   doctl apps create --spec .do/app.yaml
 # Secrets marked type: SECRET are set in the App Platform dashboard, never committed.
 name: kindredkinks
@@ -22,7 +23,7 @@ databases:
     engine: PG
     version: "16"
     production: true
-    cluster_name: kindredkinks-db
+    cluster_name: openheart-db
 
 jobs:
   - name: migrate
