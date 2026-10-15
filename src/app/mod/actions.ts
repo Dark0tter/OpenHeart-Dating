@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { isAdmin, outranks, requireStaff } from "@/lib/session";
+import { setStaffRole } from "@/lib/staff-roles";
 import {
   closeReport,
   closeTicket,
@@ -27,6 +28,19 @@ async function staffOrThrow(minimum: "MODERATOR" | "ADMIN" = "MODERATOR") {
 
 const text = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
 
+/** Moderators can't act on admins, admins can't act on the owner. */
+async function assertOutranks(staff: { role: UserRole }, userId: string) {
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (target && !outranks(staff.role, target.role)) {
+    throw new Error(
+      "This person is staff at or above your level. Ask the owner to handle it.",
+    );
+  }
+}
+
 export async function reportAction(fd: FormData) {
   const staff = await staffOrThrow();
   const reportId = text(fd, "reportId");
@@ -36,6 +50,9 @@ export async function reportAction(fd: FormData) {
     where: { id: reportId },
   });
   const userId = report.reportedUserId;
+  if (["warn", "suspend", "escalate"].includes(action)) {
+    await assertOutranks(staff, userId);
+  }
 
   switch (action) {
     case "assign":
@@ -128,6 +145,7 @@ export async function memberAction(fd: FormData) {
   const userId = text(fd, "userId");
   const action = text(fd, "action");
   const note = text(fd, "note");
+  if (action !== "set_role") await assertOutranks(staff, userId);
 
   if (action === "suspend") {
     const days = Number(text(fd, "days")) || null;
@@ -155,16 +173,13 @@ export async function memberAction(fd: FormData) {
       note,
     });
   } else if (action === "set_role") {
-    await staffOrThrow("ADMIN");
-    const role = text(fd, "role") as UserRole;
-    if (!Object.values(UserRole).includes(role)) throw new Error("Bad role");
-    if (userId === staff.id) throw new Error("You can't change your own role");
-    await prisma.user.update({ where: { id: userId }, data: { role } });
-    await logAction({
-      actorId: staff.id,
-      action: `role_${role.toLowerCase()}`,
-      targetUserId: userId,
+    const result = await setStaffRole({
+      actor: staff,
+      userId,
+      role: text(fd, "role") as UserRole,
+      reason: note,
     });
+    if (!result.ok) throw new Error(result.error);
   } else {
     throw new Error("Unknown action");
   }
@@ -201,7 +216,7 @@ export async function appealAction(fd: FormData) {
   const appeal = await prisma.appeal.findUniqueOrThrow({
     where: { id: appealId },
   });
-  if (staff.role !== UserRole.ADMIN) {
+  if (!isAdmin(staff.role)) {
     const lastSuspension = await prisma.modAction.findFirst({
       where: { targetUserId: appeal.userId, action: { startsWith: "suspend" } },
       orderBy: { createdAt: "desc" },

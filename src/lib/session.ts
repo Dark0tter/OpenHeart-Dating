@@ -1,6 +1,9 @@
-import { AccountStatus, UserRole } from "@prisma/client";
+import { AccountStatus } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { roleRank } from "@/lib/roles";
+
+export { isAdmin, isStaff, outranks, roleRank } from "@/lib/roles";
 
 /** How stale lastActiveAt may get before a request refreshes it. */
 const ACTIVE_TOUCH_MS = 5 * 60 * 1000;
@@ -70,20 +73,12 @@ export async function requireMember() {
   return { ...user, profile: user.profile };
 }
 
-export function isStaff(role: UserRole | undefined | null): boolean {
-  return role === UserRole.MODERATOR || role === UserRole.ADMIN;
-}
-
-/** Moderators and admins. Pass "ADMIN" for admin-only actions. */
+/** Staff at or above `minimum`. The owner passes every check. */
 export async function requireStaff(
-  minimum: "MODERATOR" | "ADMIN" = "MODERATOR",
+  minimum: "MODERATOR" | "ADMIN" | "OWNER" = "MODERATOR",
 ) {
   const user = await requireUser();
   if (!user) return null;
-  if (
-    minimum === "ADMIN" ? user.role !== UserRole.ADMIN : !isStaff(user.role)
-  ) {
-    return null;
-  }
+  if (roleRank(user.role) < roleRank(minimum)) return null;
   return user;
 }

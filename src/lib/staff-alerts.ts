@@ -26,7 +26,10 @@ type Recipient = { id: string | null; email: string };
 /** Active moderators and admins; SUPPORT_EMAIL if nobody has been appointed yet. */
 async function recipients(): Promise<Recipient[]> {
   const staff = await prisma.user.findMany({
-    where: { role: { in: ["ADMIN", "MODERATOR"] }, accountStatus: "ACTIVE" },
+    where: {
+      role: { in: ["OWNER", "ADMIN", "MODERATOR"] },
+      accountStatus: "ACTIVE",
+    },
     select: { id: true, email: true },
   });
   if (staff.length > 0) return staff;

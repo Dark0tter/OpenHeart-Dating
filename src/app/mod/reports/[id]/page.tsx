@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { isAdmin as isAdminRole, requireStaff } from "@/lib/session";
 import { orderedPair } from "@/lib/utils";
 import { reportAction } from "@/app/mod/actions";
 
@@ -74,7 +73,7 @@ export default async function ReportDetail({
         })()
       : Promise.resolve([]),
   ]);
-  const isAdmin = staff.role === UserRole.ADMIN;
+  const isAdmin = isAdminRole(staff.role);
   const open = report.status === "open";
 
   return (

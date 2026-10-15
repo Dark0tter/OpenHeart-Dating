@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { UserRole } from "@prisma/client";
-import { requireStaff } from "@/lib/session";
+import { isAdmin, requireStaff } from "@/lib/session";
 import { getObject } from "@/lib/storage";
 import { logAction } from "@/lib/moderation/staff-actions";
 
@@ -16,7 +15,7 @@ export async function GET(req: Request) {
   if (!/^(selfies|evidence)\/[\w./-]+$/.test(key) || key.includes("..")) {
     return new NextResponse(null, { status: 400 });
   }
-  if (key.startsWith("evidence/") && staff.role !== UserRole.ADMIN) {
+  if (key.startsWith("evidence/") && !isAdmin(staff.role)) {
     return new NextResponse(null, { status: 404 });
   }
   const body = await getObject(key);

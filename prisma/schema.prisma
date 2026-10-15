@@ -116,6 +116,9 @@ enum UserRole {
   MEMBER
   MODERATOR
   ADMIN
+  /// The site owner. Only set from the command line (npm run staff:set); the
+  /// only role that can promote or demote staff.
+  OWNER
 }
 
 enum AuthTokenKind {

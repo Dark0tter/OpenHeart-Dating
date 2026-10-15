@@ -29,7 +29,7 @@ Prices are what each service listed when this was written; check before paying.
 Before real members sign up:
 
 - `ALLOW_VERIFICATION_STUB=false` and `PHOTO_REVIEW_MODE=pre`.
-- Make yourself admin: `npm run staff:set -- you@example.com ADMIN`, then turn on notifications in Settings on your phone.
+- Make yourself owner: `npm run staff:set -- you@example.com OWNER` (after verifying your age on the site), then turn on notifications in Settings on your phone. Your dashboard is at `/owner`; promote and demote moderators from `/owner/staff`.
 - Do one test signup through the verification provider's sandbox and confirm the session disappears from its dashboard afterwards, one test date check-in, and one test call between two accounts.
 
 ## Stage 3: legal, before advertising the site

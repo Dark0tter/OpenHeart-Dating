@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { isAdmin as isAdminRole, requireStaff } from "@/lib/session";
 import { memberAction } from "@/app/mod/actions";
 import { supporterAction } from "@/app/mod/supporter-actions";
 import { supporterStatus } from "@/lib/supporter";
@@ -53,7 +52,7 @@ export default async function MemberDetail({
     }),
     supporterStatus(id),
   ]);
-  const isAdmin = staff.role === UserRole.ADMIN;
+  const isAdmin = isAdminRole(staff.role);
 
   return (
     <div className="space-y-8">
@@ -146,23 +145,25 @@ export default async function MemberDetail({
               </button>
             )}
           </div>
-          {isAdmin && user.id !== staff.id && (
-            <div className="flex items-center gap-2">
-              <select
-                name="role"
-                defaultValue={user.role}
-                aria-label="Role"
-                className="h-9 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
-              >
-                <option value="MEMBER">Member</option>
-                <option value="MODERATOR">Moderator</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-              <button name="action" value="set_role" className={btn}>
-                Change role
-              </button>
-            </div>
-          )}
+          {staff.role === "OWNER" &&
+            user.id !== staff.id &&
+            user.role !== "OWNER" && (
+              <div className="flex items-center gap-2">
+                <select
+                  name="role"
+                  defaultValue={user.role}
+                  aria-label="Role"
+                  className="h-9 rounded-md border border-forest/15 bg-cream/80 px-2 text-sm"
+                >
+                  <option value="MEMBER">Member</option>
+                  <option value="MODERATOR">Moderator</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+                <button name="action" value="set_role" className={btn}>
+                  Change role
+                </button>
+              </div>
+            )}
         </form>
       </section>
 

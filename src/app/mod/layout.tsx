@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UserRole } from "@prisma/client";
-import { requireStaff } from "@/lib/session";
+import { isAdmin, requireStaff } from "@/lib/session";
 
 export const metadata = { title: "Moderation · OpenHeart" };
 
@@ -45,7 +44,7 @@ export default async function ModLayout({
                 {l.label}
               </Link>
             ))}
-            {staff.role === UserRole.ADMIN && (
+            {isAdmin(staff.role) && (
               <>
                 <Link
                   href="/mod/sponsors"
@@ -57,6 +56,14 @@ export default async function ModLayout({
                   Audit log
                 </Link>
               </>
+            )}
+            {staff.role === "OWNER" && (
+              <Link
+                href="/owner"
+                className="font-medium text-forest hover:underline"
+              >
+                Owner dashboard
+              </Link>
             )}
           </nav>
           <Link

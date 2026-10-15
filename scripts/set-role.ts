@@ -1,6 +1,7 @@
 /**
- * Makes an existing account a moderator or admin (or back to member).
- *   npm run staff:set -- someone@example.com MODERATOR
+ * Sets an account's role. This is the only way to make someone OWNER (the
+ * owner then promotes and demotes staff from /owner/staff).
+ *   npm run staff:set -- you@example.com OWNER
  */
 import { PrismaClient, UserRole } from "@prisma/client";
 
@@ -8,7 +9,7 @@ async function main() {
   const [email, role] = process.argv.slice(2);
   if (!email || !role || !(role in UserRole)) {
     console.error(
-      "Usage: npm run staff:set -- <email> <MEMBER|MODERATOR|ADMIN>",
+      "Usage: npm run staff:set -- <email> <MEMBER|MODERATOR|ADMIN|OWNER>",
     );
     process.exit(1);
   }

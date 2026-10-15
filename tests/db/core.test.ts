@@ -28,6 +28,8 @@ import { orderedPair } from "@/lib/utils";
 import { dailyDigest, staffAlerts } from "@/lib/staff-alerts";
 import { pickSponsorPlacement, recordSponsorEvent } from "@/lib/sponsors";
 import { busy, canCall, expireCalls, RING_MS } from "@/lib/calls";
+import { setStaffRole } from "@/lib/staff-roles";
+import { cityStats } from "@/lib/owner-stats";
 import {
   endSupporter,
   grantSupporter,
@@ -746,5 +748,165 @@ describe("retention clean-up", () => {
     expect(await prisma.user.count({ where: { id: abandoned.id } })).toBe(0);
     expect(await prisma.user.count({ where: { id: confirmed.id } })).toBe(1);
     expect(await prisma.user.count({ where: { id: fresh.id } })).toBe(1);
+  });
+});
+
+describe("staff roles", () => {
+  async function verified(name = "Staffer") {
+    const user = await makeUser(name);
+    await prisma.verification.create({
+      data: { userId: user.id, status: "VERIFIED_ADULT", provider: "persona" },
+    });
+    return user;
+  }
+  async function owner() {
+    const user = await verified("Owner");
+    return prisma.user.update({
+      where: { id: user.id },
+      data: { role: "OWNER" },
+    });
+  }
+
+  it("lets only the owner promote, and only verified members", async () => {
+    const boss = await owner();
+    const admin = await prisma.user.update({
+      where: { id: (await verified()).id },
+      data: { role: "ADMIN" },
+    });
+    const member = await verified("New mod");
+    const unverified = await makeUser();
+
+    expect(
+      await setStaffRole({
+        actor: admin,
+        userId: member.id,
+        role: "MODERATOR",
+        reason: "",
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await setStaffRole({
+        actor: boss,
+        userId: unverified.id,
+        role: "MODERATOR",
+        reason: "",
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await setStaffRole({
+        actor: boss,
+        userId: member.id,
+        role: "OWNER",
+        reason: "",
+      }),
+    ).toMatchObject({ ok: false });
+
+    const res = await setStaffRole({
+      actor: boss,
+      userId: member.id,
+      role: "MODERATOR",
+      reason: "",
+    });
+    expect(res.ok).toBe(true);
+    const after = await prisma.user.findUniqueOrThrow({
+      where: { id: member.id },
+    });
+    expect(after.role).toBe("MODERATOR");
+    const log = await prisma.modAction.findFirst({
+      where: { targetUserId: member.id, action: "role_moderator" },
+    });
+    expect(log?.actorId).toBe(boss.id);
+    expect(
+      await prisma.notification.count({
+        where: { userId: member.id, type: "staff_alert" },
+      }),
+    ).toBe(1);
+  });
+
+  it("needs a reason to demote, and never touches the owner", async () => {
+    const boss = await owner();
+    const otherOwner = await owner();
+    const mod = await prisma.user.update({
+      where: { id: (await verified()).id },
+      data: { role: "MODERATOR" },
+    });
+
+    expect(
+      await setStaffRole({
+        actor: boss,
+        userId: mod.id,
+        role: "MEMBER",
+        reason: "  ",
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await setStaffRole({
+        actor: boss,
+        userId: otherOwner.id,
+        role: "MEMBER",
+        reason: "x",
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await setStaffRole({
+        actor: boss,
+        userId: boss.id,
+        role: "MEMBER",
+        reason: "x",
+      }),
+    ).toMatchObject({ ok: false });
+
+    const res = await setStaffRole({
+      actor: boss,
+      userId: mod.id,
+      role: "MEMBER",
+      reason: "Shared report details",
+    });
+    expect(res.ok).toBe(true);
+    const log = await prisma.modAction.findFirst({
+      where: { targetUserId: mod.id, action: "role_member" },
+    });
+    expect(log?.note).toContain("Shared report details");
+  });
+});
+
+describe("owner city counts", () => {
+  it("groups spellings of the same city and skips closed accounts", async () => {
+    const country = `Testland ${randomUUID().slice(0, 8)}`;
+    const place = (city: string, c = country) => ({
+      city,
+      state: "TX",
+      country: c,
+    });
+    const a = await makeUser();
+    const b = await makeUser();
+    const c = await makeUser();
+    const gone = await makeUser();
+    await prisma.profile.update({
+      where: { userId: a.id },
+      data: place("Austin"),
+    });
+    await prisma.profile.update({
+      where: { userId: b.id },
+      data: place(" austin "),
+    });
+    await prisma.profile.update({
+      where: { userId: c.id },
+      data: place("Dallas", country.toUpperCase()),
+    });
+    await prisma.profile.update({
+      where: { userId: gone.id },
+      data: place("Austin"),
+    });
+    await prisma.user.update({
+      where: { id: gone.id },
+      data: { accountStatus: "SUSPENDED" },
+    });
+
+    const rows = await cityStats({ country });
+    expect(rows).toHaveLength(2);
+    const austin = rows.find((r) => r.city?.toLowerCase() === "austin");
+    expect(austin?.members).toBe(2);
+    expect(rows.find((r) => r.city === "Dallas")?.members).toBe(1);
   });
 });

@@ -52,6 +52,14 @@ export default async function AppLayout({
               <Link href="/mod" className="underline">
                 Moderation dashboard
               </Link>
+              {user.role === "OWNER" && (
+                <>
+                  {" · "}
+                  <Link href="/owner" className="underline">
+                    Owner dashboard
+                  </Link>
+                </>
+              )}
             </div>
           )}
           <main id="main" className="mx-auto max-w-5xl px-4 py-8">
