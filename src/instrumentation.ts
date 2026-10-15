@@ -10,6 +10,19 @@ export async function register() {
 
   if (
     process.env.NEXT_RUNTIME === "nodejs" &&
+    process.env.NODE_ENV === "production"
+  ) {
+    const { missingSettings } = await import("@/lib/startup-check");
+    const missing = missingSettings();
+    if (missing.length > 0) {
+      console.error(
+        `[setup] Missing settings: ${missing.join("; ")}. Add them in the hosting dashboard's environment variables.`,
+      );
+    }
+  }
+
+  if (
+    process.env.NEXT_RUNTIME === "nodejs" &&
     process.env.NODE_ENV === "production" &&
     process.env.JOBS !== "off"
   ) {

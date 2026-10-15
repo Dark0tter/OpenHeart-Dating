@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "npm run db:setup && next start",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
