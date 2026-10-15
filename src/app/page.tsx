@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { OPERATOR } from "@/lib/constants/site";
 
 const STEPS = [
   {
@@ -318,6 +319,9 @@ export default function Home() {
             Advertise with us
           </Link>
         </nav>
+        <p className="mx-auto mt-4 max-w-5xl text-xs text-forest/70">
+          © {new Date().getFullYear()} {OPERATOR}
+        </p>
       </footer>
     </div>
   );

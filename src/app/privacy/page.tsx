@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { ContactLine } from "@/components/contact-line";
+import { OPERATOR, OPERATOR_DESCRIPTION } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "Privacy promise — Kindred Kinks",
@@ -30,6 +32,17 @@ export default function PrivacyPage() {
           </li>
           <li>We don&apos;t build behavioral or shadow profiles.</li>
         </ul>
+
+        <h2 className="mt-12 font-[family-name:var(--font-fraunces)] text-2xl text-forest">
+          Who we are
+        </h2>
+        <p className="mt-3 text-ink/75">
+          Kindred Kinks is run by {OPERATOR_DESCRIPTION}. {OPERATOR} decides how
+          your information is used and is responsible for it (under European
+          law, the &ldquo;data controller&rdquo;). To ask a question, download
+          your data, or have it deleted, use Settings or contact us through{" "}
+          <ContactLine />.
+        </p>
 
         <h2 className="mt-12 font-[family-name:var(--font-fraunces)] text-2xl text-forest">
           The sponsor block

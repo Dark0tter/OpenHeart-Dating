@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { ContactLine } from "@/components/contact-line";
+import { OPERATOR, OPERATOR_DESCRIPTION } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "Terms of use — Kindred Kinks",
@@ -28,6 +29,18 @@ export default function TermsPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-4xl text-forest">
           Terms of use
         </h1>
+
+        <section>
+          <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
+            Who runs Kindred Kinks
+          </h2>
+          <p className="mt-2">
+            Kindred Kinks, on the website and in the apps, is operated by{" "}
+            {OPERATOR_DESCRIPTION} (&ldquo;we&rdquo; and &ldquo;us&rdquo; in
+            these terms). By creating an account or using Kindred Kinks, you
+            agree to these terms.
+          </p>
+        </section>
 
         <section>
           <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
@@ -128,6 +141,10 @@ export default function TermsPage() {
           </h2>
           <p className="mt-2">
             Questions, appeals, or safety concerns: <ContactLine />.
+          </p>
+          <p className="mt-2">
+            Legal notices for {OPERATOR} can be sent the same way; mark them
+            &ldquo;Legal notice&rdquo; in the subject.
           </p>
         </section>
       </main>

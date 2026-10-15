@@ -44,7 +44,11 @@ Before real members sign up:
 
 ## Stage 3: legal, before advertising the site
 
-- **Business entity.** An LLC keeps your personal savings separate from the site. State filing fees run roughly $50-500. The tax ID (EIN) is free from the IRS. Payment processors and Apple's organization accounts will ask for both.
+- **Business entity: done.** Kindred Kinks is operated by CertiScan.IS Inc., a Delaware corporation; the Terms, Privacy page and footers say so (change it in `src/lib/constants/site.ts`). Things that come with it:
+  - Delaware's annual report and franchise tax are due every March 1 (at least $225 a year: $175 minimum tax plus the $50 filing fee, using the authorized-shares method for small share counts). Keep a registered agent in Delaware.
+  - If you run the company from another state, that state may require registering it there as a "foreign corporation".
+  - Get the company's EIN (free from the IRS) and a D-U-N-S number (free from Dun & Bradstreet). Apple requires the D-U-N-S number to enroll as an organization, so the stores show "CertiScan.IS Inc." as the seller instead of your personal name.
+  - Register the DMCA agent and the NCMEC CyberTipline account in the company's name. The DMCA form needs an address; a registered agent's or a P.O. box works if you don't want your home address public.
 - **Lawyer review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety`. Look for an attorney who works with adult platforms; many offer flat-fee document reviews. Topics to raise:
   - Section 230 and FOSTA-SESTA.
   - 18 U.S.C. 2257 record keeping, since members can post explicit photos on the website.

@@ -10,6 +10,7 @@ import { MemberGate } from "@/components/member-gate";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { currentAnnouncements } from "@/lib/announcements";
 import { isAppRequest } from "@/lib/content-policy";
+import { OPERATOR } from "@/lib/constants/site";
 import { redirect } from "next/navigation";
 import { AccountStatus } from "@prisma/client";
 import { currentAccount, isStaff } from "@/lib/session";
@@ -96,6 +97,9 @@ export default async function AppLayout({
                 </Link>
               ))}
             </nav>
+            <p className="mt-3 text-center text-xs text-ink/50">
+              © {new Date().getFullYear()} {OPERATOR}
+            </p>
           </footer>
         </CallProvider>
       </RealtimeProvider>
