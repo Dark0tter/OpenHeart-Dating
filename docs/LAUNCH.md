@@ -3,6 +3,10 @@
 Everything the code can't do for you, in the order to do it, cheapest first.
 Prices are what each service listed when this was written; check before paying.
 
+The first launch is **web only**. The phone apps (Stage 4) wait until the site
+shows people want it. Members can still get notifications without the apps by
+adding the site to their home screen (iPhone needs iOS 16.4 or later).
+
 ## Stage 1: free, do now
 
 | What | Cost | Why |
@@ -10,10 +14,9 @@ Prices are what each service listed when this was written; check before paying.
 | Cloudflare account (DNS, Turnstile) | Free | DNS, DDoS protection, bot check on signup (`TURNSTILE_*`) |
 | Resend account | Free tier | Sign-in and alert emails (`RESEND_API_KEY`, `EMAIL_FROM`); verify your domain |
 | Sentry account | Free developer tier | Error alerts (`SENTRY_DSN`) |
-| Firebase project | Free | Android notifications (`FCM_SERVICE_ACCOUNT_JSON`, `google-services.json`) |
 | Push keys for the website | Free | `npm run vapid:generate` |
 | NCMEC CyberTipline registration | Free | US law requires reporting child abuse material you find; register as an electronic service provider at report.cybertip.org |
-| `SUPPORT_EMAIL` | Free | Any inbox you check; both app stores require a safety contact |
+| `SUPPORT_EMAIL` | Free | Any inbox you check; shown as the safety and account contact |
 
 ## Stage 2: about $25-40 a month, to go live on the web
 
@@ -47,7 +50,7 @@ Before real members sign up:
 - **Business entity: done.** Kindred Kinks is operated by CertiScan.IS Inc., a Delaware corporation; the Terms, Privacy page and footers say so (change it in `src/lib/constants/site.ts`). Things that come with it:
   - Delaware's annual report and franchise tax are due every March 1 (at least $225 a year: $175 minimum tax plus the $50 filing fee, using the authorized-shares method for small share counts). Keep a registered agent in Delaware.
   - If you run the company from another state, that state may require registering it there as a "foreign corporation".
-  - Get the company's EIN (free from the IRS) and a D-U-N-S number (free from Dun & Bradstreet). Apple requires the D-U-N-S number to enroll as an organization, so the stores show "CertiScan.IS Inc." as the seller instead of your personal name.
+  - Get the company's EIN (free from the IRS). The D-U-N-S number Apple needs can wait for Stage 4.
   - Register the DMCA agent and the NCMEC CyberTipline account in the company's name. The DMCA form needs an address; a registered agent's or a P.O. box works if you don't want your home address public.
 - **Lawyer review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety`. Look for an attorney who works with adult platforms; many offer flat-fee document reviews. Topics to raise:
   - Section 230 and FOSTA-SESTA.
@@ -56,10 +59,17 @@ Before real members sign up:
   - GDPR and the UK Online Safety Act, if you accept members from Europe or the UK.
 - **Sponsor contracts.** Businesses can reach you from `/advertise`; inquiries land on the owner Ads page. Use a one-page agreement saying sponsors get anonymous daily totals only, no member data, and you can pull an ad at any time.
 
-## Stage 4: phone apps
+## Stage 4: phone apps (after the web launch proves itself)
+
+Decide from what the website shows after a few months: whether new members
+keep coming back, whether conversations actually happen, and whether the
+owner Cities page and waiting list show demand beyond your first city. Members
+asking for an app is a good sign too. Until then, skip everything below.
 
 | What | Cost | Notes |
 | --- | --- | --- |
+| D-U-N-S number | Free | From Dun & Bradstreet. Apple requires it to enroll as an organization, so the stores show "CertiScan.IS Inc." as the seller instead of your personal name. Can take a couple of weeks |
+| Firebase project | Free | Android notifications (`FCM_SERVICE_ACCOUNT_JSON`, `google-services.json`) |
 | Apple Developer Program | $99/year | Fee waivers exist for some nonprofits |
 | Google Play Console | $25 once | |
 | Apple push key (APNs) | Free with the Apple account | Certificates, Identifiers & Profiles → Keys → new key with Apple Push Notifications. Fill in `APNS_*` |
