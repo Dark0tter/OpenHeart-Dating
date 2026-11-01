@@ -12,6 +12,9 @@ ALTER TABLE "KinkCategory" RENAME TO "InterestCategory";
 ALTER TABLE "Kink" RENAME TO "Interest";
 ALTER TABLE "ProfileKink" RENAME TO "ProfileInterest";
 
+ALTER TABLE "InterestCategory" RENAME CONSTRAINT "KinkCategory_pkey" TO "InterestCategory_pkey";
+ALTER TABLE "Interest" RENAME CONSTRAINT "Kink_pkey" TO "Interest_pkey";
+
 ALTER TABLE "ProfileInterest" RENAME COLUMN "kinkId" TO "interestId";
 ALTER TABLE "ChatRoom" RENAME COLUMN "kinkCategoryId" TO "interestCategoryId";
 ALTER TABLE "SponsorPlacement" RENAME COLUMN "targetKinkSlugs" TO "targetInterestSlugs";
