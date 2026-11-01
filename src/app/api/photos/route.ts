@@ -9,7 +9,6 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { allowedTiers, isRestricted } from "@/lib/content-policy";
 import { galleryFor, MAX_PHOTOS, photoSrc } from "@/lib/photos";
 import { ImageError, processUpload } from "@/lib/images";
 import { photoReviewMode, scanImage } from "@/lib/moderation/image-scan";
@@ -23,8 +22,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = new URL(req.url).searchParams.get("userId") ?? user.id;
-  const adultAllowedHere = !isRestricted(await allowedTiers(user));
-  return NextResponse.json(await galleryFor(userId, user, adultAllowedHere));
+  return NextResponse.json(await galleryFor(userId, user, false));
 }
 
 /** POST multipart: file, visibility. */
@@ -53,20 +51,10 @@ export async function POST(req: Request) {
     : PhotoVisibility.PUBLIC;
 
   if (visibility === PhotoVisibility.ADULT) {
-    if (isRestricted(await allowedTiers(user))) {
-      return NextResponse.json(
-        {
-          error: "Adult photos can only be added on the Kindred Kinks website.",
-        },
-        { status: 403 },
-      );
-    }
-    if (user.verification?.status !== "VERIFIED_ADULT") {
-      return NextResponse.json(
-        { error: "Verify your age before adding adult photos." },
-        { status: 403 },
-      );
-    }
+    return NextResponse.json(
+      { error: "Adult photo albums are no longer available." },
+      { status: 400 },
+    );
   }
 
   const count = await prisma.photo.count({

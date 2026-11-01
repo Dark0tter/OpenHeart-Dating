@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/session";
 
-export const metadata = { title: "Owner · Kindred Kinks" };
+export const metadata = { title: "Owner · OpenHeart" };
 
 const LINKS = [
   { href: "/owner", label: "Overview" },
@@ -27,7 +27,7 @@ export default async function OwnerLayout({
             href="/owner"
             className="font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
-            Kindred Kinks owner
+            OpenHeart owner
           </Link>
           <nav className="flex flex-wrap gap-4 text-sm">
             {LINKS.map((l) => (

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/rooms", label: "Rooms", icon: MessagesSquare },
-  { href: "/events", label: "Events & munches", icon: CalendarDays },
+  { href: "/events", label: "Events & meetups", icon: CalendarDays },
 ];
 
 /** Rooms and events share the Community tab in the main navigation. */

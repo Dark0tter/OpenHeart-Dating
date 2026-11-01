@@ -12,7 +12,7 @@ const base: RankProfile = {
   seekingOrientationIds: [],
   goalIds: ["dating"],
   styleIds: [],
-  kinks: [],
+  interests: [],
   latitude: 40.71,
   longitude: -74.0,
   lastActiveAt: new Date(),
@@ -66,11 +66,11 @@ describe("ranking", () => {
   it("pushes someone's hard limits down", () => {
     const viewer = {
       ...base,
-      kinks: [{ kinkId: "k1", level: "HARD_LIMIT" as const }],
+      interests: [{ interestId: "k1", level: "HARD_LIMIT" as const }],
     };
     const clash = scoreMatch(viewer, {
       ...base,
-      kinks: [{ kinkId: "k1", level: "FAVORITE" as const }],
+      interests: [{ interestId: "k1", level: "FAVORITE" as const }],
     });
     const neutral = scoreMatch(viewer, { ...base });
     expect(clash.total).toBeLessThan(neutral.total);

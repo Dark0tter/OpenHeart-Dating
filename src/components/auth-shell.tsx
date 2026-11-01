@@ -16,7 +16,7 @@ export function AuthShell({
           className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest"
         >
           <BrandMark className="h-16 w-8" />
-          Kindred Kinks
+          OpenHeart
         </Link>
         {subtitle && <p className="mt-2 text-sm text-ink/70">{subtitle}</p>}
         {children}

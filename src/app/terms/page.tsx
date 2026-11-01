@@ -5,7 +5,7 @@ import { ContactLine } from "@/components/contact-line";
 import { OPERATOR, OPERATOR_DESCRIPTION } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
-  title: "Terms of use — Kindred Kinks",
+  title: "Terms of use — OpenHeart",
 };
 
 const PROHIBITED = [
@@ -32,12 +32,12 @@ export default function TermsPage() {
 
         <section>
           <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
-            Who runs Kindred Kinks
+            Who runs OpenHeart
           </h2>
           <p className="mt-2">
-            Kindred Kinks, on the website and in the apps, is operated by{" "}
+            OpenHeart, on the website and in the apps, is operated by{" "}
             {OPERATOR_DESCRIPTION} (&ldquo;we&rdquo; and &ldquo;us&rdquo; in
-            these terms). By creating an account or using Kindred Kinks, you
+            these terms). By creating an account or using OpenHeart, you
             agree to these terms.
           </p>
         </section>
@@ -47,7 +47,7 @@ export default function TermsPage() {
             Who can join
           </h2>
           <p className="mt-2">
-            Kindred Kinks is for adults 18 and over. You must give your real
+            OpenHeart is for adults 18 and over. You must give your real
             date of birth and pass age verification before your profile goes
             live. One account per person.
           </p>
@@ -98,23 +98,22 @@ export default function TermsPage() {
             Mobile apps
           </h2>
           <p className="mt-2">
-            The iPhone and Android apps show a limited version of Kindred Kinks.
-            Some interests, rooms, and all adult photos are only available on
-            the website.
+            The iPhone and Android apps use the same dating features as the
+            website, with general-audience sponsor placements and explicit-word
+            masking where needed for store safety.
           </p>
         </section>
 
         <section>
           <h2 className="font-[family-name:var(--font-fraunces)] text-2xl text-forest">
-            Donations
+            Supporter
           </h2>
           <p className="mt-2">
-            Kindred Kinks is free to use. Donations are optional gifts that help
-            keep it running; they are never required to use any part of Kindred
-            Kinks, and they don&apos;t buy access to features, matches, or other
-            members. Donations aren&apos;t tax-deductible. Donors may get a
-            cosmetic thank-you (a badge and the option to hide the sponsor
-            block) on the website only.
+            OpenHeart is free to use. Supporter is optional and helps keep it
+            running; it is never required to use any part of OpenHeart, and it
+            does not buy access to features, matches, or other members.
+            Supporters may get a cosmetic thank-you badge and the option to
+            hide sponsor blocks.
           </p>
         </section>
 

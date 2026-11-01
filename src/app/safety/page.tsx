@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = { title: "Safety tips — Kindred Kinks" };
+export const metadata: Metadata = { title: "Safety tips — OpenHeart" };
 
 const SECTIONS: { title: string; tips: string[] }[] = [
   {
     title: "Before you meet",
     tips: [
-      "Keep chatting on Kindred Kinks until you trust someone. Scammers push to move to WhatsApp, Telegram or text quickly.",
+      "Keep chatting on OpenHeart until you trust someone. Scammers push to move to WhatsApp, Telegram or text quickly.",
       "A short video call is a good way to check someone is who their photos say.",
       "Look for the photo-verified badge, and be cautious with brand-new profiles that have one photo and little else.",
       "Never send money, gift cards, crypto or verification codes to someone you haven't met — no matter the story.",
@@ -21,23 +21,23 @@ const SECTIONS: { title: string; tips: string[] }[] = [
       "Meet somewhere public for the first time, and get there and back on your own.",
       "Tell a friend where you'll be, or set up a date check-in so someone is alerted if you don't check in.",
       "Keep your phone charged and your drink in sight.",
-      "It's always OK to leave. You can end a date, a scene or a conversation at any time.",
+      "It's always OK to leave. You can end a date or a conversation at any time.",
     ],
   },
   {
-    title: "Kink and consent",
+    title: "Boundaries and consent",
     tips: [
-      "Negotiate before anything happens: interests, limits, safewords and aftercare. Hard limits are never up for debate.",
+      "Talk through expectations before a date: where you're meeting, how long you plan to stay, and what feels comfortable.",
       "Consent can be withdrawn at any moment, and being intoxicated means someone can't consent.",
-      "First meetings with someone from the kink community are best at a munch — a casual meetup in a public place.",
-      "Ask around: established community members and event hosts often know who has a good reputation.",
+      "Move at your own pace. A good match will respect a slow start, public dates, and clear boundaries.",
+      "If someone's words and behavior don't line up, slow down and trust your instincts.",
     ],
   },
   {
     title: "Privacy",
     tips: [
       "Your exact location is never shown — only an approximate distance. Incognito mode hides you from search entirely.",
-      "Photos you upload have their location and camera data removed. Private and adult albums are only visible to people you approve.",
+      "Photos you upload have their location and camera data removed. Private albums are only visible to people you approve.",
       "Think before sharing photos that show your face together with anything you'd want to keep private.",
     ],
   },
@@ -63,7 +63,7 @@ export default function SafetyPage() {
           Dating safely
         </h1>
         <p>
-          Most people on Kindred Kinks are here for the same reasons you are.
+          Most people on OpenHeart are here for the same reasons you are.
           These habits help keep it that way.
         </p>
         <p className="rounded-md bg-sage/15 px-4 py-3 text-forest">

@@ -74,7 +74,7 @@ export async function saveSponsor(fd: FormData) {
     body: body || null,
     linkUrl,
     label,
-    targetKinkSlugs: slugs(text(fd, "targetKinkSlugs")),
+    targetInterestSlugs: slugs(text(fd, "targetInterestSlugs")),
     targetGoalSlugs: slugs(text(fd, "targetGoalSlugs")),
     dailyCap,
     startsAt,

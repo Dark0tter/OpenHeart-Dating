@@ -58,7 +58,7 @@ export default function EventsPage() {
         </Link>
       </div>
       <p className="mt-1 text-sm text-ink/70">
-        Munches, socials, classes and online meetups run by members. Exact
+        Meetups, socials, classes and online meetups run by members. Exact
         addresses are only shared with people who RSVP &ldquo;going&rdquo;.
       </p>
 
@@ -102,7 +102,7 @@ export default function EventsPage() {
           <Link href="/events/new" className="text-forest underline">
             host one
           </Link>
-          ? A coffee munch is an easy start.
+          ? A coffee meetup is an easy start.
         </p>
       ) : (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2">

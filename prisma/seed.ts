@@ -4,11 +4,11 @@ import {
   BODY_TAGS,
   categoryTier,
   ETHNICITY_TAGS,
-  kinkTier,
+  interestTier,
   GOAL_TAGS,
   IDENTITY_TAGS,
-  KINK_CATEGORIES,
-  KINK_CATEGORY_NOTES,
+  INTEREST_CATEGORIES,
+  INTEREST_CATEGORY_NOTES,
   ORIENTATION_TAGS,
   RELATIONSHIP_STYLE_TAGS,
   slugify,
@@ -73,19 +73,19 @@ async function main() {
     });
   }
 
-  for (const [categoryName, names] of Object.entries(KINK_CATEGORIES)) {
+  for (const [categoryName, names] of Object.entries(INTEREST_CATEGORIES)) {
     const categorySlug = slugify(categoryName);
-    const description = KINK_CATEGORY_NOTES[categoryName] ?? null;
+    const description = INTEREST_CATEGORY_NOTES[categoryName] ?? null;
     const tier = categoryTier(categoryName);
-    const category = await prisma.kinkCategory.upsert({
+    const category = await prisma.interestCategory.upsert({
       where: { slug: categorySlug },
       create: { slug: categorySlug, name: categoryName, description, tier },
       update: { name: categoryName, description, tier },
     });
     for (const name of new Set(names)) {
       const slug = slugify(`${categoryName}-${name}`);
-      const tier = kinkTier(categoryName, name);
-      await prisma.kink.upsert({
+      const tier = interestTier(categoryName, name);
+      await prisma.interest.upsert({
         where: { slug },
         create: { slug, name, categoryId: category.id, tier },
         update: { name, categoryId: category.id, tier },
@@ -104,7 +104,7 @@ async function main() {
     update: {},
   });
 
-  for (const category of await prisma.kinkCategory.findMany()) {
+  for (const category of await prisma.interestCategory.findMany()) {
     const description = [
       `For members interested in ${category.name}.`,
       category.description,
@@ -112,15 +112,15 @@ async function main() {
       .filter(Boolean)
       .join(" ");
     await prisma.chatRoom.upsert({
-      where: { slug: `kink-${category.slug}` },
+      where: { slug: `interest-${category.slug}` },
       create: {
-        slug: `kink-${category.slug}`,
+        slug: `interest-${category.slug}`,
         name: category.name,
         description,
-        kind: "KINK_CATEGORY",
-        kinkCategoryId: category.id,
+        kind: "INTEREST_CATEGORY",
+        interestCategoryId: category.id,
       },
-      update: { name: category.name, description, kinkCategoryId: category.id },
+      update: { name: category.name, description, interestCategoryId: category.id },
     });
   }
 

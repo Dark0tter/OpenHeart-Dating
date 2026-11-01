@@ -1,7 +1,7 @@
-export type EventKindId = "MUNCH" | "SOCIAL" | "CLASS" | "ONLINE";
+export type EventKindId = "MEETUP" | "SOCIAL" | "CLASS" | "ONLINE";
 
 export const KIND_SHORT: Record<EventKindId, string> = {
-  MUNCH: "Munch",
+  MEETUP: "Meetup",
   SOCIAL: "Social",
   CLASS: "Class",
   ONLINE: "Online",

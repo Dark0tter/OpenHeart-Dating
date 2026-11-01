@@ -1,13 +1,13 @@
 import {
   AdPreference,
   ContentTier,
-  KinkInterestLevel,
+  InterestLevel,
   Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isSupporter } from "@/lib/supporter";
 
-const POSITIVE_LEVELS: KinkInterestLevel[] = [
+const POSITIVE_LEVELS: InterestLevel[] = [
   "FAVORITE",
   "INTERESTED",
   "CURIOUS",
@@ -109,7 +109,7 @@ export async function pickSponsorPlacement(
   const now = opts.now ?? new Date();
   const active = activePlacementWhere(sponsorTiers(tiers, app), now);
   const untargeted: Prisma.SponsorPlacementWhereInput = {
-    targetKinkSlugs: { isEmpty: true },
+    targetInterestSlugs: { isEmpty: true },
     targetGoalSlugs: { isEmpty: true },
   };
   const pick = <T extends { id: string; dailyCap: number }>(items: T[]) =>
@@ -132,8 +132,7 @@ export async function pickSponsorPlacement(
   ]);
   const preference = user?.adPreference ?? AdPreference.GENERIC;
 
-  // Supporter is a website-only donation, so its perks never apply in the apps.
-  if (supporter && !app && preference === AdPreference.NONE) return null;
+  if (supporter && preference === AdPreference.NONE) return null;
 
   if (preference !== AdPreference.PROFILE_INTERESTS) {
     return pick(
@@ -146,9 +145,9 @@ export async function pickSponsorPlacement(
   const profile = await prisma.profile.findUnique({
     where: { userId },
     select: {
-      kinks: {
-        where: { kink: { tier: { in: tiers } } },
-        select: { level: true, kink: { select: { slug: true } } },
+      interests: {
+        where: { interest: { tier: { in: tiers } } },
+        select: { level: true, interest: { select: { slug: true } } },
       },
       goalTags: { select: { tag: { select: { slug: true } } } },
     },
@@ -156,8 +155,8 @@ export async function pickSponsorPlacement(
 
   const liked = new Set<string>();
   const limits = new Set<string>();
-  for (const k of profile?.kinks ?? []) {
-    (POSITIVE_LEVELS.includes(k.level) ? liked : limits).add(k.kink.slug);
+  for (const k of profile?.interests ?? []) {
+    (POSITIVE_LEVELS.includes(k.level) ? liked : limits).add(k.interest.slug);
   }
   const goals = (profile?.goalTags ?? []).map((g) => g.tag.slug);
 
@@ -167,7 +166,7 @@ export async function pickSponsorPlacement(
       AND: [
         {
           OR: [
-            { targetKinkSlugs: { hasSome: [...liked] } },
+            { targetInterestSlugs: { hasSome: [...liked] } },
             { targetGoalSlugs: { hasSome: goals } },
           ],
         },
@@ -177,7 +176,7 @@ export async function pickSponsorPlacement(
 
   // Never show a placement for something the member marked as a soft or hard limit.
   const targeted = candidates.filter(
-    (c) => !c.targetKinkSlugs.some((slug) => limits.has(slug)),
+    (c) => !c.targetInterestSlugs.some((slug) => limits.has(slug)),
   );
   const chosen = pick(targeted);
   if (chosen) return chosen;

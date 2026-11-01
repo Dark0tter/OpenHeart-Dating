@@ -6,11 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type Person = { id: string; displayName: string; photo: string | null };
-type Scope = "PRIVATE_ALBUM" | "ADULT_ALBUM";
+type Scope = "PRIVATE_ALBUM";
 
 const SCOPE_LABEL: Record<Scope, string> = {
   PRIVATE_ALBUM: "private photos",
-  ADULT_ALBUM: "adult photos",
 };
 
 function Avatar({ p }: { p: Person }) {
@@ -61,8 +60,8 @@ export function AlbumAccess() {
           Private photo access
         </h2>
         <p className="text-sm text-ink/70">
-          Nobody sees your private or adult photos unless you say yes. You can
-          take access back at any time.
+          Nobody sees your private photos unless you say yes. You can take
+          access back at any time.
         </p>
       </div>
 

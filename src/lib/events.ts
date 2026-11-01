@@ -7,7 +7,7 @@ import {
 import { distanceKm } from "@/lib/utils";
 
 export const EVENT_KIND_LABELS: Record<EventKind, string> = {
-  MUNCH: "Munch (casual meetup in a public place)",
+  MEETUP: "Meetup (casual meetup in a public place)",
   SOCIAL: "Social or party",
   CLASS: "Class or workshop",
   ONLINE: "Online",
@@ -15,7 +15,7 @@ export const EVENT_KIND_LABELS: Record<EventKind, string> = {
 
 export const EVENT_TIER_LABELS: Record<ContentTier, string> = {
   STANDARD: "General — shown everywhere",
-  ADULT_TEXT: "Adult themes — hidden in the apps unless members opt in",
+  ADULT_TEXT: "Sensitive topics — website only",
   WEB_ONLY: "Website only",
 };
 

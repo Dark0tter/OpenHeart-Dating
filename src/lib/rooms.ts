@@ -1,6 +1,6 @@
 import {
   AccountStatus,
-  KinkInterestLevel,
+  InterestLevel,
   RoomKind,
   Visibility,
 } from "@prisma/client";
@@ -74,7 +74,7 @@ export async function roomOnlineMembers(roomId: string, viewerUserId: string) {
     }));
 }
 
-const POSITIVE_LEVELS: KinkInterestLevel[] = [
+const POSITIVE_LEVELS: InterestLevel[] = [
   "FAVORITE",
   "INTERESTED",
   "CURIOUS",
@@ -85,9 +85,9 @@ export async function interestRoomIds(userId: string): Promise<Set<string>> {
   const profile = await prisma.profile.findUnique({
     where: { userId },
     select: {
-      kinks: {
+      interests: {
         where: { level: { in: POSITIVE_LEVELS } },
-        select: { kink: { select: { categoryId: true } } },
+        select: { interest: { select: { categoryId: true } } },
       },
       goalTags: { select: { tagId: true } },
     },
@@ -99,7 +99,7 @@ export async function interestRoomIds(userId: string): Promise<Set<string>> {
       isActive: true,
       OR: [
         { kind: RoomKind.GENERAL },
-        { kinkCategoryId: { in: profile.kinks.map((k) => k.kink.categoryId) } },
+        { interestCategoryId: { in: profile.interests.map((k) => k.interest.categoryId) } },
         { goalTagId: { in: profile.goalTags.map((g) => g.tagId) } },
       ],
     },

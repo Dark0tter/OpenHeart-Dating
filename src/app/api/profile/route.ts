@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { KinkInterestLevel, Visibility } from "@prisma/client";
+import { InterestLevel, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { slugify } from "@/lib/constants/tags";
@@ -42,11 +42,11 @@ const updateSchema = z.object({
   seekingOrientationTagIds: z.array(z.string()).optional(),
   customIdentity: z.string().max(40).optional(),
   customOrientation: z.string().max(40).optional(),
-  kinks: z
+  interests: z
     .array(
       z.object({
-        kinkId: z.string(),
-        level: z.nativeEnum(KinkInterestLevel),
+        interestId: z.string(),
+        level: z.nativeEnum(InterestLevel),
       }),
     )
     .optional(),
@@ -80,9 +80,9 @@ export async function GET() {
       bodyTags: { include: { tag: true } },
       ethnicityTags: { include: { tag: true } },
       accessibilityTags: { include: { tag: true } },
-      kinks: {
-        where: { kink: { tier: { in: tiers } } },
-        include: { kink: { include: { category: true } } },
+      interests: {
+        where: { interest: { tier: { in: tiers } } },
+        include: { interest: { include: { category: true } } },
       },
       seekingIdentityTags: { include: { tag: true } },
       seekingOrientationTags: { include: { tag: true } },
@@ -161,7 +161,7 @@ export async function PATCH(req: Request) {
     });
   }
 
-  // Activate only when age-verified (adult content / full access gate)
+  // Activate only when age-verified; OpenHeart is an 18+ dating app.
   if (data.isActive === true) {
     if (!user.emailVerified) {
       return NextResponse.json(
@@ -342,28 +342,28 @@ export async function PATCH(req: Request) {
       });
     }
 
-    if (data.kinks) {
-      // Only replace kinks this client can see; ones hidden from the app stay.
-      await tx.profileKink.deleteMany({
-        where: { profileId, kink: { tier: { in: tiers } } },
+    if (data.interests) {
+      // Only replace interests this client can see; ones hidden from the app stay.
+      await tx.profileInterest.deleteMany({
+        where: { profileId, interest: { tier: { in: tiers } } },
       });
       const allowed = new Set(
         (
-          await tx.kink.findMany({
+          await tx.interest.findMany({
             where: {
-              id: { in: data.kinks.map((k) => k.kinkId) },
+              id: { in: data.interests.map((k) => k.interestId) },
               tier: { in: tiers },
             },
             select: { id: true },
           })
         ).map((k) => k.id),
       );
-      await tx.profileKink.createMany({
-        data: data.kinks
-          .filter((k) => allowed.has(k.kinkId))
+      await tx.profileInterest.createMany({
+        data: data.interests
+          .filter((k) => allowed.has(k.interestId))
           .map((k) => ({
             profileId,
-            kinkId: k.kinkId,
+            interestId: k.interestId,
             level: k.level,
           })),
         skipDuplicates: true,

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const KINDS = [
-  { value: "MUNCH", label: "Munch — casual meetup in a public place" },
+  { value: "MEETUP", label: "Meetup — casual gathering in a public place" },
   { value: "SOCIAL", label: "Social or party" },
   { value: "CLASS", label: "Class or workshop" },
   { value: "ONLINE", label: "Online" },
@@ -20,7 +20,7 @@ const TIERS = [
   },
   {
     value: "ADULT_TEXT",
-    label: "Adult themes — hidden in the apps unless members opt in",
+    label: "Sensitive topics — website only",
   },
   { value: "WEB_ONLY", label: "Website only" },
 ];
@@ -30,7 +30,7 @@ const select =
 
 export default function NewEventPage() {
   const router = useRouter();
-  const [kind, setKind] = useState("MUNCH");
+  const [kind, setKind] = useState("MEETUP");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -79,7 +79,7 @@ export default function NewEventPage() {
         Host an event
       </h1>
       <p className="mt-1 text-sm text-ink/70">
-        First munches should be in a public place like a café or bar. The exact
+        First meetups should be in a public place like a cafe or bar. The exact
         address or link is only shown to people who RSVP &ldquo;going&rdquo;,
         and you can see who&apos;s coming.
       </p>
@@ -216,7 +216,7 @@ export default function NewEventPage() {
 
         <p className="text-xs text-ink/70">
           No ticket sales, paid entry links or money requests — events are free
-          to list and attend through Kindred Kinks. Follow the community
+          to list and attend through OpenHeart. Follow the community
           guidelines.
         </p>
         {error && (

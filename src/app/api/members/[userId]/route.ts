@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { ConsentScope, KinkInterestLevel, Visibility } from "@prisma/client";
+import { ConsentScope, InterestLevel, Visibility } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 import { assertProfileViewable } from "@/lib/discovery";
-import { allowedTiers, isAppRequest, isRestricted } from "@/lib/content-policy";
+import { allowedTiers, isAppRequest } from "@/lib/content-policy";
 import { textFilterFor } from "@/lib/moderation/app-text";
 import { galleryFor } from "@/lib/photos";
 import { promptQuestion } from "@/lib/constants/prompts";
@@ -19,12 +19,12 @@ import {
 
 type Ctx = { params: Promise<{ userId: string }> };
 
-const SHOWN_LEVELS: KinkInterestLevel[] = [
-  KinkInterestLevel.FAVORITE,
-  KinkInterestLevel.INTERESTED,
-  KinkInterestLevel.CURIOUS,
-  KinkInterestLevel.NO,
-  KinkInterestLevel.HARD_LIMIT,
+const SHOWN_LEVELS: InterestLevel[] = [
+  InterestLevel.FAVORITE,
+  InterestLevel.INTERESTED,
+  InterestLevel.CURIOUS,
+  InterestLevel.NO,
+  InterestLevel.HARD_LIMIT,
 ];
 
 export async function GET(req: Request, ctx: Ctx) {
@@ -48,7 +48,6 @@ export async function GET(req: Request, ctx: Ctx) {
 
   const tiers = await allowedTiers(viewer);
   const filterText = textFilterFor(tiers);
-  const adultAllowedHere = !isRestricted(tiers);
 
   const profile = await prisma.profile.findUniqueOrThrow({
     where: { userId },
@@ -68,9 +67,9 @@ export async function GET(req: Request, ctx: Ctx) {
       bodyTags: { include: { tag: true } },
       ethnicityTags: { include: { tag: true } },
       accessibilityTags: { include: { tag: true } },
-      kinks: {
-        where: { level: { in: SHOWN_LEVELS }, kink: { tier: { in: tiers } } },
-        include: { kink: { select: { name: true } } },
+      interests: {
+        where: { level: { in: SHOWN_LEVELS }, interest: { tier: { in: tiers } } },
+        include: { interest: { select: { name: true } } },
       },
       prompts: { orderBy: { sortOrder: "asc" } },
     },
@@ -85,10 +84,10 @@ export async function GET(req: Request, ctx: Ctx) {
     match,
     following,
     albumRequests,
-    viewerKinks,
+    viewerInterests,
     profileShared,
   ] = await Promise.all([
-    galleryFor(userId, viewer, adultAllowedHere),
+    galleryFor(userId, viewer, false),
     prisma.like.findUnique({
       where: {
         fromUserId_toUserId: { fromUserId: viewer.id, toUserId: userId },
@@ -115,17 +114,21 @@ export async function GET(req: Request, ctx: Ctx) {
       select: { followerId: true },
     }),
     prisma.consentRequest.findMany({
-      where: { requesterId: viewer.id, ownerId: userId },
+      where: {
+        requesterId: viewer.id,
+        ownerId: userId,
+        scope: ConsentScope.PRIVATE_ALBUM,
+      },
       select: { scope: true, status: true },
     }),
     isSelf || !viewer.profile
       ? []
-      : prisma.profileKink.findMany({
+      : prisma.profileInterest.findMany({
           where: {
             profileId: viewer.profile.id,
-            kink: { tier: { in: tiers } },
+            interest: { tier: { in: tiers } },
           },
-          select: { kinkId: true, level: true },
+          select: { interestId: true, level: true },
         }),
     prisma.consentGrant.findFirst({
       where: {
@@ -139,11 +142,11 @@ export async function GET(req: Request, ctx: Ctx) {
   ]);
 
   const clashes = findClashes(
-    viewerKinks,
-    profile.kinks.map((k) => ({
-      kinkId: k.kinkId,
+    viewerInterests,
+    profile.interests.map((k) => ({
+      interestId: k.interestId,
       level: k.level,
-      name: k.kink.name,
+      name: k.interest.name,
     })),
   );
 
@@ -164,8 +167,8 @@ export async function GET(req: Request, ctx: Ctx) {
         )
       : null;
 
-  const kinksAt = (level: KinkInterestLevel) =>
-    profile.kinks.filter((k) => k.level === level).map((k) => k.kink.name);
+  const interestsAt = (level: InterestLevel) =>
+    profile.interests.filter((k) => k.level === level).map((k) => k.interest.name);
 
   return NextResponse.json({
     member: {
@@ -191,16 +194,16 @@ export async function GET(req: Request, ctx: Ctx) {
       body: profile.bodyTags.map((t) => t.tag.label),
       ethnicity: profile.ethnicityTags.map((t) => t.tag.label),
       accessibility: profile.accessibilityTags.map((t) => t.tag.label),
-      kinks: {
-        favorite: kinksAt(KinkInterestLevel.FAVORITE),
-        interested: kinksAt(KinkInterestLevel.INTERESTED),
-        curious: kinksAt(KinkInterestLevel.CURIOUS),
-        softLimits: kinksAt(KinkInterestLevel.NO),
-        hardLimits: kinksAt(KinkInterestLevel.HARD_LIMIT),
+      interests: {
+        favorite: interestsAt(InterestLevel.FAVORITE),
+        interested: interestsAt(InterestLevel.INTERESTED),
+        curious: interestsAt(InterestLevel.CURIOUS),
+        softLimits: interestsAt(InterestLevel.NO),
+        hardLimits: interestsAt(InterestLevel.HARD_LIMIT),
       },
       limitsNote: profile.limitsNote ? filterText(profile.limitsNote) : null,
       clashes,
-      limitsCompared: viewerKinks.length > 0 && profile.kinks.length > 0,
+      limitsCompared: viewerInterests.length > 0 && profile.interests.length > 0,
       prompts: profile.prompts.flatMap((p) => {
         const question = promptQuestion(p.promptId);
         return question ? [{ question, answer: filterText(p.answer) }] : [];
@@ -218,6 +221,5 @@ export async function GET(req: Request, ctx: Ctx) {
         albumRequests.map((r) => [r.scope, r.status]),
       ) as Partial<Record<ConsentScope, string>>,
     },
-    adultAllowedHere,
   });
 }

@@ -39,20 +39,20 @@ export function SupporterPanel() {
       <div>
         <h1 className="flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-3xl text-forest">
           <Heart aria-hidden className="h-7 w-7 text-coral" />
-          Support Kindred Kinks
+          Support OpenHeart
         </h1>
         <p className="mt-2 text-ink/70">
-          Kindred Kinks is free: likes, messages, search, calls and matching
-          never cost anything, and never will. Donations are completely
-          optional. They help pay for servers and safety tools, and they
-          don&apos;t unlock any part of dating on Kindred Kinks.
+          OpenHeart is free: likes, messages, search, calls and matching
+          never cost anything, and never will. Supporter is completely
+          optional. It helps pay for servers and safety tools, removes sponsor
+          blocks, and does not unlock any core dating feature.
         </p>
       </div>
 
       {s.active ? (
         <section className="rounded-lg border border-forest/15 bg-mist/60 p-5">
           <p className="font-medium text-forest">
-            Thank you for supporting Kindred Kinks.
+            Thank you for supporting OpenHeart.
           </p>
           {s.until && (
             <p className="mt-1 text-sm text-ink/70">
@@ -75,7 +75,7 @@ export function SupporterPanel() {
             </span>
           </label>
           <p className="mt-3 text-sm text-ink/70">
-            To hide the sponsor block on the website, choose &ldquo;No sponsor
+            To hide sponsor blocks, choose &ldquo;No sponsor
             block&rdquo; in{" "}
             <Link href="/settings" className="underline">
               Settings
@@ -91,7 +91,7 @@ export function SupporterPanel() {
       ) : (
         <section className="rounded-lg border border-forest/15 bg-cream/60 p-5">
           <h2 className="font-medium text-forest">
-            A small thank-you for donors
+            A small thank-you for Supporters
           </h2>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/85">
             {s.perks.map((p) => (
@@ -99,15 +99,13 @@ export function SupporterPanel() {
             ))}
           </ul>
           <p className="mt-4 text-sm text-ink/70">
-            Donations open soon. We&apos;ll post here when they do.
+            Supporter billing opens soon. We&apos;ll post here when it does.
           </p>
         </section>
       )}
 
       <p className="text-xs text-ink/60">
-        Donations are voluntary gifts to Kindred Kinks, not a membership or a
-        purchase, and aren&apos;t tax-deductible. Nobody is ever required to
-        donate to use Kindred Kinks.
+        Supporter is voluntary and never required to use OpenHeart.
       </p>
     </div>
   );

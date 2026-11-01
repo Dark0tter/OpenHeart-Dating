@@ -3,12 +3,12 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Community guidelines — Kindred Kinks",
+  title: "Community guidelines — OpenHeart",
 };
 
 const WELCOME = [
   "Dating, relationships, and friendship",
-  "Community events, munches, and local meetups",
+  "Community events, meetups, and local meetups",
   "Educational resources and support groups",
   "Sharing your hobbies, art, or personal site when you're not selling anything",
   "Planning dates, and exchanging gifts once you've actually met",

@@ -28,7 +28,7 @@ type Member = {
   body: string[];
   ethnicity: string[];
   accessibility: string[];
-  kinks: {
+  interests: {
     favorite: string[];
     interested: string[];
     curious: string[];
@@ -51,9 +51,8 @@ type Data = {
     following: boolean;
     youAreIncognito?: boolean;
     profileShared?: boolean;
-    albumRequests: Partial<Record<"PRIVATE_ALBUM" | "ADULT_ALBUM", string>>;
+    albumRequests: Partial<Record<"PRIVATE_ALBUM", string>>;
   };
-  adultAllowedHere: boolean;
 };
 
 function Chips({ title, items }: { title: string; items: string[] }) {
@@ -186,7 +185,6 @@ export default function MemberPage() {
         ownerName={m.displayName}
         gallery={data.gallery}
         requests={r.albumRequests}
-        canRequestAdult={data.adultAllowedHere}
       />
 
       {msg && (
@@ -303,14 +301,14 @@ export default function MemberPage() {
         <Chips title="Body" items={m.body} />
         <Chips title="Ethnicity" items={m.ethnicity} />
         <Chips title="Accessibility" items={m.accessibility} />
-        <Chips title="Favorite interests" items={m.kinks.favorite} />
-        <Chips title="Into" items={m.kinks.interested} />
-        <Chips title="Curious about" items={m.kinks.curious} />
+        <Chips title="Favorite interests" items={m.interests.favorite} />
+        <Chips title="Into" items={m.interests.interested} />
+        <Chips title="Curious about" items={m.interests.curious} />
       </section>
 
       <LimitsSection
-        hardLimits={m.kinks.hardLimits}
-        softLimits={m.kinks.softLimits}
+        hardLimits={m.interests.hardLimits}
+        softLimits={m.interests.softLimits}
         note={m.limitsNote}
       />
 

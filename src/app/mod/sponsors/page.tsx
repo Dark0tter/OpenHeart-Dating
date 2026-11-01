@@ -122,11 +122,11 @@ export default async function SponsorsAdmin({
                     {p.endsAt &&
                       ` to ${utcInput(p.endsAt).replace("T", " ")} UTC`}
                   </p>
-                  {(p.targetKinkSlugs.length > 0 ||
+                  {(p.targetInterestSlugs.length > 0 ||
                     p.targetGoalSlugs.length > 0) && (
                     <p className="text-xs text-ink/70">
                       Shown to people who list:{" "}
-                      {[...p.targetKinkSlugs, ...p.targetGoalSlugs].join(", ")}
+                      {[...p.targetInterestSlugs, ...p.targetGoalSlugs].join(", ")}
                     </p>
                   )}
                 </div>
@@ -381,8 +381,8 @@ export default async function SponsorsAdmin({
           Only show to people who list these interests (optional,
           comma-separated slugs)
           <input
-            name="targetKinkSlugs"
-            defaultValue={editing?.targetKinkSlugs.join(", ")}
+            name="targetInterestSlugs"
+            defaultValue={editing?.targetInterestSlugs.join(", ")}
             className={input}
           />
         </label>

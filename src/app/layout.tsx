@@ -15,16 +15,16 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Kindred Kinks — Dating without artificial paywalls",
+  title: "OpenHeart — Dating without artificial paywalls",
   description:
-    "Privacy-first dating for LGBTQIA+ people, kink-positive adults, and anyone who needs safer discoverability. Free likes, messages, and matching.",
+    "Privacy-first dating for LGBTQIA+ people, interest-positive adults, and anyone who needs safer discoverability. Free likes, messages, and matching.",
   metadataBase: new URL(appUrl()),
   openGraph: {
     type: "website",
-    siteName: "Kindred Kinks",
-    title: "Kindred Kinks — Dating without artificial paywalls",
+    siteName: "OpenHeart",
+    title: "OpenHeart — Dating without artificial paywalls",
     description:
-      "Privacy-first dating and community for LGBTQIA+ and kink-positive adults. Free likes, messages, and matching.",
+      "Privacy-first dating and community for LGBTQIA+ and interest-positive adults. Free likes, messages, and matching.",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image", images: ["/og-image.png"] },

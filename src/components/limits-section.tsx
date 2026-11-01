@@ -79,7 +79,7 @@ export function LimitsSection({
 
 function list(items: Clash[]) {
   return items
-    .map((c) => `${c.kink} (${LEVEL_LABEL[c.interest].toLowerCase()})`)
+    .map((c) => `${c.name} (${LEVEL_LABEL[c.level].toLowerCase()})`)
     .join(", ");
 }
 

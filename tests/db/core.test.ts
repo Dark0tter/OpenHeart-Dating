@@ -506,7 +506,7 @@ describe("sponsors", () => {
         sponsorName: "Test sponsor",
         title: "Hello",
         linkUrl: "https://example.org",
-        targetKinkSlugs: [],
+        targetInterestSlugs: [],
         targetGoalSlugs: [],
         contentTier: data.tier,
         approvedAt: data.approved ? new Date() : null,
@@ -665,12 +665,12 @@ describe("supporters", () => {
       data: { adPreference: "NONE" },
     });
     await prisma.sponsorPlacement.deleteMany();
-    const p = await prisma.sponsorPlacement.create({
+    await prisma.sponsorPlacement.create({
       data: {
         sponsorName: "Test sponsor",
         title: "Hello",
         linkUrl: "https://example.org",
-        targetKinkSlugs: [],
+        targetInterestSlugs: [],
         targetGoalSlugs: [],
         contentTier: "STANDARD",
         approvedAt: new Date(),
@@ -678,8 +678,8 @@ describe("supporters", () => {
     });
     expect(await pickSponsorPlacement(u.id, ["STANDARD"])).toBeNull();
     expect(
-      (await pickSponsorPlacement(u.id, ["STANDARD"], { app: true }))?.id,
-    ).toBe(p.id);
+      await pickSponsorPlacement(u.id, ["STANDARD"], { app: true }),
+    ).toBeNull();
 
     await endSupporter(u.id);
     expect(await isSupporter(u.id)).toBe(false);

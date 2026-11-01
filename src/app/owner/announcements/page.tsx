@@ -129,7 +129,7 @@ export default async function OwnerAnnouncements({
           <input type="checkbox" name="websiteOnly" className="mt-1" />
           <span>
             Website only. Tick this for anything about donations, supporters, or
-            adult content, which must never appear in the phone apps.
+            off-app payments, which must never appear in the phone apps.
           </span>
         </label>
         <button className="rounded-md bg-forest px-4 py-2 text-cream hover:bg-forest/90">

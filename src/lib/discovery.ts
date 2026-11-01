@@ -15,7 +15,7 @@ export type SearchFilters = {
   identityTagIds?: string[];
   orientationTagIds?: string[];
   goalTagIds?: string[];
-  kinkIds?: string[];
+  interestIds?: string[];
   minAge?: number;
   maxAge?: number;
   maxDistanceKm?: number;
@@ -113,7 +113,7 @@ const rankInclude = {
   relationshipStyleTags: { include: { tag: true } },
   seekingIdentityTags: true,
   seekingOrientationTags: true,
-  kinks: { select: { kinkId: true, level: true } },
+  interests: { select: { interestId: true, level: true } },
   _count: { select: { prompts: true } },
   photos: {
     where: { visibility: "PUBLIC", status: "APPROVED" },
@@ -141,7 +141,7 @@ function toRankProfile(p: RankedRow): RankProfile {
     seekingOrientationIds: p.seekingOrientationTags.map((t) => t.tagId),
     goalIds: p.goalTags.map((t) => t.tagId),
     styleIds: p.relationshipStyleTags.map((t) => t.tagId),
-    kinks: p.kinks,
+    interests: p.interests,
     latitude: p.latitude,
     longitude: p.longitude,
     lastActiveAt: p.user.lastActiveAt,
@@ -210,11 +210,11 @@ export async function searchProfiles(filters: SearchFilters) {
     ...(filters.goalTagIds?.length
       ? { goalTags: { some: { tagId: { in: filters.goalTagIds } } } }
       : {}),
-    ...(filters.kinkIds?.length
+    ...(filters.interestIds?.length
       ? {
-          kinks: {
+          interests: {
             some: {
-              kinkId: { in: filters.kinkIds },
+              interestId: { in: filters.interestIds },
               level: { in: ["FAVORITE", "INTERESTED", "CURIOUS"] },
             },
           },

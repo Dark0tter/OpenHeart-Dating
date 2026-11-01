@@ -55,7 +55,7 @@ export function AppNav() {
             className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-xl text-forest"
           >
             <BrandMark className="h-10 w-5" />
-            Kindred Kinks
+            OpenHeart
           </Link>
           <div className="flex items-center gap-1">
             <div className="hidden gap-1 text-sm md:flex">

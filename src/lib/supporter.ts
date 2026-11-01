@@ -2,14 +2,14 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Supporter is a voluntary, website-only donation. Its thank-you perks are
- * cosmetic and never apply inside the apps (store payment rules). An admin
- * grants it by hand until a payment processor is connected.
+ * Supporter is voluntary and never unlocks core dating features. It is the
+ * ad-free/support-the-app tier; admins can grant it by hand until billing is
+ * connected.
  */
 export const SUPPORTER_PERKS = [
-  "A Supporter badge on your profile on the website (you can hide it)",
-  "The option to hide the sponsor block on the website",
-  "Keeping Kindred Kinks free, independent, and tracker-free for everyone",
+  "A Supporter badge on your profile (you can hide it)",
+  "The option to hide sponsor blocks",
+  "Keeping OpenHeart free, independent, and tracker-free for everyone",
 ];
 
 const DAY = 24 * 60 * 60 * 1000;

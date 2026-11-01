@@ -3,15 +3,11 @@ import { z } from "zod";
 import { ConsentScope, MessageRequestStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { isVerifiedAdult } from "@/lib/verification";
 import { isBlockedEitherWay } from "@/lib/safety";
 import { photoSrc, primaryPhotoWhere } from "@/lib/photos";
 import { notify } from "@/lib/notify";
 
-const ALBUM_SCOPES = [
-  ConsentScope.PRIVATE_ALBUM,
-  ConsentScope.ADULT_ALBUM,
-] as const;
+const ALBUM_SCOPES = [ConsentScope.PRIVATE_ALBUM] as const;
 const DECLINE_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
 
 const requestSchema = z.discriminatedUnion("action", [
@@ -101,9 +97,9 @@ export async function GET() {
 }
 
 /**
- * Consent-gated access. PRIVATE_ALBUM and ADULT_ALBUM stay hidden until the
- * owner accepts a request or shares them; PROFILE_ACCESS lets an incognito
- * owner reveal themselves to one person. Owners can revoke at any time.
+ * Consent-gated access. PRIVATE_ALBUM stays hidden until the owner accepts a
+ * request or shares it; PROFILE_ACCESS lets an incognito owner reveal
+ * themselves to one person. Owners can revoke at any time.
  */
 export async function POST(req: Request) {
   const user = await requireUser();
@@ -128,7 +124,6 @@ export async function POST(req: Request) {
       const error = await grantError(
         user.id,
         request.requesterId,
-        request.scope,
       );
       if (error) return NextResponse.json({ error }, { status: 403 });
       await grant(user.id, request.requesterId, request.scope);
@@ -151,6 +146,12 @@ export async function POST(req: Request) {
   }
 
   const { action, otherUserId, scope } = body;
+  if (scope === ConsentScope.ADULT_ALBUM) {
+    return NextResponse.json(
+      { error: "Adult albums are no longer available." },
+      { status: 400 },
+    );
+  }
   if (otherUserId === user.id) {
     return NextResponse.json({ error: "Invalid target" }, { status: 400 });
   }
@@ -165,15 +166,6 @@ export async function POST(req: Request) {
     if (await isBlockedEitherWay(user.id, otherUserId)) {
       return NextResponse.json(
         { error: "Cannot interact with this user" },
-        { status: 403 },
-      );
-    }
-    if (
-      scope === ConsentScope.ADULT_ALBUM &&
-      !(await isVerifiedAdult(user.id))
-    ) {
-      return NextResponse.json(
-        { error: "Verify your age before asking to see adult photos." },
         { status: 403 },
       );
     }
@@ -226,7 +218,7 @@ export async function POST(req: Request) {
   }
 
   if (action === "grant") {
-    const error = await grantError(user.id, otherUserId, scope);
+    const error = await grantError(user.id, otherUserId);
     if (error) return NextResponse.json({ error }, { status: 403 });
     const g = await grant(user.id, otherUserId, scope);
     const name = user.profile?.displayName ?? "A member";
@@ -272,18 +264,9 @@ export async function POST(req: Request) {
 async function grantError(
   ownerId: string,
   viewerId: string,
-  scope: ConsentScope,
 ): Promise<string | null> {
   if (await isBlockedEitherWay(ownerId, viewerId)) {
     return "Cannot interact with this user";
-  }
-  if (scope === ConsentScope.ADULT_ALBUM) {
-    if (!(await isVerifiedAdult(ownerId))) {
-      return "Verify your age before sharing adult photos.";
-    }
-    if (!(await isVerifiedAdult(viewerId))) {
-      return "They need to verify their age before they can see adult photos.";
-    }
   }
   return null;
 }
