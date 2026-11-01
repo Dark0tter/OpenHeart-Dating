@@ -30,7 +30,7 @@ describe("solicitation filter", () => {
     "Dom looking for a sub, safe sane and consensual",
     "My cat is called Venus",
     "Gift of the gab, ask me anything",
-    "Costs $50 to get in to the munch? No — it's free",
+    "Costs $50 to get in to the meetup? No — it's free",
   ])("allows %j", (text) => {
     expect(findSolicitation({ bio: text })).toEqual([]);
   });
@@ -63,7 +63,7 @@ describe("scam signals", () => {
   it.each([
     "Want to grab coffee Saturday at 10?",
     "My birthday is 12/04/1990",
-    "The munch is on 2026-11-14 at 7pm",
+    "The meetup is on 2026-11-14 at 7pm",
     "",
   ])("doesn't flag %j", (text) => {
     expect(scamSignals(text)).toEqual([]);

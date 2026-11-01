@@ -30,7 +30,7 @@ export default async function VerifyEmailPage({
             Your email is confirmed. Thank you!
           </p>
           <Link href="/feed" className="text-forest underline">
-            Continue to Kindred Kinks
+            Continue to OpenHeart
           </Link>
         </div>
       ) : (

@@ -5,7 +5,7 @@ import { ContactLine } from "@/components/contact-line";
 import { OPERATOR, OPERATOR_DESCRIPTION } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
-  title: "Privacy promise — Kindred Kinks",
+  title: "Privacy promise — OpenHeart",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           Our privacy promise
         </h1>
         <p className="mt-4 text-lg text-ink/75">
-          Members are the customers, not the product. Kindred Kinks only uses
+          Members are the customers, not the product. OpenHeart only uses
           what you choose to tell it.
         </p>
 
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           Who we are
         </h2>
         <p className="mt-3 text-ink/75">
-          Kindred Kinks is run by {OPERATOR_DESCRIPTION}. {OPERATOR} decides how
+          OpenHeart is run by {OPERATOR_DESCRIPTION}. {OPERATOR} decides how
           your information is used and is responsible for it (under European
           law, the &ldquo;data controller&rdquo;). To ask a question, download
           your data, or have it deleted, use Settings or contact us through{" "}

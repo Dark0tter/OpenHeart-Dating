@@ -18,7 +18,7 @@ import { prisma } from "@/lib/prisma";
 
 const STEP_SECONDS = 30;
 const DIGITS = 6;
-const ISSUER = "Kindred Kinks";
+const ISSUER = "OpenHeart";
 const RECOVERY_CODE_COUNT = 10;
 const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 

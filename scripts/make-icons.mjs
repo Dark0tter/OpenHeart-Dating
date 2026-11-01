@@ -5,7 +5,7 @@ import { dirname } from "path";
 import sharp from "sharp";
 
 const PLUM = "#2c1239";
-const MASTER = "brand/kindred-kinks-logo-master.jpg";
+const MASTER = "brand/openheart-logo-master.jpg";
 const FAVICON_SVG = readFileSync("public/favicon.svg");
 
 /** The mark without most of the surrounding background, for splash screens and Android. */
@@ -66,9 +66,9 @@ console.log("wrote src/app/favicon.ico");
 
 const ogText =
   Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
-  <text x="600" y="282" font-family="Georgia, serif" font-size="84" fill="#fdecd2">Kindred Kinks</text>
+  <text x="600" y="282" font-family="Georgia, serif" font-size="84" fill="#fdecd2">OpenHeart</text>
   <text x="604" y="352" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#fa9285">Privacy-first dating and community</text>
-  <text x="604" y="394" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#fa9285">for LGBTQIA+ and kink-positive adults</text>
+  <text x="604" y="394" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#fa9285">for LGBTQIA+ and interest-positive adults</text>
 </svg>`);
 await save(
   "public/og-image.png",

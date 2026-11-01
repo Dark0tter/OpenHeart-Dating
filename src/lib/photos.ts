@@ -16,7 +16,7 @@ export const VISIBILITY_LABELS: Record<PhotoVisibility, string> = {
   PUBLIC: "Everyone",
   MATCH_ONLY: "Matches only",
   PRIVATE: "Private album (by request)",
-  ADULT: "Adult album (by request, website only)",
+  ADULT: "Private album (legacy)",
 };
 
 export function photoSrc(photoId: string, size: "thumb" | "full" = "full") {
@@ -36,7 +36,7 @@ export type AccessContext = {
   privateGrant: boolean;
   adultGrant: boolean;
   viewerVerifiedAdult: boolean;
-  /** False inside the mobile apps: adult photos are website-only. */
+  /** Legacy adult photos are treated as unavailable outside migrated data. */
   adultAllowedHere: boolean;
 };
 
@@ -154,11 +154,6 @@ export async function galleryFor(
   const lockedPrivate = ctx.privateGrant
     ? 0
     : approved.filter((p) => p.visibility === PhotoVisibility.PRIVATE).length;
-  const lockedAdult =
-    !adultAllowedHere || (ctx.adultGrant && ctx.viewerVerifiedAdult)
-      ? 0
-      : approved.filter((p) => p.visibility === PhotoVisibility.ADULT).length;
-
   return {
     photos: visible.map((p) => ({
       id: p.id,
@@ -171,7 +166,6 @@ export async function galleryFor(
         : {}),
     })),
     lockedPrivate,
-    lockedAdult,
   };
 }
 

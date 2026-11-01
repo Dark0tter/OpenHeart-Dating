@@ -58,7 +58,7 @@ export async function GET() {
         bodyTags: { include: { tag: true } },
         ethnicityTags: { include: { tag: true } },
         accessibilityTags: { include: { tag: true } },
-        kinks: { include: { kink: { select: { name: true } } } },
+        interests: { include: { interest: { select: { name: true } } } },
         prompts: true,
         photos: {
           select: { id: true, visibility: true, status: true, createdAt: true },
@@ -157,7 +157,7 @@ export async function GET() {
 
   const data = {
     exportedAt: new Date().toISOString(),
-    note: `Photos can be downloaded individually while signed in at ${appUrl()}/api/photos/<id>. ID documents are never stored by Kindred Kinks.`,
+    note: `Photos can be downloaded individually while signed in at ${appUrl()}/api/photos/<id>. ID documents are never stored by OpenHeart.`,
     account: {
       id: user.id,
       email: user.email,
@@ -179,7 +179,6 @@ export async function GET() {
       preferences: {
         adPreference: user.adPreference,
         showOnline: user.showOnline,
-        appAdultContent: user.appAdultContent,
         notifyEmail: user.notifyEmail,
         readReceipts: user.readReceipts,
         allowCalls: user.allowCalls,
@@ -228,7 +227,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(data, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="kindredkinks-data-${new Date().toISOString().slice(0, 10)}.json"`,
+      "Content-Disposition": `attachment; filename="openheart-data-${new Date().toISOString().slice(0, 10)}.json"`,
       "Cache-Control": "no-store",
     },
   });

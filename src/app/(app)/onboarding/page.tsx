@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhotoManager } from "@/components/photo-manager";
-import { KinkPicker, type KinkCategory } from "@/components/kink-picker";
+import { InterestPicker, type InterestCategory } from "@/components/interest-picker";
 import {
   MAX_PROMPT_ANSWER,
   MAX_PROMPTS,
   PROFILE_PROMPTS,
 } from "@/lib/constants/prompts";
-import type { KinkLevel } from "@/lib/limits";
+import type { InterestLevel } from "@/lib/limits";
 import { cn } from "@/lib/utils";
 
 type Tag = { id: string; label: string; category?: string };
@@ -58,7 +58,7 @@ function OnboardingInner() {
     body: Tag[];
     ethnicity: Tag[];
     accessibility: Tag[];
-    kinks: KinkCategory[];
+    interests: InterestCategory[];
     contentRestricted?: boolean;
   } | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -81,7 +81,7 @@ function OnboardingInner() {
   const [bodyTags, setBodyTags] = useState<string[]>([]);
   const [ethnicityTags, setEthnicityTags] = useState<string[]>([]);
   const [accessibilityTags, setAccessibilityTags] = useState<string[]>([]);
-  const [kinks, setKinks] = useState<Record<string, KinkLevel>>({});
+  const [interests, setInterests] = useState<Record<string, InterestLevel>>({});
   const [bio, setBio] = useState("");
   const [limitsNote, setLimitsNote] = useState("");
   const [pronouns, setPronouns] = useState("");
@@ -152,10 +152,10 @@ function OnboardingInner() {
       setBodyTags(ids(p.bodyTags));
       setEthnicityTags(ids(p.ethnicityTags));
       setAccessibilityTags(ids(p.accessibilityTags));
-      setKinks(
+      setInterests(
         Object.fromEntries(
-          (p.kinks ?? []).map((k: { kinkId: string; level: KinkLevel }) => [
-            k.kinkId,
+          (p.interests ?? []).map((k: { interestId: string; level: InterestLevel }) => [
+            k.interestId,
             k.level,
           ]),
         ),
@@ -192,11 +192,11 @@ function OnboardingInner() {
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
   }
 
-  function setKinkLevel(kinkId: string, level: KinkLevel | null) {
-    setKinks((prev) => {
+  function setInterestLevel(interestId: string, level: InterestLevel | null) {
+    setInterests((prev) => {
       const next = { ...prev };
-      if (level) next[kinkId] = level;
-      else delete next[kinkId];
+      if (level) next[interestId] = level;
+      else delete next[interestId];
       return next;
     });
   }
@@ -303,8 +303,8 @@ function OnboardingInner() {
         ...(customOrientation.trim()
           ? { customOrientation: customOrientation.trim() }
           : {}),
-        kinks: Object.entries(kinks).map(([kinkId, level]) => ({
-          kinkId,
+        interests: Object.entries(interests).map(([interestId, level]) => ({
+          interestId,
           level,
         })),
         limitsNote: limitsNote.trim() || null,
@@ -350,13 +350,13 @@ function OnboardingInner() {
     return <p className="text-ink/70">Loading…</p>;
   }
 
-  const hardLimits = tags.kinks
-    .flatMap((c) => c.kinks)
-    .filter((k) => kinks[k.id] === "HARD_LIMIT")
+  const hardLimits = tags.interests
+    .flatMap((c) => c.interests)
+    .filter((k) => interests[k.id] === "HARD_LIMIT")
     .map((k) => k.name);
-  const softLimits = tags.kinks
-    .flatMap((c) => c.kinks)
-    .filter((k) => kinks[k.id] === "NO")
+  const softLimits = tags.interests
+    .flatMap((c) => c.interests)
+    .filter((k) => interests[k.id] === "NO")
     .map((k) => k.name);
 
   return (
@@ -539,10 +539,7 @@ function OnboardingInner() {
               location data is removed. You can also keep photos in a private
               album that people have to ask to see.
             </p>
-            <PhotoManager
-              canAddAdult={verified}
-              adultAllowedHere={!tags.contentRestricted}
-            />
+            <PhotoManager />
             <p className="text-sm text-ink/70">
               Later, you can earn the photo-verified badge with a quick selfie
               from your{" "}
@@ -768,14 +765,14 @@ function OnboardingInner() {
             {tags.contentRestricted && (
               <p className="text-sm text-ink/70">
                 The app shows a shorter list. You can see and edit the full list
-                on the Kindred Kinks website, and anything you set there is
+                on the OpenHeart website, and anything you set there is
                 kept.
               </p>
             )}
-            <KinkPicker
-              categories={tags.kinks}
-              value={kinks}
-              onChange={setKinkLevel}
+            <InterestPicker
+              categories={tags.interests}
+              value={interests}
+              onChange={setInterestLevel}
             />
             <fieldset
               id="limits"
@@ -811,7 +808,7 @@ function OnboardingInner() {
                   maxLength={1000}
                   rows={3}
                   className="mt-1 w-full rounded-md border border-forest/15 bg-cream/80 px-3 py-2 text-sm"
-                  placeholder="Boundaries in your own words, e.g. no marks above the collar, no photos during play, safeword is red."
+                  placeholder="Boundaries in your own words, e.g. I move slowly with new people, no last-minute plans, or I prefer public first dates."
                 />
               </div>
             </fieldset>

@@ -3,16 +3,16 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LEVEL_LABEL, type KinkLevel } from "@/lib/limits";
+import { LEVEL_LABEL, type InterestLevel } from "@/lib/limits";
 
-export type KinkCategory = {
+export type InterestCategory = {
   id: string;
   name: string;
   description: string | null;
-  kinks: { id: string; name: string }[];
+  interests: { id: string; name: string }[];
 };
 
-const LEVELS: KinkLevel[] = [
+const LEVELS: InterestLevel[] = [
   "FAVORITE",
   "INTERESTED",
   "CURIOUS",
@@ -20,7 +20,7 @@ const LEVELS: KinkLevel[] = [
   "HARD_LIMIT",
 ];
 
-const ON_STYLE: Record<KinkLevel, string> = {
+const ON_STYLE: Record<InterestLevel, string> = {
   FAVORITE: "border-forest bg-forest text-cream",
   INTERESTED: "border-forest bg-forest/80 text-cream",
   CURIOUS: "border-sage bg-sage/30 text-forest",
@@ -34,8 +34,8 @@ function LevelButtons({
   onChange,
 }: {
   name: string;
-  value: KinkLevel | undefined;
-  onChange: (level: KinkLevel | null) => void;
+  value: InterestLevel | undefined;
+  onChange: (level: InterestLevel | null) => void;
 }) {
   return (
     <div role="group" aria-label={name} className="flex flex-wrap gap-1">
@@ -62,7 +62,7 @@ function LevelButtons({
   );
 }
 
-function KinkRow({
+function InterestRow({
   name,
   hint,
   value,
@@ -70,8 +70,8 @@ function KinkRow({
 }: {
   name: string;
   hint?: string;
-  value: KinkLevel | undefined;
-  onChange: (level: KinkLevel | null) => void;
+  value: InterestLevel | undefined;
+  onChange: (level: InterestLevel | null) => void;
 }) {
   return (
     <li className="flex flex-col gap-1.5 border-b border-forest/10 py-2.5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
@@ -88,14 +88,14 @@ function KinkRow({
  * Tap a level to set it, tap it again to clear. Only the open category is
  * rendered, so the full list stays quick on phones.
  */
-export function KinkPicker({
+export function InterestPicker({
   categories,
   value,
   onChange,
 }: {
-  categories: KinkCategory[];
-  value: Record<string, KinkLevel>;
-  onChange: (kinkId: string, level: KinkLevel | null) => void;
+  categories: InterestCategory[];
+  value: Record<string, InterestLevel>;
+  onChange: (interestId: string, level: InterestLevel | null) => void;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
@@ -105,7 +105,7 @@ export function KinkPicker({
   const all = useMemo(
     () =>
       categories.flatMap((c) =>
-        c.kinks.map((k) => ({ ...k, category: c.name })),
+        c.interests.map((k) => ({ ...k, category: c.name })),
       ),
     [categories],
   );
@@ -152,7 +152,7 @@ export function KinkPicker({
         ) : (
           <ul className="rounded-md border border-forest/10 bg-cream/50 px-3">
             {flat.map((k) => (
-              <KinkRow
+              <InterestRow
                 key={k.id}
                 name={k.name}
                 hint={k.category}
@@ -165,9 +165,9 @@ export function KinkPicker({
       ) : (
         <ul className="space-y-2">
           {categories.map((cat) => {
-            const chosen = cat.kinks.filter((k) => value[k.id]).length;
+            const chosen = cat.interests.filter((k) => value[k.id]).length;
             const isOpen = open === cat.id;
-            const panelId = `kink-cat-${cat.id}`;
+            const panelId = `interest-cat-${cat.id}`;
             return (
               <li
                 key={cat.id}
@@ -200,8 +200,8 @@ export function KinkPicker({
                       </p>
                     )}
                     <ul>
-                      {cat.kinks.map((k) => (
-                        <KinkRow
+                      {cat.interests.map((k) => (
+                        <InterestRow
                           key={k.id}
                           name={k.name}
                           value={value[k.id]}

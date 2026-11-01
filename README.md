@@ -1,8 +1,8 @@
-# Kindred Kinks
+# OpenHeart
 
-Privacy-first dating for LGBTQIA+ people, kink-positive adults, and users with elevated safety needs — without artificial paywalls on likes, messages, matching, or filtering.
+Privacy-first dating for LGBTQIA+ people and users with elevated safety needs — without artificial paywalls on likes, messages, matching, or filtering.
 
-**Tagline:** Dating, connection, identity, and kink without artificial paywalls.
+**Tagline:** Dating, connection, identity, and shared interests without artificial paywalls.
 
 ## Stack (Phase 1)
 
@@ -14,35 +14,28 @@ Privacy-first dating for LGBTQIA+ people, kink-positive adults, and users with e
 
 ## Core principles encoded in the product
 
-1. **Inclusive by default** — identity, orientation, goals, body, ethnicity, accessibility, and kink are tag-based. No male/female search columns.
+1. **Inclusive by default** — identity, orientation, goals, body, ethnicity, accessibility, and interests are tag-based. No male/female search columns.
 2. **Privacy first** — `PUBLIC` / `LIMITED` / `INCOGNITO` visibility. Incognito profiles are excluded from search, browse, discovery, and public URLs.
-3. **Consent-centered** — adult albums require verified-adult status + explicit consent grants.
+3. **Consent-centered** — private albums require explicit consent grants.
 4. **No messaging paywall** — likes, matches, messages, and filters are free.
 5. **Meet by shared interests** — interest rooms first, private chat when it clicks.
 
 ## Taxonomies
 
-All preset lists live in `src/lib/constants/tags.ts` and are seeded by `npm run db:setup`: 27 gender identities, 20 orientations, 14 relationship styles, and 341 kinks in 19 categories. Members can also write in their own identity or orientation; write-ins appear on their own profile but never in the shared pick lists.
+All preset lists live in `src/lib/constants/tags.ts` and are seeded by `npm run db:setup`: gender identities, orientations, relationship styles, and a broad general-dating interest taxonomy across lifestyle, hobbies, communication, wellness, community, travel, and date ideas. Members can also write in their own identity or orientation; write-ins appear on their own profile but never in the shared pick lists.
 
-Adding entries is safe. Renaming an entry, or moving a kink to a different category, creates a new entry and leaves the old one on existing profiles.
+Adding entries is safe. Renaming an entry, or moving an interest to a different category, creates a new entry and leaves the old one on existing profiles.
 
-Kinks are intentionally excluded if they involve minors, animals, incest, real non-consent, or financial domination.
-
-Each kink can be marked Favorite, Interested, Curious, Soft limit (stored as `NO`) or Hard limit, and members can add limits in their own words (`Profile.limitsNote`). Limits get their own section on profiles. Viewing someone shows a limits check listing where your interests meet their limits and the other way round (`src/lib/limits.ts`). Clashes lower the match ranking (hard limits more than soft), search cards flag hard-limit clashes, and search can hide them entirely.
+Each interest can be marked Favorite, Interested, Curious, Soft limit (stored as `NO`) or Hard limit, and members can add limits in their own words (`Profile.limitsNote`). Limits get their own section on profiles. Viewing someone shows a limits check listing where your interests meet their limits and the other way round (`src/lib/limits.ts`). Clashes lower the match ranking (hard limits more than soft), search cards flag hard-limit clashes, and search can hide them entirely.
 
 ## Mobile app content policy
 
 The iOS and Android apps run the same code under one policy, built to the stricter of Apple's and Google's rules on every point, so neither platform needs its own version. The server enforces it, so an app can't show more than it's allowed.
 
-- **How the app is detected.** The native shell appends `KindredKinksApp` to its WebView user agent (Capacitor: `appendUserAgent`) and sends `x-kindredkinks-client: app` on direct API calls. See `src/lib/content-policy.ts`.
-- **Three content tiers** (`ContentTier`):
-  - `STANDARD`: shown everywhere.
-  - `ADULT_TEXT`: shown in the apps only to verified adults who turned on "Show the full interest list" on the website. The setting can't be changed from inside the app.
-  - `WEB_ONLY`: never shown in the apps.
-- **What's web-only:** Edge Play, Caregiver / Little, Teacher/Student roleplay, adult photos, and media in private messages.
-- **Where tiers are set:** each kink and category in `src/lib/constants/tags.ts`, and each sponsor ad via `SponsorPlacement.contentTier`. Ads default to `WEB_ONLY` until someone reviews them.
-- **Explicit words** in rooms, posts, message requests and private messages are masked in the apps unless the member opted in. See `src/lib/moderation/app-text.ts`.
-- **Hidden rooms** don't appear in the app's room list, and the app can't join, read or post in them. Kinks hidden from the app are kept when a member saves their profile from the app.
+- **How the app is detected.** The native shell appends `OpenHeartApp` to its WebView user agent (Capacitor: `appendUserAgent`) and sends `x-openheart-client: app` on direct API calls. See `src/lib/content-policy.ts`.
+- **General-audience apps:** the app shells receive `STANDARD` content only. Website-only/sensitive event or sponsor placements stay off-app.
+- **Where tiers are set:** events and sponsor ads use `ContentTier`; general dating interests are `STANDARD` by default. Ads default to `WEB_ONLY` until someone reviews them.
+- **Explicit words** in rooms, posts, message requests and private messages are masked in the apps. See `src/lib/moderation/app-text.ts`.
 - **Store requirements also covered:**
   - In-app account deletion (Settings page and `DELETE /api/account`).
   - Accepting the Terms at sign-up.
@@ -58,8 +51,8 @@ Flag colors live in `src/lib/themes.ts`; each flag's accents were picked to meet
 
 ## How people meet
 
-- **Rooms.** Seeding creates a Welcome room, one room per kink category and one per relationship goal. Any member can join any room.
-- **Automatic invites.** Saving a profile invites the member to every room matching their interests: kink categories with something marked Favorite, Interested or Curious, plus their goals. Declined invites are never re-sent. No and Hard limit never trigger an invite.
+- **Rooms.** Seeding creates a Welcome room, one room per interest category and one per relationship goal. Any member can join any room.
+- **Automatic invites.** Saving a profile invites the member to every room matching their interests: interest categories with something marked Favorite, Interested or Curious, plus their goals. Declined invites are never re-sent. No and Hard limit never trigger an invite.
 - **Online now.** Each room shows who's been active in the last 90 seconds. Members can hide themselves in Settings; incognito members only appear to people already allowed to see them. Room member lists are otherwise never exposed.
 - **Private chat.** Clicking a name in a room lets you send a private message request. Accepting it opens a private conversation.
 - **Home feed.** Posts from everyone you've liked or followed, plus your own. Blocked and hidden incognito authors are filtered out.
@@ -101,13 +94,13 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 ## What's built
 
 - **Accounts:** email confirmation, password reset and change (signs out other devices), Turnstile bot check, rate limits stored in Postgres, error alerts (Sentry), download-my-data (`GET /api/account/export`) and account deletion.
-- **Photos:** re-encoded with location and camera data stripped, safety-scan hook, moderator review before going live, private and adult albums shared only by consent, selfie verification badge.
+- **Photos:** re-encoded with location and camera data stripped, safety-scan hook, moderator review before going live, private albums shared only by consent, selfie verification badge.
 - **Discovery:** location from the browser or city (rounded to about 1 km), approximate distances, ranking by mutual fit, shared goals and interests, profile prompts, a completeness meter.
 - **Messaging:** live updates (Postgres LISTEN/NOTIFY over server-sent events, polling fallback), typing indicators, mutual read receipts, scam warnings, unmatch.
 - **Calls:** voice and video calls between matches once both have messaged (WebRTC, device to device, never recorded). Ringing goes out as a lock-screen alert; block or unmatch ends a call; anyone can turn calls off. Works for most networks with free STUN; add a TURN relay (`TURN_URLS`) for strict networks.
 - **Notifications:** in-app bell, web push, native app push (APNs and Firebase), and email (when away), each switchable in Settings.
 - **Sponsors** (`/mod/sponsors`, admins): direct-sold listings with an approval checklist, website-only vs. app-safe, per-person daily caps, and anonymous daily view/click totals.
-- **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and munches with RSVPs (address only shown to people going).
+- **Community:** interest rooms with hosts (mute, ban, slow mode, pinned notice, rules), events and meetups with RSVPs (address only shown to people going).
 - **Safety:** date check-ins that email a trusted contact if you don't check in, `/safety` tips, block, report, age verification through Didit, Persona or Veriff by signed webhook, with the provider's copy of the ID deleted as soon as the result arrives.
 - **Trust and safety staff tools** (`/mod`): report queue with assignment, user history, warnings, suspensions with appeals (decided by a different moderator), photo and selfie review, support tickets, room and event moderation, child-safety escalation that preserves evidence under legal hold, and a full audit log. Staff can only act on people ranked below them.
 - **Owner dashboard** (`/owner`, owner only): members and growth, sign-up funnel, members by country and city with local-sponsor readiness, the sponsor network (views, clicks, approvals, audience settings), the moderation queue, which services are switched on, and staff management: search for a member to make them a moderator or admin, and demote with a reason that goes in the audit log. Also sponsor inquiries from `/advertise`, the city waiting list, and site-wide announcements. Make yourself owner with `npm run staff:set -- you@example.com OWNER`; that command is the only way to create an owner.
@@ -118,16 +111,16 @@ CI (`.github/workflows/ci.yml`) starts Postgres 16, applies every migration, che
 
 ## Mobile apps
 
-`mobile/` holds the Capacitor shells for iOS and Android. They load the live website with `KindredKinksApp` added to the user agent, so the server applies the app store content policy below.
+`mobile/` holds the Capacitor shells for iOS and Android. They load the live website with `OpenHeartApp` added to the user agent, so the server applies the app store content policy below.
 
 ```bash
 cd mobile && npm install
-KINDREDKINKS_URL=https://your-domain npm run sync
+OPENHEART_URL=https://your-domain npm run sync
 npm run ios       # opens Xcode (needs a Mac and an Apple Developer account to publish)
 npm run android   # opens Android Studio
 ```
 
-Before publishing, set the bundle ID (`KINDREDKINKS_APP_ID`, default `com.kindredkinks.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires.
+Before publishing, set the bundle ID (`OPENHEART_APP_ID`, default `com.openheart.app`), add app icons and splash screens, and fill in the stores' privacy questionnaires.
 
 **App notifications.** The apps use Apple's and Google's own (free) push services; the server talks to them directly (`src/lib/native-push.ts`). Members turn them on in Settings → Notifications inside the app, and tapping one opens the right page.
 
@@ -144,7 +137,7 @@ Before publishing, set the bundle ID (`KINDREDKINKS_APP_ID`, default `com.kindre
 | `GET/POST/PATCH /api/safety/check-ins` | Date check-ins |
 | `DELETE /api/matches/[matchId]` | Unmatch |
 | `GET /api/account/export` | Download all your data as JSON |
-| `GET/POST /api/events`, `POST /api/events/[id]/rsvp` | Events and munches |
+| `GET/POST /api/events`, `POST /api/events/[id]/rsvp` | Events and meetups |
 | `GET /api/live` | Live updates (server-sent events) |
 | `POST /api/cron` | Run background jobs now (needs `CRON_SECRET`) |
 | `GET /api/search` | Tag-filtered search. Incognito profiles only appear after a match, after they liked or messaged you, or via a `PROFILE_ACCESS` grant |
@@ -152,7 +145,7 @@ Before publishing, set the bundle ID (`KINDREDKINKS_APP_ID`, default `com.kindre
 | `GET/POST /api/messages/[matchId]` | Free messaging + read receipts |
 | `POST /api/blocks` | Immediate block (likes/messages/match cleared) |
 | `POST /api/reports` | Reports with high-priority emergency queue |
-| `POST /api/consent` | Grant/deny/revoke `ADULT_ALBUM` or `PROFILE_ACCESS` |
+| `POST /api/consent` | Grant/deny/revoke `PRIVATE_ALBUM` or `PROFILE_ACCESS` |
 | `GET /api/rooms` | All rooms, with joined / invited / matches-your-profile flags |
 | `POST/DELETE /api/rooms/[id]/membership` | Join (accepts any pending invite) or leave a room |
 | `DELETE /api/rooms/[id]/invite` | Decline a room invite |
@@ -169,18 +162,18 @@ Database migrations live in `prisma/migrations`; `npm run db:setup` applies them
 Members are the customers, not the product.
 
 - **Always free:** likes, messages, matching, search, filters, safety tools.
-- **Sponsor block:** every member except donors who turn it off on the website sees one small labelled block at the bottom of app pages (`SponsorSlot`). It's `GENERIC` by default; members can choose `PROFILE_INTERESTS` instead, which matches only the kinks (Favorite/Interested/Curious) and relationship goals on their profile and skips anything they marked No/Hard Limit. Every sponsor is approved by an admin at `/mod/sponsors`, which shows only anonymous daily view and click totals; who saw or clicked is never stored. Links open with no referrer. The apps only ever show general-audience sponsors, and the block never appears in messages or signup.
-- **Donations / Supporter badge** (`/supporter`): voluntary, website-only donations, never a condition of service. Donors get a cosmetic thank-you on the website (badge, option to hide the sponsor block). The apps never show the page, the link, the badge, or the perk, so no money flows through or is mentioned in the app stores. Stripe's rules exclude adult dating, so admins grant the badge by hand at `/mod/users/<id>` until an adult-friendly processor is connected.
+- **Sponsor block:** every free member sees one small labelled block at the bottom of app pages (`SponsorSlot`). It's `GENERIC` by default; members can choose `PROFILE_INTERESTS` instead, which matches only general interests and relationship goals on their profile and skips anything they marked No/Hard Limit. Every sponsor is approved by an admin at `/mod/sponsors`, which shows only anonymous daily view and click totals; who saw or clicked is never stored. Links open with no referrer. The apps only ever show general-audience sponsors, and the block never appears in messages or signup.
+- **Supporter / ad-free** (`/supporter`): voluntary Supporter status is never a condition of service. Supporters can hide the sponsor block and show or hide a cosmetic thank-you badge; core dating features stay free.
 - **No data sales, no third-party trackers, no cross-site tracking.**
 
 ## Financial solicitation policy
 
-`src/lib/moderation/solicitation.ts` blocks wishlists (Amazon, Throne), payment links and cashtags (Cash App, Venmo, PayPal.me, Zelle), tip jars (Buy Me a Coffee, Ko-fi), paid-content promotion (OnlyFans, Fansly, Patreon, etc.), and financial domination (findom, paypig, human ATM, etc.) in display names, profiles, and messages. Findom is excluded from the platform entirely and is not in the kink taxonomy. Blocked content isn't saved, and an `AUTOMATED` `FINANCIAL_SOLICITATION` report goes to the moderation queue (HIGH priority after 3 attempts in 30 days). Nothing is banned automatically: warnings, suspensions, and verification-based bans are moderator decisions with appeals. Public pages: `/privacy`, `/guidelines`.
+`src/lib/moderation/solicitation.ts` blocks wishlists (Amazon, Throne), payment links and cashtags (Cash App, Venmo, PayPal.me, Zelle), tip jars (Buy Me a Coffee, Ko-fi), paid-content promotion (OnlyFans, Fansly, Patreon, etc.), and financial domination (findom, paypig, human ATM, etc.) in display names, profiles, and messages. Findom is excluded from the platform entirely and is not in the interest taxonomy. Blocked content isn't saved, and an `AUTOMATED` `FINANCIAL_SOLICITATION` report goes to the moderation queue (HIGH priority after 3 attempts in 30 days). Nothing is banned automatically: warnings, suspensions, and verification-based bans are moderator decisions with appeals. Public pages: `/privacy`, `/guidelines`.
 
 ## Legal / compliance checklist (ops)
 
-- 18+ enforcement + age verification before adult content
-- Consent-based sharing of explicit material
+- 18+ enforcement + age verification for dating safety
+- Consent-based sharing of private photos
 - GDPR / CCPA: data download and account deletion are built in
 - DMCA + ToS + Community Guidelines
 - Never permanently store government ID images (tokens + status only)
@@ -205,11 +198,11 @@ GitHub Actions (`.github/workflows/ci.yml`) runs migrations, tests, typecheck, l
 
 Step-by-step with costs, cheapest first: [docs/LAUNCH.md](docs/LAUNCH.md). In short, things the code can't do for you:
 
-1. **Legal review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety` by a lawyer familiar with adult platforms (US: Section 230, FOSTA-SESTA, 18 U.S.C. 2257 if explicit images are allowed; EU/UK: GDPR, Online Safety Act).
+1. **Legal review** of `/terms`, `/privacy`, `/guidelines` and `/child-safety` by a lawyer familiar with dating platforms (US: Section 230; EU/UK: GDPR, Online Safety Act).
 2. **NCMEC CyberTipline** registration as an electronic service provider. US law requires reporting child sexual abuse material you become aware of; the `/mod` escalation preserves evidence, but the report itself is filed on NCMEC's site.
 3. **Moderation.** One person can run it: make yourself owner (`npm run staff:set -- you@example.com OWNER`), turn on push notifications in Settings on your phone, and you'll be alerted within a minute of any urgent report, plus a daily summary email of everything waiting. The Terms promise a review within 24 hours, and the summary flags anything older. Admins and the owner may decide appeals of their own decisions; add moderators later from `/owner/staff` if volume grows.
 4. **Accounts and keys:** hosting (DigitalOcean), domain and Cloudflare, email (Resend; verify the sending domain), photo storage (Spaces), an age-verification provider (Didit recommended: free for 500 checks a month; a workflow with ID verification and a webhook to `/api/verification/didit-webhook`), Turnstile, Sentry, VAPID keys (`npm run vapid:generate`), `CRON_SECRET`, `SUPPORT_EMAIL`.
-5. **App stores:** Apple Developer Program ($99/year) and Google Play Console ($25 once). Both review dating apps closely: have a demo account ready, and answer the content questions honestly (the apps never show adult photos).
+5. **App stores:** Apple Developer Program ($99/year) and Google Play Console ($25 once). Both review dating apps closely: have a demo account ready, and answer the content questions honestly.
 6. **Before real users:** `ALLOW_VERIFICATION_STUB=false`, `PHOTO_REVIEW_MODE=pre`, a test signup through the verification provider's sandbox, a test date check-in, and a restore test of the database backup.
 
 ## Hosting target
@@ -217,7 +210,7 @@ Step-by-step with costs, cheapest first: [docs/LAUNCH.md](docs/LAUNCH.md). In sh
 - App: DigitalOcean App Platform
 - DB: DigitalOcean Managed PostgreSQL
 - DNS/WAF: Cloudflare
-- Domain: `kindredkinks.com` (DNS on Cloudflare; `www` redirects to the bare domain)
+- Domain: `openheart.com` (DNS on Cloudflare; `www` redirects to the bare domain)
 
 ## Design note
 

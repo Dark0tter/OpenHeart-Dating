@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-type Visibility = "PUBLIC" | "MATCH_ONLY" | "PRIVATE" | "ADULT";
+type Visibility = "PUBLIC" | "MATCH_ONLY" | "PRIVATE";
 
 type OwnPhoto = {
   id: string;
@@ -19,7 +19,6 @@ const VISIBILITY_OPTIONS: { value: Visibility; label: string }[] = [
   { value: "PUBLIC", label: "Everyone" },
   { value: "MATCH_ONLY", label: "Matches only" },
   { value: "PRIVATE", label: "Private album (by request)" },
-  { value: "ADULT", label: "Adult album (website only)" },
 ];
 
 const STATUS_TEXT = {
@@ -28,13 +27,7 @@ const STATUS_TEXT = {
   REJECTED: "Not approved",
 } as const;
 
-export function PhotoManager({
-  canAddAdult,
-  adultAllowedHere,
-}: {
-  canAddAdult: boolean;
-  adultAllowedHere: boolean;
-}) {
+export function PhotoManager() {
   const [photos, setPhotos] = useState<OwnPhoto[]>([]);
   const [visibility, setVisibility] = useState<Visibility>("PUBLIC");
   const [busy, setBusy] = useState(false);
@@ -87,10 +80,6 @@ export function PhotoManager({
     await fetch(`/api/photos/${id}`, { method: "DELETE" });
     load();
   }
-
-  const options = VISIBILITY_OPTIONS.filter(
-    (o) => o.value !== "ADULT" || (canAddAdult && adultAllowedHere),
-  );
 
   return (
     <section aria-labelledby="photos-heading" className="space-y-4">
@@ -158,12 +147,7 @@ export function PhotoManager({
                   onChange={(e) => patch(p.id, { visibility: e.target.value })}
                   className="h-9 w-full rounded border border-forest/15 bg-cream/80 px-2"
                 >
-                  {VISIBILITY_OPTIONS.filter(
-                    (o) =>
-                      o.value !== "ADULT" ||
-                      canAddAdult ||
-                      p.visibility === "ADULT",
-                  ).map((o) => (
+                  {VISIBILITY_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -202,7 +186,7 @@ export function PhotoManager({
               onChange={(e) => setVisibility(e.target.value as Visibility)}
               className="h-11 rounded-md border border-forest/15 bg-cream/80 px-3 text-sm"
             >
-              {options.map((o) => (
+              {VISIBILITY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>

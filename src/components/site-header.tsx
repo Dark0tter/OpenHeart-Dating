@@ -12,7 +12,7 @@ export async function SiteHeader() {
         className="inline-flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-forest md:text-3xl"
       >
         <BrandMark className="h-14 w-7 md:h-16 md:w-8" />
-        Kindred Kinks
+        OpenHeart
       </Link>
       <nav className="flex items-center gap-3 text-sm md:gap-5">
         {session?.user ? (

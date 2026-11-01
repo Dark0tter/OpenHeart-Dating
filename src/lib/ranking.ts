@@ -1,5 +1,5 @@
 import { distanceKm } from "@/lib/utils";
-import { clashPenalty, type KinkLevel as Level } from "@/lib/limits";
+import { clashPenalty, type InterestLevel as Level } from "@/lib/limits";
 
 export type RankProfile = {
   identityIds: string[];
@@ -8,7 +8,7 @@ export type RankProfile = {
   seekingOrientationIds: string[];
   goalIds: string[];
   styleIds: string[];
-  kinks: { kinkId: string; level: Level }[];
+  interests: { interestId: string; level: Level }[];
   latitude: number | null;
   longitude: number | null;
   lastActiveAt: Date;
@@ -19,7 +19,7 @@ export type RankProfile = {
   ageVerified: boolean;
 };
 
-const KINK_WEIGHT: Partial<Record<Level, number>> = {
+const INTEREST_WEIGHT: Partial<Record<Level, number>> = {
   FAVORITE: 3,
   INTERESTED: 2,
   CURIOUS: 1,
@@ -44,13 +44,13 @@ export type ScoreBreakdown = {
   total: number;
   mutualFit: number;
   sharedGoals: number;
-  kinks: number;
+  interests: number;
   limitsClash: number;
   distance: number;
   activity: number;
   profileQuality: number;
   trust: number;
-  /** Kinks where one person's hard limit is something the other is into. */
+  /** Interests where one person's hard limit is something the other is into. */
   hardClashes: number;
 };
 
@@ -72,23 +72,23 @@ export function scoreMatch(
     Math.min(overlap(viewer.goalIds, candidate.goalIds), 2) * 1.5 +
     Math.min(overlap(viewer.styleIds, candidate.styleIds), 2);
 
-  const theirs = new Map(candidate.kinks.map((k) => [k.kinkId, k.level]));
-  let kinkRaw = 0;
+  const theirs = new Map(candidate.interests.map((k) => [k.interestId, k.level]));
+  let interestRaw = 0;
   let penalty = 0;
   let hardClashes = 0;
-  for (const mine of viewer.kinks) {
-    const other = theirs.get(mine.kinkId);
+  for (const mine of viewer.interests) {
+    const other = theirs.get(mine.interestId);
     if (!other) continue;
-    const a = KINK_WEIGHT[mine.level];
-    const b = KINK_WEIGHT[other];
-    if (a && b) kinkRaw += Math.min(a, b);
+    const a = INTEREST_WEIGHT[mine.level];
+    const b = INTEREST_WEIGHT[other];
+    if (a && b) interestRaw += Math.min(a, b);
     const p = clashPenalty(mine.level, other);
     penalty += p;
     if (p > 0 && (mine.level === "HARD_LIMIT" || other === "HARD_LIMIT")) {
       hardClashes += 1;
     }
   }
-  const kinks = Math.min(kinkRaw, 18) / 3;
+  const interests = Math.min(interestRaw, 18) / 3;
   const limitsClash = -Math.min(penalty, 9);
 
   let distance = 0;
@@ -121,7 +121,7 @@ export function scoreMatch(
   const total =
     mutualFit +
     sharedGoals +
-    kinks +
+    interests +
     limitsClash +
     distance +
     activity +
@@ -132,7 +132,7 @@ export function scoreMatch(
     total: Math.round(total * 100) / 100,
     mutualFit,
     sharedGoals,
-    kinks,
+    interests,
     limitsClash,
     distance,
     activity,

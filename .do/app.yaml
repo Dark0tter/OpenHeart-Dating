@@ -3,7 +3,7 @@
 # can't be renamed, so it keeps the original name), then:
 #   doctl apps create --spec .do/app.yaml
 # Secrets marked type: SECRET are set in the App Platform dashboard, never committed.
-name: kindredkinks
+name: openheart
 region: nyc
 
 alerts:
@@ -13,9 +13,9 @@ alerts:
 # DNS is on Cloudflare: add the CNAME records App Platform shows for each
 # domain (see docs/LAUNCH.md). www redirects to the bare domain in middleware.
 domains:
-  - domain: kindredkinks.com
+  - domain: openheart.com
     type: PRIMARY
-  - domain: www.kindredkinks.com
+  - domain: www.openheart.com
     type: ALIAS
 
 databases:
@@ -79,7 +79,7 @@ services:
         type: SECRET
       - key: EMAIL_FROM
         scope: RUN_TIME
-        value: "Kindred Kinks <hello@kindredkinks.com>"
+        value: "OpenHeart <hello@openheart.com>"
       - key: TURNSTILE_SECRET_KEY
         scope: RUN_TIME
         type: SECRET

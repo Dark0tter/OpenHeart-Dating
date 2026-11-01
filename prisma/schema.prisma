@@ -1,4 +1,4 @@
-// Kindred Kinks — Phase 1 schema
+// OpenHeart — Phase 1 schema
 // Identity, attraction, and preferences are tag-driven (no binary gender search columns).
 
 generator client {
@@ -47,7 +47,7 @@ enum ContentTier {
   WEB_ONLY
 }
 
-enum KinkInterestLevel {
+enum InterestLevel {
   FAVORITE
   INTERESTED
   CURIOUS
@@ -86,8 +86,8 @@ enum ReportSource {
   AUTOMATED
 }
 
-/// Sexual interests are special-category data (GDPR Art. 9), so interest-based
-/// sponsor matching is a choice; GENERIC is the default.
+/// Interest-based sponsor matching is a choice; GENERIC is the privacy-first
+/// default and uses only non-sensitive profile interests members selected.
 enum AdPreference {
   GENERIC
   PROFILE_INTERESTS
@@ -143,8 +143,6 @@ model User {
   showOnline      Boolean       @default(true)
   /// Matches may voice/video call once both have sent a message.
   allowCalls      Boolean       @default(true)
-  /// Lets ADULT_TEXT content show in the mobile apps. Can only be changed on the website.
-  appAdultContent Boolean       @default(false)
   termsAcceptedAt DateTime?
   /// "system" | "light" | "dark"; see src/lib/themes.ts.
   themeMode       String        @default("system")
@@ -274,7 +272,7 @@ model Profile {
   userId      String     @unique
   displayName String
   bio         String?    @db.Text
-  /// Boundaries in the member's own words, beyond the kink list (e.g. "no marks above the collar").
+  /// Boundaries in the member's own words, beyond the interest list.
   limitsNote  String?    @db.Text
   pronouns    String?
   visibility  Visibility @default(PUBLIC)
@@ -298,7 +296,7 @@ model Profile {
   bodyTags               ProfileBodyTag[]
   ethnicityTags          ProfileEthnicityTag[]
   accessibilityTags      ProfileAccessibilityTag[]
-  kinks                  ProfileKink[]
+  interests                  ProfileInterest[]
   seekingIdentityTags    SeekingIdentityTag[]
   seekingOrientationTags SeekingOrientationTag[]
   prompts                ProfilePrompt[]
@@ -440,17 +438,17 @@ model AccessibilityTag {
   profiles ProfileAccessibilityTag[]
 }
 
-model KinkCategory {
+model InterestCategory {
   id          String      @id @default(uuid())
   slug        String      @unique
   name        String
   description String?
   tier        ContentTier @default(STANDARD)
-  kinks       Kink[]
+  interests       Interest[]
   rooms       ChatRoom[]
 }
 
-model Kink {
+model Interest {
   id          String        @id @default(uuid())
   slug        String        @unique
   categoryId  String
@@ -458,8 +456,8 @@ model Kink {
   description String?
   /// Effective tier: never lower than the category's.
   tier        ContentTier   @default(STANDARD)
-  category    KinkCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  profiles    ProfileKink[]
+  category    InterestCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  profiles    ProfileInterest[]
 
   @@index([categoryId])
 }
@@ -527,15 +525,15 @@ model ProfileAccessibilityTag {
   @@id([profileId, tagId])
 }
 
-model ProfileKink {
+model ProfileInterest {
   profileId String
-  kinkId    String
-  level     KinkInterestLevel
+  interestId    String
+  level     InterestLevel
   profile   Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  kink      Kink              @relation(fields: [kinkId], references: [id], onDelete: Cascade)
+  interest      Interest              @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
-  @@id([profileId, kinkId])
-  @@index([kinkId, level])
+  @@id([profileId, interestId])
+  @@index([interestId, level])
 }
 
 /// Who this user wants to meet — tag-based, never hard-coded male/female columns.
@@ -776,13 +774,13 @@ model RoomBan {
 }
 
 enum EventKind {
-  MUNCH
+  MEETUP
   SOCIAL
   CLASS
   ONLINE
 }
 
-/// Munches, meetups, classes and online events. The exact address and any
+/// Meetups, socials, classes and online events. The exact address and any
 /// online link are only shown to the host and members who RSVP "going".
 model Event {
   id          String      @id @default(uuid())
@@ -902,7 +900,7 @@ model SupportTicket {
 
 enum RoomKind {
   GENERAL
-  KINK_CATEGORY
+  INTEREST_CATEGORY
   GOAL
 }
 
@@ -913,7 +911,7 @@ model ChatRoom {
   name            String
   description     String?
   kind            RoomKind
-  kinkCategoryId  String?
+  interestCategoryId  String?
   goalTagId       String?
   isActive        Boolean          @default(true)
   /// Shown above the chat; set by hosts.
@@ -923,7 +921,7 @@ model ChatRoom {
   createdAt       DateTime         @default(now())
   bans            RoomBan[]
   events          Event[]
-  kinkCategory    KinkCategory?    @relation(fields: [kinkCategoryId], references: [id], onDelete: SetNull)
+  interestCategory    InterestCategory?    @relation(fields: [interestCategoryId], references: [id], onDelete: SetNull)
   goalTag         GoalTag?         @relation(fields: [goalTagId], references: [id], onDelete: SetNull)
   members         RoomMembership[]
   invites         RoomInvite[]
@@ -1005,7 +1003,7 @@ model Post {
   @@index([authorId, createdAt])
 }
 
-/// Targeting uses only kink and relationship-goal slugs the member chose to list.
+/// Targeting uses only interest and relationship-goal slugs the member chose to list.
 /// There are deliberately no viewer columns; reach is counted in SponsorDailyStat totals.
 model SponsorPlacement {
   id              String             @id @default(uuid())
@@ -1014,7 +1012,7 @@ model SponsorPlacement {
   title           String
   body            String?
   linkUrl         String
-  targetKinkSlugs String[]
+  targetInterestSlugs String[]
   targetGoalSlugs String[]
   /// Set from the creative itself; explicit creatives must not reach the apps.
   contentTier     ContentTier        @default(WEB_ONLY)
@@ -1148,7 +1146,7 @@ model Announcement {
   linkLabel   String?
   /// "info" or "warning".
   tone        String    @default("info")
-  /// Hidden in the phone apps (for anything about donations or adult content).
+  /// Hidden in the phone apps (for anything about off-app billing or sensitive content).
   websiteOnly Boolean   @default(false)
   startsAt    DateTime  @default(now())
   endsAt      DateTime?

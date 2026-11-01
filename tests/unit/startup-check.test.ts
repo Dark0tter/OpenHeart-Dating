@@ -17,7 +17,7 @@ describe("startup settings check", () => {
         DATABASE_URL: "postgres://x",
         NEXTAUTH_SECRET: "s",
         BAN_HASH_SECRET: "b",
-        AUTH_URL: "https://kindredkinks.com",
+        AUTH_URL: "https://openheart.com",
       }),
     ).toEqual([]);
     expect(missingSettings({ DATABASE_URL: "  " })[0]).toMatch(/^DATABASE_URL/);

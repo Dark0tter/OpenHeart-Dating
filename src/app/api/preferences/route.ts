@@ -14,7 +14,6 @@ const schema = z
     notifyEmail: z.boolean().optional(),
     readReceipts: z.boolean().optional(),
     allowCalls: z.boolean().optional(),
-    appAdultContent: z.boolean().optional(),
     themeMode: z.enum(THEME_MODES).optional(),
     themeFlag: z
       .string()
@@ -36,12 +35,10 @@ export async function GET() {
     notifyEmail: user.notifyEmail,
     readReceipts: user.readReceipts,
     allowCalls: user.allowCalls,
-    appAdultContent: user.appAdultContent,
     themeMode: user.themeMode,
     themeFlag: user.themeFlag,
-    verifiedAdult: user.verification?.status === "VERIFIED_ADULT",
     inApp,
-    isSupporter: inApp ? false : await isSupporter(user.id),
+    isSupporter: await isSupporter(user.id),
   });
 }
 
@@ -58,31 +55,12 @@ export async function PATCH(req: Request) {
 
   if (
     parsed.data.adPreference === AdPreference.NONE &&
-    ((await isAppRequest()) || !(await isSupporter(user.id)))
+    !(await isSupporter(user.id))
   ) {
     return NextResponse.json(
       { error: "This option is only available on the website." },
       { status: 403 },
     );
-  }
-
-  if (parsed.data.appAdultContent !== undefined) {
-    // Store rules: adult content in the apps may only be enabled off-app.
-    if (await isAppRequest()) {
-      return NextResponse.json(
-        { error: "Change this setting on the Kindred Kinks website." },
-        { status: 403 },
-      );
-    }
-    if (
-      parsed.data.appAdultContent &&
-      user.verification?.status !== "VERIFIED_ADULT"
-    ) {
-      return NextResponse.json(
-        { error: "Verify your age before turning this on." },
-        { status: 403 },
-      );
-    }
   }
 
   const updated = await prisma.user.update({
@@ -94,7 +72,6 @@ export async function PATCH(req: Request) {
       notifyEmail: true,
       readReceipts: true,
       allowCalls: true,
-      appAdultContent: true,
       themeMode: true,
       themeFlag: true,
     },

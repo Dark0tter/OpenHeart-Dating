@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     identityTagIds: parseList("identity"),
     orientationTagIds: parseList("orientation"),
     goalTagIds: parseList("goals"),
-    kinkIds: parseList("kinks"),
+    interestIds: parseList("interests"),
     minAge: num(searchParams.get("minAge")),
     maxAge: num(searchParams.get("maxAge")),
     maxDistanceKm:

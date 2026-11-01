@@ -14,7 +14,6 @@ export type GalleryPhoto = {
 export type Gallery = {
   photos: GalleryPhoto[];
   lockedPrivate: number;
-  lockedAdult: number;
 };
 
 export function PhotoGallery({
@@ -22,13 +21,11 @@ export function PhotoGallery({
   ownerName,
   gallery,
   requests,
-  canRequestAdult,
 }: {
   ownerId: string;
   ownerName: string;
   gallery: Gallery;
-  requests: Partial<Record<"PRIVATE_ALBUM" | "ADULT_ALBUM", string>>;
-  canRequestAdult: boolean;
+  requests: Partial<Record<"PRIVATE_ALBUM", string>>;
 }) {
   const [open, setOpen] = useState<number | null>(null);
   const [sent, setSent] = useState(requests);
@@ -42,7 +39,7 @@ export function PhotoGallery({
     if (open === null && d.open) d.close();
   }, [open]);
 
-  async function requestAccess(scope: "PRIVATE_ALBUM" | "ADULT_ALBUM") {
+  async function requestAccess(scope: "PRIVATE_ALBUM") {
     const res = await fetch("/api/consent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,7 +54,7 @@ export function PhotoGallery({
   const current = open !== null ? photos[open] : null;
 
   const locked: {
-    scope: "PRIVATE_ALBUM" | "ADULT_ALBUM";
+    scope: "PRIVATE_ALBUM";
     count: number;
     label: string;
   }[] = [
@@ -65,11 +62,6 @@ export function PhotoGallery({
       scope: "PRIVATE_ALBUM" as const,
       count: gallery.lockedPrivate,
       label: "private",
-    },
-    {
-      scope: "ADULT_ALBUM" as const,
-      count: canRequestAdult ? gallery.lockedAdult : 0,
-      label: "adult",
     },
   ].filter((l) => l.count > 0);
 

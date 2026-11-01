@@ -164,10 +164,7 @@ export default function ProfilePage() {
       {data.completeness && <Completeness {...data.completeness} />}
 
       <div id="photos" className="scroll-mt-24">
-        <PhotoManager
-          canAddAdult={verifiedAdult}
-          adultAllowedHere={!data.contentRestricted}
-        />
+        <PhotoManager />
       </div>
       <div id="selfie" className="scroll-mt-24">
         <SelfieVerify />

@@ -9,7 +9,7 @@ const base: RankProfile = {
   seekingOrientationIds: [],
   goalIds: [],
   styleIds: [],
-  kinks: [],
+  interests: [],
   latitude: null,
   longitude: null,
   lastActiveAt: new Date(),
@@ -23,19 +23,19 @@ const base: RankProfile = {
 describe("findClashes", () => {
   it("finds both directions and puts hard limits first", () => {
     const mine = [
-      { kinkId: "rope", level: "FAVORITE" as const },
-      { kinkId: "pain", level: "HARD_LIMIT" as const },
-      { kinkId: "roleplay", level: "CURIOUS" as const },
+      { interestId: "coffee", level: "FAVORITE" as const },
+      { interestId: "nightlife", level: "HARD_LIMIT" as const },
+      { interestId: "travel", level: "CURIOUS" as const },
     ];
     const theirs = [
-      { kinkId: "rope", level: "NO" as const, name: "Rope" },
-      { kinkId: "pain", level: "INTERESTED" as const, name: "Pain" },
-      { kinkId: "roleplay", level: "HARD_LIMIT" as const, name: "Roleplay" },
+      { interestId: "coffee", level: "NO" as const, name: "Coffee Dates" },
+      { interestId: "nightlife", level: "INTERESTED" as const, name: "Nightlife" },
+      { interestId: "travel", level: "HARD_LIMIT" as const, name: "Travel" },
     ];
     expect(findClashes(mine, theirs)).toEqual([
-      { kink: "Pain", whose: "yours", limit: "hard", interest: "INTERESTED" },
-      { kink: "Roleplay", whose: "theirs", limit: "hard", interest: "CURIOUS" },
-      { kink: "Rope", whose: "theirs", limit: "soft", interest: "FAVORITE" },
+      { name: "Nightlife", whose: "yours", limit: "hard", level: "INTERESTED" },
+      { name: "Travel", whose: "theirs", limit: "hard", level: "CURIOUS" },
+      { name: "Coffee Dates", whose: "theirs", limit: "soft", level: "FAVORITE" },
     ]);
   });
 
@@ -43,12 +43,12 @@ describe("findClashes", () => {
     expect(
       findClashes(
         [
-          { kinkId: "x", level: "HARD_LIMIT" },
-          { kinkId: "y", level: "FAVORITE" },
+          { interestId: "x", level: "HARD_LIMIT" },
+          { interestId: "y", level: "FAVORITE" },
         ],
         [
-          { kinkId: "x", level: "NO" },
-          { kinkId: "y", level: "CURIOUS" },
+          { interestId: "x", level: "NO" },
+          { interestId: "y", level: "CURIOUS" },
         ],
       ),
     ).toEqual([]);
@@ -67,19 +67,19 @@ describe("limit penalties", () => {
   it("ranks a soft-limit clash between a clean match and a hard-limit clash", () => {
     const viewer = {
       ...base,
-      kinks: [{ kinkId: "k", level: "INTERESTED" as const }],
+      interests: [{ interestId: "k", level: "INTERESTED" as const }],
     };
     const clean = scoreMatch(viewer, {
       ...base,
-      kinks: [{ kinkId: "k", level: "CURIOUS" as const }],
+      interests: [{ interestId: "k", level: "CURIOUS" as const }],
     });
     const soft = scoreMatch(viewer, {
       ...base,
-      kinks: [{ kinkId: "k", level: "NO" as const }],
+      interests: [{ interestId: "k", level: "NO" as const }],
     });
     const hard = scoreMatch(viewer, {
       ...base,
-      kinks: [{ kinkId: "k", level: "HARD_LIMIT" as const }],
+      interests: [{ interestId: "k", level: "HARD_LIMIT" as const }],
     });
     expect(clean.total).toBeGreaterThan(soft.total);
     expect(soft.total).toBeGreaterThan(hard.total);

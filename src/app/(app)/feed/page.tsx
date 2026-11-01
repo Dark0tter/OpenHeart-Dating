@@ -145,7 +145,7 @@ export default function FeedPage() {
           actions={[
             { href: "/search", label: "Browse people near you" },
             { href: "/rooms", label: "Chat in a room" },
-            { href: "/events", label: "Find a munch or event" },
+            { href: "/events", label: "Find a meetup or event" },
           ]}
         />
       )}

@@ -14,7 +14,7 @@ export async function GET() {
     body,
     ethnicity,
     accessibility,
-    kinks,
+    interests,
   ] = await Promise.all([
     prisma.identityTag.findMany({
       where: { isCustom: false },
@@ -32,7 +32,7 @@ export async function GET() {
     }),
     prisma.ethnicityTag.findMany({ orderBy: { label: "asc" } }),
     prisma.accessibilityTag.findMany({ orderBy: { label: "asc" } }),
-    prisma.kinkCategory.findMany({
+    prisma.interestCategory.findMany({
       where: { tier: { in: tiers } },
       orderBy: { name: "asc" },
       select: {
@@ -40,7 +40,7 @@ export async function GET() {
         slug: true,
         name: true,
         description: true,
-        kinks: {
+        interests: {
           where: { tier: { in: tiers } },
           orderBy: { name: "asc" },
           select: { id: true, slug: true, name: true },
@@ -57,7 +57,7 @@ export async function GET() {
     body,
     ethnicity,
     accessibility,
-    kinks: kinks.filter((c) => c.kinks.length > 0),
+    interests: interests.filter((c) => c.interests.length > 0),
     contentRestricted: isRestricted(tiers),
   });
 }

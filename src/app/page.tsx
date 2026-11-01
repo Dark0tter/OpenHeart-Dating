@@ -24,7 +24,7 @@ const STEPS = [
   },
   {
     title: "Meet people your way",
-    body: "Search nearby, chat in interest rooms, or find a local munch or event.",
+    body: "Search nearby, chat in interest rooms, or find a local meetup or event.",
   },
 ];
 
@@ -52,7 +52,7 @@ const FEATURES: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: MessagesSquare,
     title: "Community, not just swiping",
-    body: "Rooms for shared interests and local munches make it easy to get to know people first.",
+    body: "Rooms for shared interests and local meetups make it easy to get to know people first.",
   },
   {
     icon: ShieldCheck,
@@ -86,7 +86,7 @@ function ProfilePreview() {
         friends first and seeing where it goes.
       </p>
       <div className="mt-4 flex flex-wrap gap-1.5 text-xs">
-        {["Rope", "Roleplay", "Cuddles", "Munches"].map((t) => (
+        {["Rope", "Roleplay", "Cuddles", "Meetups"].map((t) => (
           <span
             key={t}
             className="rounded-full bg-mist px-2.5 py-1 text-forest"
@@ -126,10 +126,10 @@ export default function Home() {
         <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-8 md:flex-row md:items-center md:justify-between md:px-10 md:pb-24">
           <div className="max-w-xl">
             <h1 className="animate-oh-rise font-[family-name:var(--font-fraunces)] text-5xl leading-[1.05] tracking-tight text-forest md:text-7xl">
-              Kindred Kinks
+              OpenHeart
             </h1>
             <p className="animate-oh-rise-delay mt-5 max-w-md text-lg leading-relaxed text-ink/75 md:text-xl">
-              Dating and community for LGBTQIA+ and kink-curious adults — where
+              Dating and community for LGBTQIA+ and interest-curious adults — where
               your identity, interests and limits are respected from the first
               hello.
             </p>
@@ -196,7 +196,7 @@ export default function Home() {
               id="different"
               className="font-[family-name:var(--font-fraunces)] text-3xl text-forest"
             >
-              What makes Kindred Kinks different
+              What makes OpenHeart different
             </h2>
             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map(({ icon: Icon, title, body }) => (
@@ -294,7 +294,7 @@ export default function Home() {
 
       <footer className="relative z-10 border-t border-forest/10 bg-cream/60 px-6 py-8 md:px-10">
         <nav
-          aria-label="About Kindred Kinks"
+          aria-label="About OpenHeart"
           className="mx-auto flex max-w-5xl flex-wrap gap-5 text-sm text-forest/80"
         >
           <Link href="/privacy" className="underline hover:text-ink">

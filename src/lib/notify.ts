@@ -75,7 +75,7 @@ async function sendPush(
 /**
  * Creates an in-app notification, updates open tabs instantly, sends a push
  * to the member's devices, and emails when they're away and opted in.
- * Notification text must be discreet: no message contents or kink details.
+ * Notification text must be discreet: no message contents or interest details.
  */
 export async function notify(
   userId: string,
@@ -138,11 +138,11 @@ export async function notify(
     to: user.email,
     subject: n.title,
     paragraphs: [
-      n.body ?? "You have something new on Kindred Kinks.",
+      n.body ?? "You have something new on OpenHeart.",
       `You can turn these emails off in Settings: ${appUrl()}/settings`,
     ],
     action: n.link
-      ? { label: "Go to Kindred Kinks", url: `${appUrl()}${n.link}` }
+      ? { label: "Go to OpenHeart", url: `${appUrl()}${n.link}` }
       : undefined,
   });
   if (sent) {

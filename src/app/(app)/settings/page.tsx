@@ -43,30 +43,12 @@ export default function SettingsPage() {
   const [adPreference, setAdPreference] = useState<string | null>(null);
   const [supporter, setSupporter] = useState(false);
   const [showOnline, setShowOnline] = useState<boolean | null>(null);
-  const [appAdult, setAppAdult] = useState<boolean | null>(null);
-  const [verifiedAdult, setVerifiedAdult] = useState(false);
-  const [inApp, setInApp] = useState(false);
   const [theme, setTheme] = useState<{
     mode: ThemeMode;
     flag: string | null;
   } | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
-
-  async function onAppAdult(value: boolean) {
-    const res = await fetch("/api/preferences", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appAdultContent: value }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setAppAdult(data.appAdultContent);
-      setMsg("Mobile app content setting saved.");
-    } else {
-      setMsg(data.error);
-    }
-  }
 
   async function onDeleteAccount(e: FormEvent) {
     e.preventDefault();
@@ -114,9 +96,6 @@ export default function SettingsPage() {
         setAdPreference(d.adPreference ?? "GENERIC");
         setSupporter(Boolean(d.isSupporter));
         setShowOnline(d.showOnline ?? true);
-        setAppAdult(Boolean(d.appAdultContent));
-        setVerifiedAdult(Boolean(d.verifiedAdult));
-        setInApp(Boolean(d.inApp));
         setTheme({ mode: d.themeMode ?? "system", flag: d.themeFlag ?? null });
       });
   }, []);
@@ -194,37 +173,6 @@ export default function SettingsPage() {
       </fieldset>
 
       <fieldset className="space-y-2">
-        <legend className="font-medium text-forest">
-          Adult content in the mobile app
-        </legend>
-        {inApp ? (
-          <p className="text-sm text-ink/70">
-            The app shows a limited version of Kindred Kinks. You can change
-            this setting on the Kindred Kinks website.
-          </p>
-        ) : (
-          <>
-            <label
-              className={`flex items-center gap-2 text-sm ${verifiedAdult ? "text-ink" : "text-ink/70"}`}
-            >
-              <input
-                type="checkbox"
-                checked={appAdult ?? false}
-                disabled={appAdult === null || !verifiedAdult}
-                onChange={(e) => onAppAdult(e.target.checked)}
-              />
-              Show the full interest list in the iPhone and Android apps
-            </label>
-            <p className="text-sm text-ink/70">
-              {verifiedAdult
-                ? "Off by default. Some interests, rooms, and adult photos are only ever shown on the website."
-                : "Available after age verification."}
-            </p>
-          </>
-        )}
-      </fieldset>
-
-      <fieldset className="space-y-2">
         <legend className="font-medium text-forest">Sponsor block</legend>
         <p className="text-sm text-ink/70">
           One small block at the bottom of the page. We never use your activity,
@@ -242,17 +190,13 @@ export default function SettingsPage() {
             value: "PROFILE_INTERESTS",
             label: "Match listings to the interests on my profile",
           },
-          ...(inApp
-            ? []
-            : [
-                {
-                  value: "NONE",
-                  label: supporter
-                    ? "No sponsor block"
-                    : "No sponsor block (Supporter donors)",
-                  disabled: !supporter,
-                },
-              ]),
+          {
+            value: "NONE",
+            label: supporter
+              ? "No sponsor block"
+              : "No sponsor block (Supporter)",
+            disabled: !supporter,
+          },
         ].map((o) => (
           <label
             key={o.value}
@@ -262,22 +206,18 @@ export default function SettingsPage() {
               type="radio"
               name="adPreference"
               value={o.value}
-              checked={
-                (inApp && adPreference === "NONE"
-                  ? "GENERIC"
-                  : adPreference) === o.value
-              }
+              checked={adPreference === o.value}
               disabled={o.disabled || adPreference === null}
               onChange={() => onAdPreference(o.value)}
             />
             {o.label}
           </label>
         ))}
-        {adPreference !== null && !inApp && (
+        {adPreference !== null && (
           <Link href="/supporter" className="text-sm text-forest underline">
             {supporter
               ? "Your Supporter badge"
-              : "Donate to support Kindred Kinks"}
+              : "Support OpenHeart"}
           </Link>
         )}
       </fieldset>

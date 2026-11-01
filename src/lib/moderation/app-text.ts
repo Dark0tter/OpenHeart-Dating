@@ -1,9 +1,9 @@
 import { ContentTier } from "@prisma/client";
 
 /**
- * Explicit words masked when text is shown in the mobile apps to members who
- * haven't opted in to adult content on the website. Kept to unambiguous terms
- * so ordinary words ("cocktail", "analysis", "Dickens") are untouched.
+ * Explicit words are masked in the mobile apps so app-store builds stay
+ * general-audience. Kept to unambiguous terms so ordinary words ("cocktail",
+ * "analysis", "Dickens") are untouched.
  */
 const EXPLICIT_WORDS = [
   "fuck\\w*",
